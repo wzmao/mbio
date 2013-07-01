@@ -14,17 +14,17 @@ def _Startup():
     _hostname = os.popen('hostname').read().replace('\n','')
     if not os.path.exists(_path__+'/.Info'):
         os.mkdir(_path__+'/.Info')
-    if not os.path.exists(_path__+'/.Info/com_name'):
-        f = open(_path__+'/.Info/com_name','w')
+    if not os.path.exists(_path__+'/.Info/com_name.bak'):
+        f = open(_path__+'/.Info/com_name.bak','w')
         f.write(_hostname)
         f.close()
         _clearSo(_path__)
         _clearData()
     else:
-        f = open(_path__+'/.Info/com_name','r')
+        f = open(_path__+'/.Info/com_name.bak','r')
         if f.read() != _hostname:
             f.close()
-            f = open(_path__+'/.Info/com_name','w')
+            f = open(_path__+'/.Info/com_name.bak','w')
             f.write(_hostname)
             _clearSo(_path__)
             _clearData()
