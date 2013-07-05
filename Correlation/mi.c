@@ -270,7 +270,7 @@ len(m) must eaqul to l*n.
   return mip;
 }
 
-int* calcMIp_P(char m[],int n,int l,int pos,int times, int cutoff)
+int* calcMIp_P(char m[],int n,int l,int pos,int times, int cutoff,double savemi[])
 {
 /*
 This function is used to calculate P value for the MIp matrix.
@@ -290,12 +290,30 @@ cutoff is the lower MI cutoff for shuffle.
   }
   int *p;
   p=malloc( l * sizeof(int) );
-  double *savemip;
-  savemip=calcMIp(m,n,l);
   for (i=0;i<l;i++)
   {
     p[i]=0;
   }
+  double savemi1[l];
+  double linesum[l],allsum=0.0,linesumtemp[l],allsumtemp=0.0;
+  for (i=0;i<l;i++)
+  {
+    linesum[i]=0.0;
+    linesumtemp[i]=0.0;
+    for (j=0;j<l;j++)
+    {
+      linesum[i]+=savemi[i*l+j];
+      allsum+=savemi[i*l+j];
+    }
+  }
+  double *savemip;
+  savemip = malloc(l* sizeof(double));
+  for (i=0;i<l;i++)
+  {
+    savemip[i]=savemi[pos*l+i]-(linesum[pos]*linesum[i]/(l-1)*l/allsum);
+    savemi1[i]=savemi[pos*l+i];
+  }
+  double tempmip=0.0;
   for (time=0;time<times;time++)
   {
     //shuffle
@@ -308,16 +326,24 @@ cutoff is the lower MI cutoff for shuffle.
       s[i*l+pos]=ch;
     }
     //Calculate
-    double *newmip;
-    newmip=calcMIp_line(s,n,l,pos);
+    double *newmi;
+    newmi=calcMI_line(s,n,l,pos);
     for (i=0;i<l;i++)
     {
-      if (newmip[i]>savemip[pos*l+i])
+      linesumtemp[i]=linesum[i]-savemi1[i]+newmi[i];
+      allsumtemp+=-savemi1[i]+newmi[i];
+    }
+    linesumtemp[pos]+=allsumtemp+savemi1[pos]-newmi[pos];
+    allsumtemp+=allsum;
+    for (i=0;i<l;i++)
+    {
+      tempmip=newmi[i]-(linesumtemp[pos]*linesumtemp[i]/(l-1)*l/allsumtemp);
+      if (tempmip>savemip[i])
       {
         p[i]++;
       }
     }
-    free(newmip);
+    free(newmi);
   }
   free(savemip);
   return p;
