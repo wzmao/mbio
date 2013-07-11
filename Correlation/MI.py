@@ -54,7 +54,7 @@ def CalcMI(sequences):
     return mi
 
 
-def ShuffleMI(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=False):
+def ShuffleMI(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=False, save=False):
     '''It is a function to calculate the p value for shuffled MI.
     Given the sequences in a list with no format.
     times is the shuffle times.
@@ -156,6 +156,10 @@ def ShuffleMI(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fals
         l = len(sequences[0])
         for ii in range(l):
             mi.append(tempmi[ii*l:ii*l+l])
+        if save:
+            import shutil
+            shutil.copy(_path__+'/../.Result/'+str(i)+'-mi.save',  './')
+            os.rename('./'+str(i)+'-mi.save', './mi.save')
         os.remove(_path__+'/../.Result/'+str(i)+'-mi.save')
     else:
         return None
@@ -172,6 +176,10 @@ def ShuffleMI(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fals
         l = len(sequences[0])
         for ii in range(l):
             p.append(tempp[ii*l:ii*l+l])
+        if save:
+            import shutil
+            shutil.copy(_path__+'/../.Result/'+str(i)+'-p.save',  './')
+            os.rename('./'+str(i)+'-p.save', './p.save')
         os.remove(_path__+'/../.Result/'+str(i)+'-p.save')
     else:
         return None
@@ -228,7 +236,7 @@ def CalcMIp(sequences):
     return mip
 
 
-def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=False):
+def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=False, save=False):
     '''It is a function to calculate the p value for shuffled MIp.
     Given the sequences in a list with no format.
     times is the shuffle times.
@@ -272,7 +280,7 @@ def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fal
             .replace
             ('#define cutoff 0.8', '#define cutoff '+str(1-cutoff))
             .replace
-            ("MIpsave.save", _path__+'/../.Result/'+str(i)+'-mi.save')
+            ("MIpsave.save", _path__+'/../.Result/'+str(i)+'-mip.save')
             .replace
             ("Psave.save", _path__+'/../.Result/'+str(i)+'-p.save'))
     f.close()
@@ -317,8 +325,8 @@ def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fal
         else:
             print '* The system cannot be recognized.'
             return None
-    if path.exists(_path__+'/../.Result/'+str(i)+'-mi.save'):
-        f = open(_path__+'/../.Result/'+str(i)+'-mi.save', 'r')
+    if path.exists(_path__+'/../.Result/'+str(i)+'-mip.save'):
+        f = open(_path__+'/../.Result/'+str(i)+'-mip.save', 'r')
         tempmi = f.read()
         f.close()
         if len(tempmi) != 8*len(sequences[0])**2:
@@ -330,7 +338,11 @@ def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fal
         l = len(sequences[0])
         for ii in range(l):
             mi.append(tempmi[ii*l:ii*l+l])
-        os.remove(_path__+'/../.Result/'+str(i)+'-mi.save')
+        if save:
+            import shutil
+            shutil.copy(_path__+'/../.Result/'+str(i)+'-mip.save',  './')
+            os.rename('./'+str(i)+'-mip.save', './mip.save')
+        os.remove(_path__+'/../.Result/'+str(i)+'-mip.save')
     else:
         return None
     if path.exists(_path__+'/../.Result/'+str(i)+'-p.save'):
@@ -346,6 +358,10 @@ def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fal
         l = len(sequences[0])
         for ii in range(l):
             p.append(tempp[ii*l:ii*l+l])
+        if save:
+            import shutil
+            shutil.copy(_path__+'/../.Result/'+str(i)+'-p.save',  './')
+            os.rename('./'+str(i)+'-p.save', './p.save')
         os.remove(_path__+'/../.Result/'+str(i)+'-p.save')
     else:
         return None
