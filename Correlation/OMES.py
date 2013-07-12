@@ -114,7 +114,7 @@ def ShuffleOMES(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=0)
             find = False
             while not find:
                 for core in [64, 32, 24, 12, 8, 4]:
-                    if int(os.popen('qstat -f | grep BP|grep parallel.q |grep "/{0} "|grep -v "/{0}/{0} "|grep -v "au"|grep -v "o"|grep "" -c'.format(str(core))).read()) != 0:
+                    if int(os.popen('qstat -f | grep BP|grep parallel.q |grep "/{0} "|grep "/0/{0} "|grep -v "au"|grep -v "o"|grep "" -c'.format(str(core))).read()) != 0:
                         find = True
                         break
             clusternames = ['bahar64', 'core32', 'core24', 'bahar12',
