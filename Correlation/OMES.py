@@ -53,7 +53,7 @@ def CalcOMES(sequences):
     return omes
 
 
-def ShuffleOMES(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=0):
+def ShuffleOMES(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=0, save=False):
     '''It is a function to calculate the p value for shuffled OMES.
     Given the sequences in a list with no format.
     times is the shuffle times.
@@ -156,6 +156,10 @@ def ShuffleOMES(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=0)
             for j in range(len(sequences[0])):
                 om[-1].append(struct.unpack('d', tempom[k:k+8])[0])
                 k += 8
+        if save:
+            import shutil
+            shutil.copy(_path__+'/../.Result/'+str(i)+'-omes.save',  './')
+            os.rename('./'+str(i)+'-omes.save', './omes.save')
         os.remove(_path__+'/../.Result/'+str(i)+'-omes.save')
     else:
         return None
@@ -173,6 +177,10 @@ def ShuffleOMES(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=0)
             for j in range(len(sequences[0])):
                 p[-1].append(struct.unpack('i', tempp[k:k+4])[0])
                 k += 4
+        if save:
+            import shutil
+            shutil.copy(_path__+'/../.Result/'+str(i)+'-p.save',  './')
+            os.rename('./'+str(i)+'-p.save', './p.save')
         os.remove(_path__+'/../.Result/'+str(i)+'-p.save')
     else:
         return None
