@@ -328,6 +328,7 @@ cutoff is the lower MI cutoff for shuffle.
     //Calculate
     double *newmi;
     newmi=calcMI_line(s,n,l,pos);
+    allsumtemp=0;
     for (i=0;i<l;i++)
     {
       linesumtemp[i]=linesum[i]-savemi1[i]+newmi[i];
