@@ -23,3 +23,7 @@ __all__.extend(MI.__all__)
 from . import OMES
 from .OMES import *
 __all__.extend(OMES.__all__)
+
+from . import SCA
+from .SCA import *
+__all__.extend(SCA.__all__)
