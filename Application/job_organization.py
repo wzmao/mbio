@@ -91,7 +91,7 @@ def Clearjob(jobnumber):
         os.removedirs(os.path.join(_path__,'..','.Cache'))
     flist=os.listdir(os.path.join(_path__,'..','.Result'))
     for i in flist:
-        if i.startswith(jobnumber+'.'):
+        if i.startswith(jobnumber+'-'):
             os.remove(os.path.join(_path__,'..','.Result',i))
     if os.listdir(os.path.join(_path__,'..','.Result'))==[]:
         os.removedirs(os.path.join(_path__,'..','.Result'))
