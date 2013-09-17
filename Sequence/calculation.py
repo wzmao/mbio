@@ -51,10 +51,11 @@ def CalcMIp(sequences):
     '''It is a function to calculate the MIp matrix based on language C.
     Given the sequences in a list with no format.
     '''
+    # TODO it will return nan instead of 0.0 for one sequence.
     if not '_c_CalcMIp' in globals().keys():
         import ctypes as ct
         from os import path
-        M = ct.CDLL(_path__+'/mi_c.so')
+        M = ct.CDLL(path.join(_path__,'mi_c.so'))
         global _c_CalcMIp
         _c_CalcMIp = M.calcMIp
         _c_CalcMIp.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
@@ -89,7 +90,7 @@ def CalcOMES(sequences):
     if not '_c_CalcOMES' in globals().keys():
         import ctypes as ct
         from os import path
-        M = ct.CDLL(_path__+'/omes_c.so')
+        M = ct.CDLL(path.join(_path__,'omes_c.so'))
         global _c_CalcOMES
         _c_CalcOMES = M.calcOMES
         _c_CalcOMES.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
@@ -118,7 +119,6 @@ def CalcOMES(sequences):
 def CalcSCA(sequence):
     from math import fsum as sum
     from math import log
-
     def mean(x):
         return 1.0*sum(x)/len(x)
     reslist = [i for i in 'ACDEFGHIKLMNPQRSTVWY']
@@ -170,7 +170,6 @@ def CalcSCA(sequence):
 def CalcSCA1(sequence):
     from math import fsum as sum
     from math import log
-
     def mean(x):
         return 1.0*sum(x)/len(x)
     reslist = [i for i in 'ACDEFGHIKLMNPQRSTVWY']
