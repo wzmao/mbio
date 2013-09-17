@@ -55,16 +55,16 @@ __all__.extend(Application.__all__)
 __all__.append('Application')
 
 
-from . import sequence
-from .sequence import *
-__all__.extend(sequence.__all__)
-__all__.append('sequence')
+from . import Sequence
+from .Sequence import *
+__all__.extend(Sequence.__all__)
+__all__.append('Sequence')
 
 
-from . import io
-from .io import *
-__all__.extend(io.__all__)
-__all__.append('io')
+from . import IO
+from .IO import *
+__all__.extend(IO.__all__)
+__all__.append('IO')
 
 
 def _clearSo(searchpath=_path__):
