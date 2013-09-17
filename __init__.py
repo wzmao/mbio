@@ -55,10 +55,10 @@ __all__.extend(Sort.__all__)
 __all__.append('Sort')
 
 
-from . import Correlation
-from .Correlation import *
-__all__.extend(Correlation.__all__)
-__all__.append('Correlation')
+from . import Sequence
+from .Sequence import *
+__all__.extend(Sequence.__all__)
+__all__.append('Sequence')
 
 
 from . import IO
