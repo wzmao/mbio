@@ -11,33 +11,27 @@ def _Startup():
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()
-    _parse()
-
-
-def _parse():
-    _CalcOMES_parse()
-
-
-def _CalcOMES_parse():
-    import ctypes as ct
-    M = ct.CDLL(_path__+'/omes_c.so')
-    global _c_CalcOMES
-    _c_CalcOMES = M.calcOMES
-    _c_CalcOMES.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
-    _c_CalcOMES.restype = ct.POINTER(ct.c_double)
-    _c_CalcOMES.__doc__ = '''It is a function to calulate the OMES matrix in C.
-    Give 4 variable.    `M, n, l`.
-        M is the sequence array with length n*l.(char array)
-        n is the sequence number.(int)
-        l is the sequence length.(int)
-    Return 1 variable.  `omes`
-        omes is an array with length l*l to return the result.(double array)'''
 
 
 def CalcOMES(sequences):
     '''It is a function to calculate the OMES matrix based on language C.
     Given the sequences in a list with no format.
     '''
+    if not '_c_CalcOMES' in globals().keys():
+        import ctypes as ct
+        from os import path
+        M = ct.CDLL(_path__+'/omes_c.so')
+        global _c_CalcOMES
+        _c_CalcOMES = M.calcOMES
+        _c_CalcOMES.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
+        _c_CalcOMES.restype = ct.POINTER(ct.c_double)
+        _c_CalcOMES.__doc__ = '''It is a function to calulate the OMES matrix in C.
+        Give 4 variable.    `M, n, l`.
+            M is the sequence array with length n*l.(char array)
+            n is the sequence number.(int)
+            l is the sequence length.(int)
+        Return 1 variable.  `omes`
+            omes is an array with length l*l to return the result.(double array)'''
     import ctypes as ct
     allsequence = ''.join(sequences)
     m = (ct.c_char * len(allsequence))()
