@@ -10,9 +10,9 @@ def _Startup():
     _path__ = _ABSpath()
     Clist = []
     for c in Clist:
-        if not path.exists(_path__+'/'+c.replace('.c', '_c.so')):
+        if not path.exists(path.join(_path__, c.replace('.c', '_c.so'))):
             from mbio import _make
-            _make(_path__+'/'+c)
+            _make(path.join(_path__, c))
 
 _Startup()
 

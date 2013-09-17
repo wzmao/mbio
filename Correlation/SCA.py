@@ -65,7 +65,7 @@ def CalcSCA(sequence):
             c[i][j] = abs(sum([xp[k][i]*xp[k][
                           j] for k in range(m)])*1.0/m-meanxp[i]*meanxp[j])
             c[j][i] = c[i][j]
-    return c,xp
+    return c
 
 def CalcSCA1(sequence):
     from math import fsum as sum

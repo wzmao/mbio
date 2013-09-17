@@ -11,33 +11,24 @@ def _Startup():
     global _path__
     _path__ = _ABSpath()
     import os
-    _hostname = os.popen('hostname').read().replace('\n','')
-    if not os.path.exists(_path__+'/.Info'):
-        os.mkdir(_path__+'/.Info')
-    if not os.path.exists(_path__+'/.Info/com_name.bak'):
-        f = open(_path__+'/.Info/com_name.bak','w')
+    _hostname = os.popen('hostname').read().replace('\n', '')
+    if not os.path.exists(os.path.join(_path__, '.Info')):
+        os.mkdir(os.path.join(_path__, '.Info'))
+    if not os.path.exists(os.path.join(_path__, '.Info', 'com_name.bak')):
+        f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'w')
         f.write(_hostname)
         f.close()
         _clearSo(_path__)
         _clearData()
     else:
-        f = open(_path__+'/.Info/com_name.bak','r')
+        f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'r')
         if f.read() != _hostname:
             f.close()
-            f = open(_path__+'/.Info/com_name.bak','w')
+            f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'w')
             f.write(_hostname)
             _clearSo(_path__)
             _clearData()
         f.close()
-
-
-def _make(p):
-    from os import path
-    from os import popen
-    abp = path.abspath(p)
-    if path.splitext(path.split(abp)[1])[1] == '.c':
-        sop = abp[:-2]+'_c.so'
-        popen('mpicc -shared -fPIC -O3 -o '+sop+' '+abp)
 
 
 def _ABSpath():
@@ -47,26 +38,13 @@ def _ABSpath():
     return os.path.abspath(os.path.dirname(caller_file))
 
 
-def _clearSo(searchpath):
-    import os
-    dirl = os.listdir(searchpath)
-    for d in dirl:
-        if os.path.isdir(os.path.join(searchpath, d)):
-            _clearSo(os.path.join(searchpath, d))
-        elif os.path.isfile(os.path.join(searchpath, d)) and d.endswith('.so'):
-            os.remove(os.path.join(searchpath, d))
-
-
-def _clearData():
-    import os
-    if os.path.exists(_path__+'/.Cache/'):
-        for i in os.listdir(_path__+'/.Cache/'):
-            os.remove(_path__+'/.Cache/'+i)
-        os.removedirs(_path__+'/.Cache/')
-    if os.path.exists(_path__+'/.Result/'):
-        for i in os.listdir(_path__+'/.Result/'):
-            os.remove(_path__+'/.Result/'+i)
-        os.removedirs(_path__+'/.Result/')
+def _make(p):
+    from os import path
+    from os import popen
+    abp = path.abspath(p)
+    if path.splitext(path.split(abp)[1])[1] == '.c':
+        sop = abp[:-2]+'_c.so'
+        popen('mpicc -shared -fPIC -O3 -o '+sop+' '+abp)
 
 
 _Startup()
@@ -87,3 +65,30 @@ from . import IO
 from .IO import *
 __all__.extend(IO.__all__)
 __all__.append('IO')
+
+
+def _clearSo(searchpath=_path__):
+    import os
+    dirl = os.listdir(searchpath)
+    for d in dirl:
+        if os.path.isdir(os.path.join(searchpath, d)):
+            _clearSo(os.path.join(searchpath, d))
+        elif os.path.isfile(os.path.join(searchpath, d)) and (d.endswith('.so') or d.endswith('pyc')):
+            os.remove(os.path.join(searchpath, d))
+
+
+def _clearData():
+    import os
+    if os.path.exists(os.path.join(_path__, '.Cache')):
+        for i in os.listdir(os.path.join(_path__, '.Cache')):
+            os.remove(os.path.join(_path__, '.Cache', i))
+        os.removedirs(os.path.join(_path__, '.Cache'))
+    if os.path.exists(os.path.join(_path__, '.Result')):
+        for i in os.listdir(os.path.join(_path__, '.Result')):
+            os.remove(os.path.join(_path__, '.Result', i))
+        os.removedirs(os.path.join(_path__, '.Result'))
+
+
+def _clear():
+    _clearSo()
+    _clearData()
