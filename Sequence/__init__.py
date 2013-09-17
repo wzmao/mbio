@@ -8,7 +8,7 @@ def _Startup():
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()
-    Clist = ['sequence.c']
+    Clist = ['correlation.c']
     for c in Clist:
         if not path.exists(path.join(_path__, c.replace('.c', '_c.so'))):
             from mbio import _make
@@ -17,9 +17,9 @@ def _Startup():
 _Startup()
 
 
-from . import calculation
-from .calculation import *
-__all__.extend(calculation.__all__)
+from . import correlation
+from .correlation import *
+__all__.extend(correlation.__all__)
 
 from . import shuffle
 from .shuffle import *

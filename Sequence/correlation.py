@@ -20,7 +20,7 @@ def CalcMI(sequences):
     if not '_c_CalcMI' in globals().keys():
         import ctypes as ct
         from os import path
-        M = ct.CDLL(path.join(_path__, 'sequence_c.so'))
+        M = ct.CDLL(path.join(_path__, 'correlation_c.so'))
         global _c_CalcMI
         _c_CalcMI = M.calcMI
         _c_CalcMI.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
@@ -55,7 +55,7 @@ def CalcMIp(sequences):
     if not '_c_CalcMIp' in globals().keys():
         import ctypes as ct
         from os import path
-        M = ct.CDLL(path.join(_path__, 'sequence_c.so'))
+        M = ct.CDLL(path.join(_path__, 'correlation_c.so'))
         global _c_CalcMIp
         _c_CalcMIp = M.calcMIp
         _c_CalcMIp.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
@@ -89,7 +89,7 @@ def CalcOMES(sequences):
     if not '_c_CalcOMES' in globals().keys():
         import ctypes as ct
         from os import path
-        M = ct.CDLL(path.join(_path__, 'sequence_c.so'))
+        M = ct.CDLL(path.join(_path__, 'correlation_c.so'))
         global _c_CalcOMES
         _c_CalcOMES = M.calcOMES
         _c_CalcOMES.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
