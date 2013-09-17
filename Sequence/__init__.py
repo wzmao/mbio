@@ -21,6 +21,6 @@ from . import MI
 from .MI import *
 __all__.extend(MI.__all__)
 
-from . import OMES
-from .OMES import *
-__all__.extend(OMES.__all__)
+from . import shuffle
+from .shuffle import *
+__all__.extend(shuffle.__all__)
