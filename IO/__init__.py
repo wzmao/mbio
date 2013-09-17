@@ -17,6 +17,6 @@ def _Startup():
 _Startup()
 
 
-from . import Fasta
-from .Fasta import *
-__all__.extend(Fasta.__all__)
+from . import fasta
+from .fasta import *
+__all__.extend(fasta.__all__)
