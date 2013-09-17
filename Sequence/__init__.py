@@ -17,9 +17,9 @@ def _Startup():
 _Startup()
 
 
-from . import MI
-from .MI import *
-__all__.extend(MI.__all__)
+from . import calculation
+from .calculation import *
+__all__.extend(calculation.__all__)
 
 from . import shuffle
 from .shuffle import *
