@@ -9,6 +9,7 @@ __all__ = []
 def _Startup():
     from mbio import _ABSpath
     global _path__
+    global _hostname
     _path__ = _ABSpath()
     import os
     _hostname = os.popen('hostname').read().replace('\n', '')

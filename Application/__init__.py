@@ -20,3 +20,7 @@ _Startup()
 from . import sort
 from .sort import *
 __all__.extend(sort.__all__)
+
+from . import cluster
+from .cluster import *
+__all__.extend(cluster.__all__)
