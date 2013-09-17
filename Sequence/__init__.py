@@ -8,7 +8,7 @@ def _Startup():
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()
-    Clist = ['mi.c', 'omes.c']
+    Clist = ['sequence.c']
     for c in Clist:
         if not path.exists(path.join(_path__, c.replace('.c', '_c.so'))):
             from mbio import _make

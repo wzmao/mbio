@@ -12,6 +12,7 @@ def _Startup():
     global _path__
     _path__ = _ABSpath()
 
+
 def ShuffleOMES(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=0, save=False):
     '''It is a function to calculate the p value for shuffled OMES.
     Given the sequences in a list with no format.
@@ -153,7 +154,6 @@ def ShuffleOMES(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=0,
         os.removedirs(_path__+'/../.Cache/')
         os.removedirs(_path__+'/../.Result/')
     return p
-
 
 
 def ShuffleMI(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=False, save=False):
@@ -303,8 +303,6 @@ def ShuffleMI(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fals
     return p
 
 
-
-
 def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=False, save=False):
     '''It is a function to calculate the p value for shuffled MIp.
     Given the sequences in a list with no format.
@@ -450,5 +448,6 @@ def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fal
         os.removedirs(_path__+'/../.Cache/')
         os.removedirs(_path__+'/../.Result/')
     return p
+
 
 _Startup()
