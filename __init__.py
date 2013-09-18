@@ -6,11 +6,14 @@ del x
 __all__ = []
 
 
-def _Startup():
+def _StartupPath():
     from mbio import _ABSpath
     global _path__
-    global _hostname
     _path__ = _ABSpath()
+
+
+def _Startup():
+    global _hostname
     import os
     _hostname = os.popen('hostname').read().replace('\n', '')
     if not os.path.exists(os.path.join(_path__, '.Info')):
@@ -19,16 +22,14 @@ def _Startup():
         f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'w')
         f.write(_hostname)
         f.close()
-        _clearSo(_path__)
-        _clearData()
+        _clear()
     else:
         f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'r')
         if f.read() != _hostname:
             f.close()
             f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'w')
             f.write(_hostname)
-            _clearSo(_path__)
-            _clearData()
+            _clear()
         f.close()
 
 
@@ -48,7 +49,7 @@ def _make(p):
         popen('mpicc -shared -fPIC -O3 -o '+sop+' '+abp)
 
 
-_Startup()
+_StartupPath()
 
 from . import Application
 from .Application import *
@@ -93,3 +94,6 @@ def _clearData():
 def _clear():
     _clearSo()
     _clearData()
+
+
+_Startup()

@@ -6,6 +6,7 @@
 #define m(i,j) m[i*l+j]
 #define mi(i,j) mi[i*l+j]
 #define om(i,j) om[i*l+j]
+#define sca(i,j) sca[i*l+j]
 
 double* calcMI(char m[],int n,int l)
 {
@@ -532,4 +533,101 @@ cutoff is the lower OMES cutoff for shuffle.
   }
   free(saveom);
   return p;
+}
+
+double* calcSCA(char m[],int n,int l)
+{
+/*
+This function is used to calculate the OMES matrix.
+m is the fastas sequences which has been concanated to one array
+n is the number of sequences and l is the length.
+len(m) must eaqul to l*n.
+
+example:
+*/
+
+  int i,j,k,k1,k2;
+  char reslist[]={ 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 
+      'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y'};
+  double q[]={.073, .025, .050, .061, .042, .072, .023, .053, .064, .089,
+         .023, .043, .052, .040, .052, .073, .056, .063, .013, .033};
+  int resnum=sizeof(reslist)/sizeof(char);
+  double p[l][resnum];
+  double *sca;
+  sca = malloc( l*l * sizeof(double) );
+  for (i=0;i<l;i++)
+    for (j=0;j<resnum;j++)
+      p[i][j]=0;
+  for (i=0;i<l;i++)
+  {
+    double count=0;
+    for (j=0;j<n;j++)
+      for (k=0;k<resnum;k++)
+        if (m(j,i)==reslist[k])
+        {
+          p[i][k]++;
+          count++;
+          break;
+        }
+    double sumall=0.0,temp=0.0;
+    sumall=0;
+    for (k=0;k<resnum;k++)
+    {
+      p[i][k]=p[i][k]*1.0/n;
+      if (p[i][k]>=1.0-1e-10 || p[i][k]<=1e-10)
+      {
+        p[i][k]=0.0;
+        temp=0;
+      }
+      else
+      {
+        temp=fabs(log((1-q[k])/q[k]*p[i][k]/(1-p[i][k])))*p[i][k];
+        p[i][k]=temp*fabs(log((1-q[k])/q[k]*p[i][k]/(1-p[i][k])));
+      }
+        sumall=sumall+temp*temp;
+    }
+    sumall=sqrt(sumall);
+    if (sumall<1e-10)
+      for(k=0;k<resnum;k++)
+        p[i][k]=0;
+    else
+      for (k=0;k<resnum;k++)
+      {
+        p[i][k]=p[i][k]/sumall;
+      }
+  }
+  double x[n][l];
+  double sumx[l];
+  for (j=0;j<l;j++)
+    sumx[j]=0.0;
+  for (i=0;i<n;i++)
+  {
+    for (j=0;j<l;j++)
+    {
+      for (k=0;k<resnum;k++)
+      {
+        if (reslist[k]==m(i,j))
+        {
+          x[i][j]=p[j][k];
+          sumx[j]+=x[i][j];
+        }
+      }
+    }
+  }
+  for (i=0;i<l;i++)
+  {
+    sca(i,i)=0;
+    for (j=i;j<l;j++)
+    {
+      double add=0;
+      for (k=0;k<n;k++)
+      {
+        add+=x[k][i]*x[k][j];
+      }
+      add=fabs(add/n-sumx[i]*sumx[j]/n/n);
+      sca(i,j)=add;
+      sca(j,i)=add;
+    }
+  }
+  return sca;
 }
