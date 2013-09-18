@@ -2,22 +2,22 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mpi.h>
-#include "../Correlation/mi.c"
-#include "../Sort/sort.c"
+#include "../Sequence/correlation.c"
+#include "../Application/sort.c"
 
 typedef int bool;
 
-#define OUTPUT 1
+#define OUTPUT
 #define TRUE 1
 #define FALSE 0
 #define True 1
 #define False 0
 #define true 1
 #define false 0
-#define seqnum 200
-#define lennum 700
-#define cutoff 0.8
-#define times 10000
+#define seqnum
+#define lennum
+#define cutoff
+#define times
 
 char reslist[]={'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M',
 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', '-'};
