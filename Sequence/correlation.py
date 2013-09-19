@@ -1,8 +1,7 @@
-'''MI is a simple protein correlation algrithm.
-We use MI to calculate the correlation for 20 kinds of amino acid and gaps.(21)
-It also provide a shuffling function to calculate the shuffled P-value.
-The shuffled P-value calculation is performced by C and MPI.
+'''Different algorithm could identify protein position correlation.
+We have MI, MIp, OMES and SCA now.
 '''
+
 __author__ = 'Wenzhi Mao'
 __all__ = ['CalcMI', 'CalcMIp', 'CalcOMES', 'CalcSCA']
 

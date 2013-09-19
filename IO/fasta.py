@@ -1,3 +1,6 @@
+'''Some Fasta file read and write functions.
+'''
+
 __author__ = 'Wenzhi Mao'
 
 __all__ = ['ReadFasta']

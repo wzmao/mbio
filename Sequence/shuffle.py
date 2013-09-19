@@ -1,8 +1,7 @@
-'''OMES is a simple protein correlation algrithm.
-We use OMES to calculate the correlation for 20 kinds of amino acid and gaps.(21)
-It also provide a shuffling function to calculate the shuffled P-value.
-The shuffled P-value calculation is performced by C and MPI.
+'''Shuffle could be a good method to eliminate some false positive signals.
+This module include the shuffle function for OMES, MI and MIp.
 '''
+
 __author__ = 'Wenzhi Mao'
 __all__ = ['ShuffleOMES', 'ShuffleMI', 'ShuffleMIp']
 
@@ -23,49 +22,55 @@ def ShuffleOMES(sequences, times=10000, cutoff=0.2, core=0, output=1, cluster=0,
     import os
     from os import path
     from mbio.Application import job_organization as jo
-    scriptfile=path.join(_path__,'..','Scripts','omes_mpi.c')
-    jobnumber=jo.AskJobNumber()
-    f = open(path.join(_path__,'..','.Cache',jobnumber+'.fasta'), 'w')
+    scriptfile = path.join(_path__, '..', 'Scripts', 'omes_mpi.c')
+    jobnumber = jo.AskJobNumber()
+    f = open(path.join(_path__, '..', '.Cache', jobnumber+'.fasta'), 'w')
     f.write('\n'.join(sequences))
     f.close()
     jo.MkdirResult()
-    f = open(scriptfile,'r')
+    f = open(scriptfile, 'r')
     script = f.read()
     f.close()
-    output='1' if output else '0'
-    jo.Writejob(jobnumber,script.replace
-            ('#define seqnum', '#define seqnum '+str(len(sequences)))
-            .replace
-            ('#define lennum', '#define lennum '+str(len(sequences[0])+1))
-            .replace
-            ('file.fasta', path.join(_path__,'..','.Cache',jobnumber+'.fasta'))
-            .replace
-            ('#define OUTPUT', '#define OUTPUT '+str(output))
-            .replace
-            ('#define times', '#define times '+str(times))
-            .replace
-            ('#define cutoff', '#define cutoff '+str(1-cutoff))
-            .replace
-            ("OMESsave.save", path.join(_path__,'..','.Result',jobnumber+'-omes.save'))
-            .replace
-            ("Psave.save", path.join(_path__,'..','.Result',jobnumber+'-p.save')))
-    jo.SubShufflejob(jobnumber,cluster,core)
-    if path.exists(path.join(_path__,'..','.Result',jobnumber+'-omes.save')):
+    output = '1' if output else '0'
+    jo.Writejob(jobnumber, script.replace
+               ('#define seqnum', '#define seqnum '+str(len(sequences)))
+                .replace
+               ('#define lennum', '#define lennum '+str(len(sequences[0])+1))
+                .replace
+               ('file.fasta', path.join(
+                _path__, '..', '.Cache', jobnumber+'.fasta'))
+                .replace
+               ('#define OUTPUT', '#define OUTPUT '+str(output))
+                .replace
+               ('#define times', '#define times '+str(times))
+                .replace
+               ('#define cutoff', '#define cutoff '+str(1-cutoff))
+                .replace
+               ("OMESsave.save", path.join(
+                _path__, '..', '.Result', jobnumber+'-omes.save'))
+                .replace
+               ("Psave.save", path.join(_path__, '..', '.Result', jobnumber+'-p.save')))
+    jo.SubShufflejob(jobnumber, cluster, core)
+    if path.exists(path.join(_path__, '..', '.Result', jobnumber+'-omes.save')):
         from mbio.IO import matrix
-        m = matrix.ReadMatrix(path.join(_path__,'..','.Result',jobnumber+'-omes.save'), 'd',len(sequences[0]))
+        m = matrix.ReadMatrix(path.join(
+            _path__, '..', '.Result', jobnumber+'-omes.save'), 'd', len(sequences[0]))
         if save:
             import shutil
-            shutil.copy(path.join(_path__,'..','.Result',jobnumber+'-omes.save'),  './')
-            os.rename(path.join('.',jobnumber+'-omes.save'), './omes.save')
+            shutil.copy(path.join(
+                _path__, '..', '.Result', jobnumber+'-omes.save'),  './')
+            os.rename(path.join('.', jobnumber+'-omes.save'), './omes.save')
     else:
         return None
-    if path.exists(path.join(_path__,'..','.Result',jobnumber+'-p.save')):
+    if path.exists(path.join(_path__, '..', '.Result', jobnumber+'-p.save')):
         from mbio.IO import matrix
-        p = matrix.ReadMatrix(path.join(_path__,'..','.Result',jobnumber+'-p.save'), 'i',len(sequences[0]))
+        p = matrix.ReadMatrix(path.join(
+            _path__, '..', '.Result', jobnumber+'-p.save'), 'i', len(sequences[0]))
         if save:
             import shutil
-            shutil.copy(path.join(_path__,'..','.Result',jobnumber+'-p.save'),  './')
-            os.rename(path.join('.',jobnumber+'-p.save'), './p.save')
+            shutil.copy(path.join(
+                _path__, '..', '.Result', jobnumber+'-p.save'),  './')
+            os.rename(path.join('.', jobnumber+'-p.save'), './p.save')
     else:
         return None
     jo.Clearjob(jobnumber)
@@ -82,53 +87,60 @@ def ShuffleMI(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fals
     import os
     from os import path
     from mbio.Application import job_organization as jo
-    scriptfile=path.join(_path__,'..','Scripts','mi_mpi.c')
-    jobnumber=jo.AskJobNumber()
-    f = open(path.join(_path__,'..','.Cache',jobnumber+'.fasta'), 'w')
+    scriptfile = path.join(_path__, '..', 'Scripts', 'mi_mpi.c')
+    jobnumber = jo.AskJobNumber()
+    f = open(path.join(_path__, '..', '.Cache', jobnumber+'.fasta'), 'w')
     f.write('\n'.join(sequences))
     f.close()
     jo.MkdirResult()
-    f = open(scriptfile,'r')
+    f = open(scriptfile, 'r')
     script = f.read()
     f.close()
-    output='1' if output else '0'
-    jo.Writejob(jobnumber,script.replace
-            ('#define seqnum', '#define seqnum '+str(len(sequences)))
-            .replace
-            ('#define lennum', '#define lennum '+str(len(sequences[0])+1))
-            .replace
-            ('file.fasta', path.join(_path__,'..','.Cache',jobnumber+'.fasta'))
-            .replace
-            ('#define OUTPUT', '#define OUTPUT '+str(output))
-            .replace
-            ('#define times', '#define times '+str(times))
-            .replace
-            ('#define cutoff', '#define cutoff '+str(1-cutoff))
-            .replace
-            ("MIsave.save", path.join(_path__,'..','.Result',jobnumber+'-mi.save'))
-            .replace
-            ("Psave.save", path.join(_path__,'..','.Result',jobnumber+'-p.save')))
-    jo.SubShufflejob(jobnumber,cluster,core)
-    if path.exists(path.join(_path__,'..','.Result',jobnumber+'-mi.save')):
+    output = '1' if output else '0'
+    jo.Writejob(jobnumber, script.replace
+               ('#define seqnum', '#define seqnum '+str(len(sequences)))
+                .replace
+               ('#define lennum', '#define lennum '+str(len(sequences[0])+1))
+                .replace
+               ('file.fasta', path.join(
+                _path__, '..', '.Cache', jobnumber+'.fasta'))
+                .replace
+               ('#define OUTPUT', '#define OUTPUT '+str(output))
+                .replace
+               ('#define times', '#define times '+str(times))
+                .replace
+               ('#define cutoff', '#define cutoff '+str(1-cutoff))
+                .replace
+               ("MIsave.save", path.join(
+                _path__, '..', '.Result', jobnumber+'-mi.save'))
+                .replace
+               ("Psave.save", path.join(_path__, '..', '.Result', jobnumber+'-p.save')))
+    jo.SubShufflejob(jobnumber, cluster, core)
+    if path.exists(path.join(_path__, '..', '.Result', jobnumber+'-mi.save')):
         from mbio.IO import matrix
-        m = matrix.ReadMatrix(path.join(_path__,'..','.Result',jobnumber+'-mi.save'), 'd',len(sequences[0]))
+        m = matrix.ReadMatrix(path.join(
+            _path__, '..', '.Result', jobnumber+'-mi.save'), 'd', len(sequences[0]))
         if save:
             import shutil
-            shutil.copy(path.join(_path__,'..','.Result',jobnumber+'-mi.save'),  './')
-            os.rename(path.join('.',jobnumber+'-mi.save'), './mi.save')
+            shutil.copy(path.join(
+                _path__, '..', '.Result', jobnumber+'-mi.save'),  './')
+            os.rename(path.join('.', jobnumber+'-mi.save'), './mi.save')
     else:
         return None
-    if path.exists(path.join(_path__,'..','.Result',jobnumber+'-p.save')):
+    if path.exists(path.join(_path__, '..', '.Result', jobnumber+'-p.save')):
         from mbio.IO import matrix
-        p = matrix.ReadMatrix(path.join(_path__,'..','.Result',jobnumber+'-p.save'), 'i',len(sequences[0]))
+        p = matrix.ReadMatrix(path.join(
+            _path__, '..', '.Result', jobnumber+'-p.save'), 'i', len(sequences[0]))
         if save:
             import shutil
-            shutil.copy(path.join(_path__,'..','.Result',jobnumber+'-p.save'),  './')
-            os.rename(path.join('.',jobnumber+'-p.save'), './p.save')
+            shutil.copy(path.join(
+                _path__, '..', '.Result', jobnumber+'-p.save'),  './')
+            os.rename(path.join('.', jobnumber+'-p.save'), './p.save')
     else:
         return None
     jo.Clearjob(jobnumber)
     return p
+
 
 def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=False, save=False):
     '''It is a function to calculate the p value for shuffled MIp.
@@ -140,49 +152,55 @@ def ShuffleMIp(sequences, times=10000, cutoff=0.2, core=1, output=1, cluster=Fal
     import os
     from os import path
     from mbio.Application import job_organization as jo
-    scriptfile=path.join(_path__,'..','Scripts','mip_mpi.c')
-    jobnumber=jo.AskJobNumber()
-    f = open(path.join(_path__,'..','.Cache',jobnumber+'.fasta'), 'w')
+    scriptfile = path.join(_path__, '..', 'Scripts', 'mip_mpi.c')
+    jobnumber = jo.AskJobNumber()
+    f = open(path.join(_path__, '..', '.Cache', jobnumber+'.fasta'), 'w')
     f.write('\n'.join(sequences))
     f.close()
     jo.MkdirResult()
-    f = open(scriptfile,'r')
+    f = open(scriptfile, 'r')
     script = f.read()
     f.close()
-    output='1' if output else '0'
-    jo.Writejob(jobnumber,script.replace
-            ('#define seqnum', '#define seqnum '+str(len(sequences)))
-            .replace
-            ('#define lennum', '#define lennum '+str(len(sequences[0])+1))
-            .replace
-            ('file.fasta', path.join(_path__,'..','.Cache',jobnumber+'.fasta'))
-            .replace
-            ('#define OUTPUT', '#define OUTPUT '+str(output))
-            .replace
-            ('#define times', '#define times '+str(times))
-            .replace
-            ('#define cutoff', '#define cutoff '+str(1-cutoff))
-            .replace
-            ("MIpsave.save", path.join(_path__,'..','.Result',jobnumber+'-mip.save'))
-            .replace
-            ("Psave.save", path.join(_path__,'..','.Result',jobnumber+'-p.save')))
-    jo.SubShufflejob(jobnumber,cluster,core)
-    if path.exists(path.join(_path__,'..','.Result',jobnumber+'-mip.save')):
+    output = '1' if output else '0'
+    jo.Writejob(jobnumber, script.replace
+               ('#define seqnum', '#define seqnum '+str(len(sequences)))
+                .replace
+               ('#define lennum', '#define lennum '+str(len(sequences[0])+1))
+                .replace
+               ('file.fasta', path.join(
+                _path__, '..', '.Cache', jobnumber+'.fasta'))
+                .replace
+               ('#define OUTPUT', '#define OUTPUT '+str(output))
+                .replace
+               ('#define times', '#define times '+str(times))
+                .replace
+               ('#define cutoff', '#define cutoff '+str(1-cutoff))
+                .replace
+               ("MIpsave.save", path.join(
+                _path__, '..', '.Result', jobnumber+'-mip.save'))
+                .replace
+               ("Psave.save", path.join(_path__, '..', '.Result', jobnumber+'-p.save')))
+    jo.SubShufflejob(jobnumber, cluster, core)
+    if path.exists(path.join(_path__, '..', '.Result', jobnumber+'-mip.save')):
         from mbio.IO import matrix
-        m = matrix.ReadMatrix(path.join(_path__,'..','.Result',jobnumber+'-mip.save'), 'd',len(sequences[0]))
+        m = matrix.ReadMatrix(path.join(
+            _path__, '..', '.Result', jobnumber+'-mip.save'), 'd', len(sequences[0]))
         if save:
             import shutil
-            shutil.copy(path.join(_path__,'..','.Result',jobnumber+'-mip.save'),  './')
-            os.rename(path.join('.',jobnumber+'-mip.save'), './mip.save')
+            shutil.copy(path.join(
+                _path__, '..', '.Result', jobnumber+'-mip.save'),  './')
+            os.rename(path.join('.', jobnumber+'-mip.save'), './mip.save')
     else:
         return None
-    if path.exists(path.join(_path__,'..','.Result',jobnumber+'-p.save')):
+    if path.exists(path.join(_path__, '..', '.Result', jobnumber+'-p.save')):
         from mbio.IO import matrix
-        p = matrix.ReadMatrix(path.join(_path__,'..','.Result',jobnumber+'-p.save'), 'i',len(sequences[0]))
+        p = matrix.ReadMatrix(path.join(
+            _path__, '..', '.Result', jobnumber+'-p.save'), 'i', len(sequences[0]))
         if save:
             import shutil
-            shutil.copy(path.join(_path__,'..','.Result',jobnumber+'-p.save'),  './')
-            os.rename(path.join('.',jobnumber+'-p.save'), './p.save')
+            shutil.copy(path.join(
+                _path__, '..', '.Result', jobnumber+'-p.save'),  './')
+            os.rename(path.join('.', jobnumber+'-p.save'), './p.save')
     else:
         return None
     jo.Clearjob(jobnumber)

@@ -4,6 +4,7 @@ __all__ = []
 
 
 def _Startup():
+	'''Get _path__ and compile files.'''
     from os import path
     from mbio import _ABSpath
     global _path__

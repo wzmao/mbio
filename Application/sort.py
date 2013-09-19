@@ -1,9 +1,13 @@
+'''Some sort functions.
+'''
+
 __author__ = 'Wenzhi Mao'
 
 __all__ = ['QuickSort']
 
 
 def _Startup():
+    '''Get _path__.'''
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()

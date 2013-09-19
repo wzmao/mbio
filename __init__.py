@@ -7,12 +7,14 @@ __all__ = []
 
 
 def _StartupPath():
+    '''Get _path__'''
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()
 
 
 def _Startup():
+    '''Do some startup initialization. Check the hostname for compilation.'''
     global _hostname
     import os
     _hostname = os.popen('hostname').read().replace('\n', '')
@@ -34,6 +36,7 @@ def _Startup():
 
 
 def _ABSpath():
+    '''Get absolute path for the script.'''
     import inspect
     import os.path
     caller_file = inspect.stack()[1][1]
@@ -41,6 +44,7 @@ def _ABSpath():
 
 
 def _make(p):
+    '''Compile C files using mpicc.'''
     from os import path
     from os import popen
     abp = path.abspath(p)
@@ -70,6 +74,8 @@ __all__.append('IO')
 
 
 def _clearSo(searchpath=_path__):
+    '''Delete all .so file and .pyc in mbio.
+    Could affect some functions. Restart the program for normal usage.'''
     import os
     dirl = os.listdir(searchpath)
     for d in dirl:
@@ -80,6 +86,7 @@ def _clearSo(searchpath=_path__):
 
 
 def _clearData():
+    '''Delete all running job files.'''
     import os
     if os.path.exists(os.path.join(_path__, '.Cache')):
         for i in os.listdir(os.path.join(_path__, '.Cache')):
@@ -92,6 +99,7 @@ def _clearData():
 
 
 def _clear():
+    '''Make the package back to start status.'''
     _clearSo()
     _clearData()
 

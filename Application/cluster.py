@@ -1,8 +1,12 @@
+'''It is a module could get some information about current computer.
+Sun Grid Engine could be monitored by this module.'''
+
 __author__ = 'Wenzhi Mao'
 __all__ = []
 
 
 def _Startup():
+    '''Get _path__.'''
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()
@@ -37,28 +41,28 @@ def Getclusterlist(available=False):
         return None
 
 
-def Getname(minc=0,maxc=64):
+def Getname(minc=0, maxc=64):
     '''The function return the cluster name and the available nodes number.
     min and max of nodes number could be assigned.'''
-    clist=Getclusterlist(True)
-    clist=[[int(i[1].split('/')[-1])-int(i[1].split('/')[-2])]+i for i in clist
-            if minc<=int(i[1].split('/')[-1])-int(i[1].split('/')[-2])<=maxc]
+    clist = Getclusterlist(True)
+    clist = [[int(i[1].split('/')[-1])-int(i[1].split('/')[-2])]+i for i in clist
+                 if minc <= int(i[1].split('/')[-1])-int(i[1].split('/')[-2]) <= maxc]
     clist.sort(reverse=True)
-    if len(clist)==0:
+    if len(clist) == 0:
         return []
     else:
-        if clist[0][2].split('/')[-1]!='4':
-            result = [{'64':'@bahar64',
-                    '32':'@core32',
-                    '24':'@core24',
-                    '12':'@bahar12',
-                    '8':'@core8',
-                    }[clist[0][2].split('/')[-1]]]
+        if clist[0][2].split('/')[-1] != '4':
+            result = [{'64': '@bahar64',
+                       '32': '@core32',
+                       '24': '@core24',
+                       '12': '@bahar12',
+                       '8': '@core8',
+                       }[clist[0][2].split('/')[-1]]]
         else:
-            if 92<=int(clist[0][1][1:])<=102:
+            if 92 <= int(clist[0][1][1:]) <= 102:
                 result = '@bahar4'
             else:
                 result = '@core4'
-        return [result,str(clist[0][0])]
+        return [result, str(clist[0][0])]
 
 _Startup()
