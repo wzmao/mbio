@@ -138,8 +138,8 @@ def CalcSCA(sequences):
     for i in range(len(allsequence)):
         m[i] = allsequence[i]
     l = len(sequences[0])
-    result = _c_CalcSCA(m, len(sequences), l)
     sca = []
+    result = _c_CalcSCA(m, len(sequences), l)
     for i in range(l**2):
         if i % l == 0:
             sca.append([])
@@ -147,6 +147,7 @@ def CalcSCA(sequences):
     return sca
 
 
+'''
 def CalcSCA1(sequence):
     from math import fsum as sum
     from math import log
@@ -198,6 +199,7 @@ def CalcSCA1(sequence):
                           j] for k in range(m)])*1.0/m-meanxp[i]*meanxp[j])
             c[j][i] = c[i][j]
     return c
+'''
 
 
 _Startup()

@@ -552,12 +552,13 @@ example:
   double q[]={.073, .025, .050, .061, .042, .072, .023, .053, .064, .089,
          .023, .043, .052, .040, .052, .073, .056, .063, .013, .033};
   int resnum=sizeof(reslist)/sizeof(char);
-  double p[l][resnum];
+  double *p;
+  p= malloc(l*resnum*sizeof(double));
   double *sca;
   sca = malloc( l*l * sizeof(double) );
   for (i=0;i<l;i++)
     for (j=0;j<resnum;j++)
-      p[i][j]=0;
+      p[i*resnum+j]=0;
   for (i=0;i<l;i++)
   {
     double count=0;
@@ -565,7 +566,7 @@ example:
       for (k=0;k<resnum;k++)
         if (m(j,i)==reslist[k])
         {
-          p[i][k]++;
+          p[i*resnum+k]++;
           count++;
           break;
         }
@@ -573,31 +574,33 @@ example:
     sumall=0;
     for (k=0;k<resnum;k++)
     {
-      p[i][k]=p[i][k]*1.0/n;
-      if (p[i][k]>=1.0-1e-10 || p[i][k]<=1e-10)
+      p[i*resnum+k]=p[i*resnum+k]*1.0/n;
+      if (p[i*resnum+k]>=1.0-1e-10 || p[i*resnum+k]<=1e-10)
       {
-        p[i][k]=0.0;
+        p[i*resnum+k]=0.0;
         temp=0;
       }
       else
       {
-        temp=fabs(log((1-q[k])/q[k]*p[i][k]/(1-p[i][k])))*p[i][k];
-        p[i][k]=temp*fabs(log((1-q[k])/q[k]*p[i][k]/(1-p[i][k])));
+        temp=fabs(log((1-q[k])/q[k]*p[i*resnum+k]/(1-p[i*resnum+k])))*p[i*resnum+k];
+        p[i*resnum+k]=temp*fabs(log((1-q[k])/q[k]*p[i*resnum+k]/(1-p[i*resnum+k])));
       }
         sumall=sumall+temp*temp;
     }
     sumall=sqrt(sumall);
     if (sumall<1e-10)
       for(k=0;k<resnum;k++)
-        p[i][k]=0;
+        p[i*resnum+k]=0;
     else
       for (k=0;k<resnum;k++)
       {
-        p[i][k]=p[i][k]/sumall;
+        p[i*resnum+k]=p[i*resnum+k]/sumall;
       }
   }
-  double x[n][l];
-  double sumx[l];
+  double *x;
+  x=malloc(n*l*sizeof(double));
+  double *sumx;
+  sumx=malloc(l*sizeof(double));
   for (j=0;j<l;j++)
     sumx[j]=0.0;
   for (i=0;i<n;i++)
@@ -608,26 +611,30 @@ example:
       {
         if (reslist[k]==m(i,j))
         {
-          x[i][j]=p[j][k];
-          sumx[j]+=x[i][j];
+          x[i*l+j]=p[j*resnum+k];
+          sumx[j]+=x[i*l+j];
         }
       }
     }
   }
   for (i=0;i<l;i++)
   {
-    sca(i,i)=0;
     for (j=i;j<l;j++)
     {
       double add=0;
       for (k=0;k<n;k++)
       {
-        add+=x[k][i]*x[k][j];
+        add+=x[k*l+i]*x[k*l+j];
       }
-      add=fabs(add/n-sumx[i]*sumx[j]/n/n);
+      add=(add/n-sumx[i]*sumx[j]/n/n);
+      if (add<0)
+        add=-add;
       sca(i,j)=add;
       sca(j,i)=add;
     }
   }
+  free(p);
+  free(x);
+  free(sumx);
   return sca;
 }
