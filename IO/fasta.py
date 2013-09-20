@@ -7,6 +7,7 @@ __all__ = ['ReadFasta']
 
 
 def _Startup():
+    '''Get _path__.'''
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()

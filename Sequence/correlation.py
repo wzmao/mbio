@@ -7,6 +7,7 @@ __all__ = ['CalcMI', 'CalcMIp', 'CalcOMES', 'CalcSCA']
 
 
 def _Startup():
+    '''Get _path__.'''
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()
@@ -116,6 +117,9 @@ def CalcOMES(sequences):
 
 
 def CalcSCA(sequences):
+    '''It is a function to calculate the SCA matrix based on language C.
+    Given the sequences in a list with no format.
+    '''
     if not '_c_CalcSCA' in globals().keys():
         import ctypes as ct
         from os import path
