@@ -3,7 +3,7 @@ We have MI, MIp, OMES and SCA now.
 '''
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['CalcMI', 'CalcMIp', 'CalcOMES', 'CalcSCA']
+__all__ = ['CalcMI', 'CalcMIp', 'CalcOMES', 'CalcSCA', 'CalcMy']
 
 
 def _Startup():
@@ -203,6 +203,37 @@ def CalcSCA1(sequence):
             c[j][i] = c[i][j]
     return c
 '''
+
+
+def CalcMy(sequences):
+    if not '_c_CalcMy' in globals().keys():
+        import ctypes as ct
+        from os import path
+        M = ct.CDLL(path.join(_path__, 'correlation_c.so'))
+        global _c_CalcMy
+        _c_CalcMy = M.calcMy
+        _c_CalcMy.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
+        _c_CalcMy.restype = ct.POINTER(ct.c_double)
+        _c_CalcMy.__doc__ = '''It is a function to calulate the SCA matrix in C.
+        Give 4 variable.    `M, n, l`.
+            M is the sequence array with length n*l.(char array)
+            n is the sequence number.(int)
+            l is the sequence length.(int)
+        Return 1 variable.  `sca`
+            sca is an array with length l*l to return the result.(double array)'''
+    import ctypes as ct
+    allsequence = ''.join(sequences)
+    m = (ct.c_char * len(allsequence))()
+    for i in range(len(allsequence)):
+        m[i] = allsequence[i]
+    l = len(sequences[0])
+    result = _c_CalcMy(m, len(sequences), l)
+    # my = []
+    # for i in range(l**2):
+    #     if i % l == 0:
+    #         sca.append([])
+    #     sca[-1].append(result[i])
+    return result
 
 
 _Startup()
