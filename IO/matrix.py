@@ -38,7 +38,7 @@ def ReadMatrix(filename, dtype=None, l=None):
             print 'Sizes of matrix are different.'
             return None
         else:
-            return [m[0][0],m[1][0]]
+            return [mlist[0][0],mlist[1][0]]
     else:
         m=parsesinglematrix(filename)
         if m==None:
@@ -71,6 +71,12 @@ def parsesinglematrix(filename):
     for i in range(l):
         m.append(list(struct.unpack(str(l)+dtype, tempmatrix[i*l*{
                  'd': 8, 'i': 4}[dtype]:(i*l+l)*{'d': 8, 'i': 4}[dtype]])))
+    if dtype=='i':
+        mm=[[0.0 for j in range(l)]for i in range(l)]
+        for i in range(l):
+            for j in range(l):
+                mm[i][j]=m[i][j]+m[j][i]
+        m=mm
     return [m,dtype,l]
 
 
