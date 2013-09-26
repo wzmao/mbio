@@ -228,12 +228,12 @@ def CalcMy(sequences):
         m[i] = allsequence[i]
     l = len(sequences[0])
     result = _c_CalcMy(m, len(sequences), l)
-    # my = []
-    # for i in range(l**2):
-    #     if i % l == 0:
-    #         sca.append([])
-    #     sca[-1].append(result[i])
-    return result
+    my = []
+    for i in range(l**2):
+        if i % l == 0:
+            my.append([])
+        my[-1].append(result[i])
+    return my
 
 
 _Startup()

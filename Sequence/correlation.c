@@ -714,7 +714,6 @@ double* calcMy(char m[],int n,int l)
     my[i]=0.0;
   for (i=0;i<l;i++)
   {
-    printf("%d\n",i);
     for (j=i;j<l;j++)
     {
       double *prop,*pro1,*pro2,allnumber=0,add=0;
