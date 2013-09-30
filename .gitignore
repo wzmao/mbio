@@ -1,0 +1,13 @@
+# Use wildcards as well
+*~
+*.so
+*.bak
+*.pyc
+*__pycache__*
+*.o
+
+
+# Can also ignore all directories and files in a directory.
+.Cache
+.Result
+.Info
