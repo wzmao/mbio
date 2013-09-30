@@ -43,16 +43,6 @@ def _ABSpath():
     return os.path.abspath(os.path.dirname(caller_file))
 
 
-def _make(p):
-    '''Compile C files using mpicc.'''
-    from os import path
-    from os import popen
-    abp = path.abspath(p)
-    if path.splitext(path.split(abp)[1])[1] == '.c':
-        sop = abp[:-2]+'_c.so'
-        popen('mpicc -shared -fPIC -O3 -o '+sop+' '+abp)
-
-
 _StartupPath()
 
 from . import Application

@@ -12,8 +12,8 @@ def _Startup():
     Clist = ['sort.c']
     for c in Clist:
         if not path.exists(path.join(_path__, c.replace('.c', '_c.so'))):
-            from mbio import _make
-            _make(path.join(_path__, c))
+            from mbio.Application import compile
+            compile.make(path.join(_path__, c))
 
 _Startup()
 
