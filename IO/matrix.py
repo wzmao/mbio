@@ -31,24 +31,29 @@ def ReadMatrix(filename, dtype=None, l=None):
     elif type(filename)==list:
         mlist=[parsesinglematrix(i) for i in filename]
         if None in mlist:
-            print 'There is non-square matrix.'
+            from mbio.IO import error
+            error.errorprint('There is non-square matrix.')
             return None
         llist=[mlist[0][2],mlist[1][2]]
         if len(set(llist))!=1 or (l and len(set(llist+[l]))!=1):
-            print 'Sizes of matrix are different.'
+            from mbio.IO import error
+            error.errorprint('Sizes of matrix are different.')
             return None
         else:
             return [mlist[0][0],mlist[1][0]]
     else:
         m=parsesinglematrix(filename)
         if m==None:
-            print 'It is not a square matrix.'
+            from mbio.IO import error
+            error.errorprint('It is not a square matrix.')
             return None
         if l and l!=m[2]:
-            print 'Sizes of matrix are different.'
+            from mbio.IO import error
+            error.errorprint('Sizes of matrix are different.')
             return None
         if dtype and dtype!=m[1]:
-            print 'Data type are different.'
+            from mbio.IO import error
+            error.errorprint('Data type are different.')
             return None
         else:
             return m[0]
