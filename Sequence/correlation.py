@@ -4,7 +4,7 @@ We have MI, MIp, OMES and SCA now.
 
 __author__ = 'Wenzhi Mao'
 __all__ = ['CalcMI', 'CalcMIp', 'CalcOMES', 'CalcSCA', 'CalcMy', 'CalcMys',
-           'CalcMyp']
+           'CalcMyp', 'apc']
 
 
 def _Startup():
@@ -304,6 +304,17 @@ def CalcMyp(sequences):
 
 
 def apc(x):
-    pass
+    l = list(set([len(x)]+[len(i) for i in x]))
+    if len(l) != 1:
+        from mbio.IO import error
+        error.errorprint('The matrix is not square.')
+        return None
+    l = l[0]
+    mean = [sum(i)*1.0/(l-1) for i in x]
+    allmean = sum(mean)/l
+    for i in range(l):
+        for j in range(l):
+            x[i][j]-=(mean[i]*mean[j])/allmean
+    return x
 
 _Startup()
