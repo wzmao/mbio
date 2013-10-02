@@ -12,7 +12,7 @@ def _Startup():
     _path__ = _ABSpath()
 
 
-def make(p, compiler='', option='',libs=''):
+def make(p, compiler='', option='', libs=''):
     '''Compile C files using given compiler.'''
     from os import path
     from os import popen
@@ -22,8 +22,9 @@ def make(p, compiler='', option='',libs=''):
     compiler = compiler if compiler else 'gcc'
     option = option if option else '-shared -fPIC -O3 -lm'
     libs = libs if libs else ''
-    if popen('which {0}'.format(compiler)).read()=='':
+    if popen('which {0}'.format(compiler)).read() == '':
         from mbio.IO import error
-        error.errorprint('The compler `{0}` is not available on this computer. gcc used instead.'.format(compiler))
-        compiler='gcc'
+        error.errorprint(
+            'The compler `{0}` is not available on this computer. gcc used instead.'.format(compiler))
+        compiler = 'gcc'
     popen('{0} {1} -o {2} {3} {4}'.format(compiler, option, sop, abp, libs))
