@@ -75,14 +75,14 @@ double* calcMys(char m[],int n,int l)
     }
   }
   free(simi);
-  double *my;
+  double *mys;
   int n1=0,n2=0;
-  my=malloc(l*l*sizeof(double));
+  mys=malloc(l*l*sizeof(double));
   for (i=0;i<l*l;i++)
-    my[i]=0.0;
+    mys[i]=0.0;
   for (i=0;i<l;i++)
   {
-    for (j=i;j<l;j++)
+    for (j=i+1;j<l;j++)
     {
       double *prop,*pro1,*pro2,allnumber=0,add=0;
       prop=malloc(20*20*20*20*sizeof(double));
@@ -223,13 +223,13 @@ double* calcMys(char m[],int n,int l)
               }
           }
         }
-      my[i*l+j]=allnumber;
-      my[j*l+i]=allnumber;
+      mys[i*l+j]=allnumber;
+      mys[j*l+i]=allnumber;
       free(prop);
       free(pro1);
       free(pro2);
     } 
   }
   free(edge);
-  return my;
+  return mys;
 }

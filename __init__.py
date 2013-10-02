@@ -2,7 +2,7 @@ __author__ = 'Wenzhi Mao'
 __version__ = '1.0.0'
 
 release = [int(x) for x in __version__.split('.')]
-del x
+del x, release
 __all__ = []
 
 

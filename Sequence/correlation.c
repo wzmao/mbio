@@ -714,7 +714,7 @@ double* calcMy(char m[],int n,int l)
     my[i]=0.0;
   for (i=0;i<l;i++)
   {
-    for (j=i;j<l;j++)
+    for (j=i+1;j<l;j++)
     {
       double *prop,*pro1,*pro2,allnumber=0,add=0;
       prop=malloc(20*20*20*20*sizeof(double));

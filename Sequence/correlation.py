@@ -214,13 +214,13 @@ def CalcMy(sequences):
         _c_CalcMy = M.calcMy
         _c_CalcMy.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
         _c_CalcMy.restype = ct.POINTER(ct.c_double)
-        _c_CalcMy.__doc__ = '''It is a function to calulate the SCA matrix in C.
+        _c_CalcMy.__doc__ = '''It is a function to calulate the My matrix in C.
         Give 4 variable.    `M, n, l`.
             M is the sequence array with length n*l.(char array)
             n is the sequence number.(int)
             l is the sequence length.(int)
-        Return 1 variable.  `sca`
-            sca is an array with length l*l to return the result.(double array)'''
+        Return 1 variable.  `my`
+            my is an array with length l*l to return the result.(double array)'''
     import ctypes as ct
     allsequence = ''.join(sequences)
     m = (ct.c_char * len(allsequence))()
@@ -245,13 +245,13 @@ def CalcMys(sequences):
         _c_CalcMys = M.calcMys
         _c_CalcMys.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
         _c_CalcMys.restype = ct.POINTER(ct.c_double)
-        _c_CalcMys.__doc__ = '''It is a function to calulate the SCA matrix in C.
+        _c_CalcMys.__doc__ = '''It is a function to calulate the Mys matrix in C.
         Give 4 variable.    `M, n, l`.
             M is the sequence array with length n*l.(char array)
             n is the sequence number.(int)
             l is the sequence length.(int)
-        Return 1 variable.  `sca`
-            sca is an array with length l*l to return the result.(double array)'''
+        Return 1 variable.  `my`
+            my is an array with length l*l to return the result.(double array)'''
     import ctypes as ct
     allsequence = ''.join(sequences)
     m = (ct.c_char * len(allsequence))()
@@ -259,11 +259,15 @@ def CalcMys(sequences):
         m[i] = allsequence[i]
     l = len(sequences[0])
     result = _c_CalcMys(m, len(sequences), l)
-    my = []
+    mys = []
     for i in range(l**2):
         if i % l == 0:
-            my.append([])
-        my[-1].append(result[i])
-    return my
+            mys.append([])
+        mys[-1].append(result[i])
+    return mys
+
+
+def apc(x):
+    pass
 
 _Startup()
