@@ -9,13 +9,14 @@ def _Startup():
     from mbio import _ABSpath
     global _path__
     _path__ = _ABSpath()
-    Clist = ['correlation.c']
-    Compiler = ['']
-    Options = ['']
-    for c, cp, o in zip(Clist,Compiler,Options):
+    Clist = ['correlation.c', 'correlation_gsl.c']
+    Compiler = ['', '']
+    Options = ['', '']
+    Libs = ['', '-lgsl -lgslcblas']
+    for c, cp, o, l in zip(Clist, Compiler, Options, Libs):
         if not path.exists(path.join(_path__, c.replace('.c', '_c.so'))):
             from mbio.Application import compile
-            compile.make(path.join(_path__, c), cp, o)
+            compile.make(path.join(_path__, c), cp, o, l)
 
 _Startup()
 
