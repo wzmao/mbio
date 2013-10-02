@@ -3,7 +3,8 @@ We have MI, MIp, OMES and SCA now.
 '''
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['CalcMI', 'CalcMIp', 'CalcOMES', 'CalcSCA', 'CalcMy', 'CalcMys']
+__all__ = ['CalcMI', 'CalcMIp', 'CalcOMES', 'CalcSCA', 'CalcMy', 'CalcMys',
+           'CalcMyp']
 
 
 def _Startup():
@@ -250,8 +251,8 @@ def CalcMys(sequences):
             M is the sequence array with length n*l.(char array)
             n is the sequence number.(int)
             l is the sequence length.(int)
-        Return 1 variable.  `my`
-            my is an array with length l*l to return the result.(double array)'''
+        Return 1 variable.  `mys`
+            mys is an array with length l*l to return the result.(double array)'''
     import ctypes as ct
     allsequence = ''.join(sequences)
     m = (ct.c_char * len(allsequence))()
@@ -265,6 +266,41 @@ def CalcMys(sequences):
             mys.append([])
         mys[-1].append(result[i])
     return mys
+
+
+def CalcMyp(sequences):
+    '''It is a function to calculate the Myp matrix based on language C.
+    Given the sequences in a list with no format.
+    '''
+    # TODO it will return nan instead of 0.0 for one sequence.
+    if not '_c_CalcMyp' in globals().keys():
+        import ctypes as ct
+        from os import path
+        M = ct.CDLL(path.join(_path__, 'correlation_c.so'))
+        global _c_CalcMyp
+        _c_CalcMyp = M.calcMyp
+        _c_CalcMyp.argtypes = [ct.POINTER(ct.c_char), ct.c_int, ct.c_int]
+        _c_CalcMyp.restype = ct.POINTER(ct.c_double)
+        _c_CalcMyp.__doc__ = '''It is a function to calulate the Myp matrix in C.
+        Give 4 variable.    `M, n, l`.
+            M is the sequence array with length n*l.(char array)
+            n is the sequence number.(int)
+            l is the sequence length.(int)
+        Return 1 variable.  `myp`
+            myp is an array with length l*l to return the result.(double array)'''
+    import ctypes as ct
+    allsequence = ''.join(sequences)
+    m = (ct.c_char * len(allsequence))()
+    for i in range(len(allsequence)):
+        m[i] = allsequence[i]
+    l = len(sequences[0])
+    result = _c_CalcMyp(m, len(sequences), l)
+    myp = []
+    for i in range(l**2):
+        if i % l == 0:
+            myp.append([])
+        myp[-1].append(result[i])
+    return myp
 
 
 def apc(x):

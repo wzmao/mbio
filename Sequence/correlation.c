@@ -642,6 +642,13 @@ example:
 
 double* calcMy(char m[],int n,int l)
 {
+/*
+This function is used to calculate the My matrix.
+m is the fastas sequences which has been concanated to one array
+n is the number of sequences and l is the length.
+len(m) must eaqul to l*n.
+*/
+
   int i,j,k,k1,k2,k3,k4;
   char reslist[]={ 'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 
       'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y'};
@@ -823,4 +830,39 @@ double* calcMy(char m[],int n,int l)
   }
   free(edge);
   return my;
+}
+
+double* calcMyp(char m[],int n,int l)
+{
+/*
+This function is used to calculate the Myp matrix.
+m is the fastas sequences which has been concanated to one array
+n is the number of sequences and l is the length.
+len(m) must eaqul to l*n.
+*/
+
+  double *myp=calcMy(m,n,l);
+  int i,j,k;
+  double mean[l],allmean=0;
+  k=0;
+  for (i=0;i<l;i++)
+  {
+    mean[i]=0;
+    for (j=0;j<l;j++)
+    {
+      mean[i]+=myp[k];
+      k++;
+    }
+    mean[i]=mean[i]/(l-1);
+    allmean+=mean[i];
+  }
+  allmean=allmean/l;
+  for (i=0;i<l;i++)
+  {
+    for (j=0;j<l;j++)
+    {
+      myp[i*l+j]-=((mean[i]*mean[j])/allmean);
+    }
+  }
+  return myp;
 }
