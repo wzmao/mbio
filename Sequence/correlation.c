@@ -407,7 +407,7 @@ example:
             if (count!=0.0)
             {
               count=count/n;
-              add+=(count-p[i][k1]*p[j][k2])*(count-p[i][k1]*p[j][k2])/(p[i][k1]*p[j][k2]);
+              add+=n*(count-p[i][k1]*p[j][k2])*(count-p[i][k1]*p[j][k2])/(p[i][k1]*p[j][k2]);
             }
           }
         }
@@ -472,7 +472,7 @@ pos is the return column.
             if (count!=0.0)
             {
               count=count/n;
-              add+=(count-p[i][k1]*p[j][k2])*(count-p[i][k1]*p[j][k2])/(p[i][k1]*p[j][k2]);
+              add+=n*(count-p[i][k1]*p[j][k2])*(count-p[i][k1]*p[j][k2])/(p[i][k1]*p[j][k2]);
             }
           }
         }
