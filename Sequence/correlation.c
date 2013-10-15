@@ -603,6 +603,8 @@ example:
   sumx=malloc(l*sizeof(double));
   for (j=0;j<l;j++)
     sumx[j]=0.0;
+  for (j=0;j<n*l;j++)
+    x[j]=0.0;
   for (i=0;i<n;i++)
   {
     for (j=0;j<l;j++)
