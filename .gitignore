@@ -8,6 +8,6 @@
 
 
 # Can also ignore all directories and files in a directory.
-.Cache
-.Result
-.Info
+mbio/.Cache
+mbio/.Result
+mbio/.Info
