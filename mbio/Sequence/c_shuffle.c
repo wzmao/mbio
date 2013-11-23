@@ -1058,9 +1058,10 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
             sum[j]+=mi[i*length+j];
         }
     }
+    double factor=1.*length/(length-1);
     for(i=0;i<length;i++)
         for(j=0;j<length;j++){
-            mip[i*length+j]=mip[j*length+i]=mi[i*length+j]-sum[i]*sum[j]/allsum*length/(length-1);
+            mip[i*length+j]=mip[j*length+i]=mi[i*length+j]-sum[i]*sum[j]/allsum*factor;
         }
     double newmi[length],tiny=1e-15;
     long id;
@@ -1101,7 +1102,7 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
             for (j=0;j<length;j++){
                 if (j==i)
                     continue;
-                if ((newmi[j]-newsum[i]*newsum[j]/newallsum*length/(length-1))>=mip[ioffset+j]){
+                if ((newmi[j]-newsum[i]*newsum[j]/newallsum*factor)>=mip[ioffset+j]-tiny){
                     p[ioffset +j]++;
                     p[j*length+i]++;
                 }
