@@ -69,8 +69,7 @@ def CalcMI(msa, ambiguity=True, turbo=True, **kwargs):
 
 
 def CalcMIp(msa, ambiguity=True, turbo=True, **kwargs):
-    '''It is a function to calculate the MIp matrix based on language C.
-    Given the sequences in a list with no format.
+    '''It is a function to calculate the MIp matrix.
     '''
     return apc(CalcMI(msa, ambiguity=True, turbo=True, **kwargs))
 
