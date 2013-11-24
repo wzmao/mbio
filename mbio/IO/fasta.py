@@ -22,7 +22,8 @@ def ReadFasta(filename, title=False, **kwargs):
     fastas = f.read()[1:].split('>')
     f.close()
     name = array([fasta.split('\n')[0] for fasta in fastas])
-    seq = array([list(''.join(''.join(fasta.split('\n')[1:]).split())) for fasta in fastas])
+    seq = array([list(''.join(''.join(fasta.split('\n')[1:]).split()))
+                for fasta in fastas])
     if title:
         return name, seq
     else:

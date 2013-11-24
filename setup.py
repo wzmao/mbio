@@ -31,10 +31,10 @@ if [int(dgt) for dgt in numpy.__version__.split('.')[:2]] < [1, 4]:
 
 __version__ = ''
 with open('mbio/__init__.py') as inp:
-  for line in inp:
-      if line.startswith('__version__'):
-          exec(line.strip())
-          break
+    for line in inp:
+        if line.startswith('__version__'):
+            exec(line.strip())
+            break
 
 PACKAGES = ['mbio',
             'mbio.IO',
@@ -42,7 +42,7 @@ PACKAGES = ['mbio',
             'mbio.Sequence', ]
 PACKAGE_DATA = {
     'mbio': ['Scripts/*.c',
-             'Scripts/*.job',]
+             'Scripts/*.job', ]
 }
 
 PACKAGE_DIR = {}
@@ -51,13 +51,13 @@ for pkg in PACKAGES:
 
 EXTENSIONS = [
     Extension('mbio.Sequence.c_correlation',
-              [join('mbio', 'Sequence', 'c_correlation.c'),],
+              [join('mbio', 'Sequence', 'c_correlation.c'), ],
               include_dirs=[numpy.get_include()]),
     Extension('mbio.Sequence.c_shuffle',
-              [join('mbio', 'Sequence', 'c_shuffle.c'),],
+              [join('mbio', 'Sequence', 'c_shuffle.c'), ],
               include_dirs=[numpy.get_include()]),
     Extension('mbio.Application.c_sort',
-              [join('mbio', 'Application', 'c_sort.c'),],
+              [join('mbio', 'Application', 'c_sort.c'), ],
               include_dirs=[numpy.get_include()]),
 ]
 

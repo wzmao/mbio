@@ -28,8 +28,8 @@ def issquare(x):
         error.errorprint('The number is negative.')
         return None
     x = xi
-    sq = x**.5
-    if abs(int(round(sq, 0))**2-x) < 1e-10:
+    sq = x ** .5
+    if abs(int(round(sq, 0)) ** 2 - x) < 1e-10:
         return True
     else:
         return False

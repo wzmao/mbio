@@ -3,9 +3,11 @@ We have MI, MIp, OMES and SCA now.
 '''
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['CalcMI', 'CalcMIp', 'CalcOMES', 'CalcSCA', 'CalcDI', 'CalcMeff', 'apc']
+__all__ = ['CalcMI', 'CalcMIp', 'CalcOMES',
+           'CalcSCA', 'CalcDI', 'CalcMeff', 'apc']
 
 from numpy import dtype, zeros, empty, ones
+
 
 def _Startup():
     '''Get _path__.'''
@@ -111,6 +113,7 @@ def CalcOMES(msa, ambiguity=True, turbo=True, **kwargs):
 
     return omes
 
+
 def CalcSCA(msa, turbo=True, **kwargs):
     """Return SCA matrix calculated for *msa*, which may be an :class:`.MSA`
     instance or a 2D Numpy character array.
@@ -140,8 +143,9 @@ def CalcSCA(msa, turbo=True, **kwargs):
     sca = msasca(msa, sca, turbo=bool(turbo))
     return sca
 
+
 def CalcDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
-                          **kwargs):
+           **kwargs):
     """Return direct information matrix calculated for *msa*, which may be an
     :class:`.MSA` instance or a 2D Numpy character array.
 
@@ -163,19 +167,19 @@ def CalcDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
     refine = 1 if refine else 0
     # msadipretest get some parameter from msa to set matrix size
     length, q = msadipretest(msa, refine=refine)
-    c = matrix.dot(matrix(zeros((length*q, 1), float)),
-                   matrix(zeros((1, length*q), float)))
-    prob = zeros((length, q+1), float)
+    c = matrix.dot(matrix(zeros((length * q, 1), float)),
+                   matrix(zeros((1, length * q), float)))
+    prob = zeros((length, q + 1), float)
     # msadirectinfo1 return c to be inversed and prob to be used
-    meff, n, length, c, prob = msadirectinfo1(msa, c, prob, theta=1.-seqid,
+    meff, n, length, c, prob = msadirectinfo1(msa, c, prob, theta=1. - seqid,
                                               pseudocount_weight=pseudo_weight,
-                                              refine=refine, q=q+1)
+                                              refine=refine, q=q + 1)
 
     c = c.I
 
     di = zeros((length, length), float)
     # get final DI
-    di = msadirectinfo2(n, length, c, prob, di, q+1)
+    di = msadirectinfo2(n, length, c, prob, di, q + 1)
     del prob, c
     return di
 
@@ -206,10 +210,10 @@ def CalcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
     weight = 0 if weight else 1  # A Mark for return weighted array.
     if (not weight):
         w = zeros((msa.shape[0]), float)
-        meff = msameff(msa, theta=1.-seqid, meff_only=weight,
+        meff = msameff(msa, theta=1. - seqid, meff_only=weight,
                        refine=refine, w=w)
     else:
-        meff = msameff(msa, theta=1.-seqid, meff_only=weight, refine=refine)
+        meff = msameff(msa, theta=1. - seqid, meff_only=weight, refine=refine)
     return meff
 
 

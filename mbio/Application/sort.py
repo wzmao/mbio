@@ -18,7 +18,7 @@ def QuickSort(l):
     Given a list of integer or float numbers, the function will return a sorted list.'''
     from .c_sort import quicksort
     from numpy import array
-    l = quicksort(array(l,dtype=float))
+    l = quicksort(array(l, dtype=float))
     return l
 
 _Startup()

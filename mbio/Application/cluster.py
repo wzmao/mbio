@@ -30,7 +30,7 @@ def Getclusterlist(available=False):
         clist = [i for i in clist if i.startswith('parallel') and
                  i.split()[2].count('/') == 2 and i.split()[3].count('.') != 0]
         clist = [[i.split()[0].split('@')[1].split('.')[0], i.split()[2]]
-                         for i in clist if i.split()[2].split('/')[-1] != '0']
+                 for i in clist if i.split()[2].split('/')[-1] != '0']
         if not available:
             return clist
         else:
@@ -45,8 +45,8 @@ def Getname(minc=0, maxc=64):
     '''The function return the cluster name and the available nodes number.
     min and max of nodes number could be assigned.'''
     clist = Getclusterlist(True)
-    clist = [[int(i[1].split('/')[-1])-int(i[1].split('/')[-2])]+i for i in clist
-                 if minc <= int(i[1].split('/')[-1])-int(i[1].split('/')[-2]) <= maxc]
+    clist = [[int(i[1].split('/')[-1]) - int(i[1].split('/')[-2])] + i for i in clist
+             if minc <= int(i[1].split('/')[-1]) - int(i[1].split('/')[-2]) <= maxc]
     clist.sort(reverse=True)
     if len(clist) == 0:
         return []
