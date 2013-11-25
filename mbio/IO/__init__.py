@@ -14,10 +14,6 @@ def _Startup():
 _Startup()
 
 
-from . import fasta
-from .fasta import *
-__all__.extend(fasta.__all__)
-
 from . import matrix
 from .matrix import *
 __all__.extend(matrix.__all__)

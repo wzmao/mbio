@@ -59,8 +59,8 @@ EXTENSIONS = [
     Extension('mbio.Application.c_sort',
               [join('mbio', 'Application', 'c_sort.c'), ],
               include_dirs=[numpy.get_include()]),
-    Extension('mbio.IO.c_fasta',
-              [join('mbio', 'IO', 'c_fasta.c'), ],
+    Extension('mbio.Sequence.c_fasta',
+              [join('mbio', 'Sequence', 'c_fasta.c'), ],
               include_dirs=[numpy.get_include()]),
 ]
 
