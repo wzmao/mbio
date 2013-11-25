@@ -45,7 +45,7 @@ static PyObject *readFasta(PyObject *self, PyObject *args) {
     return Py_BuildValue("OO", labels, seqs);
 }
 
-static PyMethodDef c_fasta_methods[] = {
+static PyMethodDef Cfasta_methods[] = {
 
     {"readFasta",  (PyCFunction)readFasta, METH_VARARGS,
      "Read FASTA file."},
@@ -55,21 +55,21 @@ static PyMethodDef c_fasta_methods[] = {
 
 
 #if PY_MAJOR_VERSION >= 3
-static struct PyModuleDef c_fastamodule = {
+static struct PyModuleDef Cfastamodule = {
         PyModuleDef_HEAD_INIT,
-        "c_fasta",
+        "Cfasta",
         "FASTA IO.",
         -1,
-        c_fasta_methods
+        Cfasta_methods
 };
-PyMODINIT_FUNC PyInit_c_fasta(void) {
+PyMODINIT_FUNC PyInit_Cfasta(void) {
     import_array();
-    return PyModule_Create(&c_fastamodule);
+    return PyModule_Create(&Cfastamodule);
 }
 #else
-PyMODINIT_FUNC initc_fasta(void) {
+PyMODINIT_FUNC initCfasta(void) {
 
-    (void) Py_InitModule3("c_fasta", c_fasta_methods,
+    (void) Py_InitModule3("Cfasta", Cfasta_methods,
                           "FASTA IO.");
     import_array();
 }

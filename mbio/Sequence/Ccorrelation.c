@@ -1673,7 +1673,7 @@ static PyObject *msadirectinfo2(PyObject *self, PyObject *args, PyObject *kwargs
 }
 
 
-static PyMethodDef c_correlation_methods[] = {
+static PyMethodDef Ccorrelation_methods[] = {
 
     {"msaentropy",  (PyCFunction)msaentropy,
      METH_VARARGS | METH_KEYWORDS,
@@ -1716,21 +1716,21 @@ static PyMethodDef c_correlation_methods[] = {
 
 #if PY_MAJOR_VERSION >= 3
 
-static struct PyModuleDef c_correlation = {
+static struct PyModuleDef Ccorrelationmodule = {
         PyModuleDef_HEAD_INIT,
-        "c_correlation",
+        "Ccorrelation",
         "MSA correlation tools.",
         -1,
-        c_correlation_methods,
+        Ccorrelation_methods,
 };
-PyMODINIT_FUNC PyInit_c_correlation(void) {
+PyMODINIT_FUNC PyInit_Ccorrelation(void) {
     import_array();
-    return PyModule_Create(&c_correlation);
+    return PyModule_Create(&Ccorrelationmodule);
 }
 #else
-PyMODINIT_FUNC initc_correlation(void) {
+PyMODINIT_FUNC initCcorrelation(void) {
 
-    Py_InitModule3("c_correlation", c_correlation_methods,
+    Py_InitModule3("Ccorrelation", Ccorrelation_methods,
         "MSA correlation tools.");
 
     import_array();

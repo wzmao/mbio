@@ -5,7 +5,7 @@ This module include the shuffle function for OMES, MI and MIp.
 __author__ = 'Wenzhi Mao'
 __all__ = ['ShuffleOMES', 'ShuffleMI', 'ShuffleMIp', 'ShuffleAll']
 
-from mbio.Sequence.correlation import getMSA
+from .correlation import getMSA
 from numpy import dtype, zeros, empty, ones
 
 
@@ -17,7 +17,7 @@ def _Startup():
 
 def ShuffleOMES(msa, times=10000, ambiguity=True):
     msa = getMSA(msa)
-    from .c_shuffle import shuffleomes
+    from .Cshuffle import shuffleomes
     length = msa.shape[1]
     p = empty((length, length), float)
     p = shuffleomes(msa, p, ambiguity=bool(ambiguity), times=times)
@@ -26,7 +26,7 @@ def ShuffleOMES(msa, times=10000, ambiguity=True):
 
 def ShuffleMI(msa, times=10000, ambiguity=True):
     msa = getMSA(msa)
-    from .c_shuffle import shufflemi
+    from .Cshuffle import shufflemi
     length = msa.shape[1]
     p = empty((length, length), float)
     p = shufflemi(msa, p, ambiguity=bool(ambiguity), times=times)
@@ -35,7 +35,7 @@ def ShuffleMI(msa, times=10000, ambiguity=True):
 
 def ShuffleMIp(msa, times=10000, ambiguity=True):
     msa = getMSA(msa)
-    from .c_shuffle import shufflemip
+    from .Cshuffle import shufflemip
     length = msa.shape[1]
     p = empty((length, length), float)
     p = shufflemip(msa, p, ambiguity=bool(ambiguity), times=times)
@@ -44,7 +44,7 @@ def ShuffleMIp(msa, times=10000, ambiguity=True):
 
 def ShuffleAll(msa, times=10000, ambiguity=True, mi=1, mip=1, omes=1):
     msa = getMSA(msa)
-    from .c_shuffle import shuffleall
+    from .Cshuffle import shuffleall
     length = msa.shape[1]
     mi = 1 if mi else 0
     mip = 1 if mip else 0

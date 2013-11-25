@@ -24,6 +24,10 @@ def getMSA(msa):
     except AttributeError:
         pass
     try:
+        msa = msa.seq
+    except AttributeError:
+        pass
+    try:
         dtype_, ndim, shape = msa.dtype, msa.ndim, msa.shape
     except AttributeError:
         raise TypeError('msa must be an MSA instance or a 2D character array')
@@ -59,7 +63,7 @@ def CalcMI(msa, ambiguity=True, turbo=True, **kwargs):
 
     msa = getMSA(msa)
 
-    from .c_correlation import msamutinfo
+    from .Ccorrelation import msamutinfo
     length = msa.shape[1]
     mutinfo = empty((length, length), float)
     mutinfo = msamutinfo(msa, mutinfo,
@@ -105,7 +109,7 @@ def CalcOMES(msa, ambiguity=True, turbo=True, **kwargs):
 
     msa = getMSA(msa)
 
-    from .c_correlation import msaomes
+    from .Ccorrelation import msaomes
     length = msa.shape[1]
     omes = empty((length, length), float)
     omes = msaomes(msa, omes, ambiguity=bool(ambiguity), turbo=bool(turbo),
@@ -137,7 +141,7 @@ def CalcSCA(msa, turbo=True, **kwargs):
     are considered as gaps."""
 
     msa = getMSA(msa)
-    from .c_correlation import msasca
+    from .Ccorrelation import msasca
     length = msa.shape[1]
     sca = zeros((length, length), float)
     sca = msasca(msa, sca, turbo=bool(turbo))
@@ -161,7 +165,7 @@ def CalcDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
     """
 
     msa = getMSA(msa)
-    from .c_correlation import msadipretest, msadirectinfo1, msadirectinfo2
+    from .Ccorrelation import msadipretest, msadirectinfo1, msadirectinfo2
     from numpy import matrix
 
     refine = 1 if refine else 0
@@ -205,7 +209,7 @@ def CalcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
     The weight for each sequence are returned when *weight* is **True**."""
 
     msa = getMSA(msa)
-    from .c_correlation import msameff
+    from .Ccorrelation import msameff
     refine = 1 if refine else 0
     weight = 0 if weight else 1  # A Mark for return weighted array.
     if (not weight):

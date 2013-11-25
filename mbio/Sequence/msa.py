@@ -2,7 +2,7 @@
 '''
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['MSA', 'ReadFasta']
+__all__ = ['MSA']
 
 from numpy import dtype, array
 
@@ -55,18 +55,5 @@ class MSA(object):
 
         for i in range(self.numseq):
             yield self.seq[i]
-
-
-def ReadFasta(filename, **kwargs):
-    '''This a function to read Fasta file.
-    Given a filename and the function will return a list of sequences.'''
-    from numpy import array
-    from os.path import isfile
-    from .c_fasta import readFasta
-    if not isfile(filename):
-        raise ValueError("File not found.")
-    msa = readFasta(filename)
-    msa = MSA(msa[1], labels=msa[0])
-    return msa
 
 _Startup()

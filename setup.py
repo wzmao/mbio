@@ -50,17 +50,17 @@ for pkg in PACKAGES:
     PACKAGE_DIR[pkg] = join(*pkg.split('.'))
 
 EXTENSIONS = [
-    Extension('mbio.Sequence.c_correlation',
-              [join('mbio', 'Sequence', 'c_correlation.c'), ],
+    Extension('mbio.Sequence.Ccorrelation',
+              [join('mbio', 'Sequence', 'Ccorrelation.c'), ],
               include_dirs=[numpy.get_include()]),
-    Extension('mbio.Sequence.c_shuffle',
-              [join('mbio', 'Sequence', 'c_shuffle.c'), ],
+    Extension('mbio.Sequence.Cshuffle',
+              [join('mbio', 'Sequence', 'Cshuffle.c'), ],
               include_dirs=[numpy.get_include()]),
     Extension('mbio.Application.c_sort',
               [join('mbio', 'Application', 'c_sort.c'), ],
               include_dirs=[numpy.get_include()]),
-    Extension('mbio.Sequence.c_fasta',
-              [join('mbio', 'Sequence', 'c_fasta.c'), ],
+    Extension('mbio.Sequence.Cfasta',
+              [join('mbio', 'Sequence', 'Cfasta.c'), ],
               include_dirs=[numpy.get_include()]),
 ]
 

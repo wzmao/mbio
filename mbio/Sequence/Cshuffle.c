@@ -1537,7 +1537,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	free(temp);
 	return Py_BuildValue("{s:O,s:O,s:O}","MI", pmiinfo, "MIp", pmipinfo, "OMES", pomesinfo);
 }
-static PyMethodDef c_shuffle_methods[] = {
+static PyMethodDef Cshuffle_methods[] = {
 
 	{"shufflemi",  (PyCFunction)shufflemi,
 	 METH_VARARGS | METH_KEYWORDS,
@@ -1560,21 +1560,21 @@ static PyMethodDef c_shuffle_methods[] = {
 
 #if PY_MAJOR_VERSION >= 3
 
-static struct PyModuleDef c_shuffle = {
+static struct PyModuleDef Cshufflemodule = {
 		PyModuleDef_HEAD_INIT,
-		"c_shuffle",
+		"Cshuffle",
 		"MSA shuffle tools.",
 		-1,
-		c_shuffle_methods,
+		Cshuffle_methods,
 };
-PyMODINIT_FUNC PyInit_c_shuffle(void) {
+PyMODINIT_FUNC PyInit_Cshuffle(void) {
 	import_array();
-	return PyModule_Create(&c_shuffle);
+	return PyModule_Create(&Cshufflemodule);
 }
 #else
-PyMODINIT_FUNC initc_shuffle(void) {
+PyMODINIT_FUNC initCshuffle(void) {
 
-	Py_InitModule3("c_shuffle", c_shuffle_methods,
+	Py_InitModule3("Cshuffle", Cshuffle_methods,
 		"MSA shuffle tools.");
 
 	import_array();

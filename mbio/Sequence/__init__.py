@@ -25,3 +25,7 @@ __all__.extend(shuffle.__all__)
 from . import msa
 from .msa import *
 __all__.extend(msa.__all__)
+
+from . import msaio
+from .msaio import *
+__all__.extend(msaio.__all__)
