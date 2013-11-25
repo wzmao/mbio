@@ -77,4 +77,3 @@ setup(
     requires=['NumPy (>=1.5)', ],
     provides=['mbio ({0:s})'.format(__version__)]
 )
-

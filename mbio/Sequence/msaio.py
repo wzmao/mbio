@@ -68,7 +68,7 @@ def ReadMatrix(filename, dtype=None, l=None, **kwargs):
         raise ValueError("Couldn't understand the filename.")
     elif type(filename) == list:
         mlist = [parsesinglematrix(i) for i in filename]
-        if mlist[0].shape!=mlist[1].shape:
+        if mlist[0].shape != mlist[1].shape:
             raise ValueError("The shape is not the same.")
         return [mlist[0][0], mlist[1][0]]
     else:
@@ -82,21 +82,21 @@ def parsesinglematrix(filename, **kwargs):
     from mbio.Application import math as mmath
     from os.path import exists
     if not (exists(filename)):
-    	raise ValueError("File {0} doesn't exists.".format(filename))
+        raise ValueError("File {0} doesn't exists.".format(filename))
     if not isfile(filename):
-    	raise ValueError("File {0} is not a file.".format(filename))
+        raise ValueError("File {0} is not a file.".format(filename))
     tempmatrix = fromfile(filename)
-    if int(tempmatrix.shape[0]**0.5)**2!=tempmatrix.shape[0]:
-    	raise ValueError("Matrix from {0} is not a square.".format(filename))
-    l=int(tempmatrix.shape[0]**0.5)
-    tempmatrix.resize((l,l))
+    if int(tempmatrix.shape[0] ** 0.5) ** 2 != tempmatrix.shape[0]:
+        raise ValueError("Matrix from {0} is not a square.".format(filename))
+    l = int(tempmatrix.shape[0] ** 0.5)
+    tempmatrix.resize((l, l))
     return tempmatrix
 
 
 def WriteMatrix(m, filename, **kwargs):
     try:
-    	m.tofile(filename)
+        m.tofile(filename)
     except:
-    	raise TypeError("Couldn't write Matrix.")
+        raise TypeError("Couldn't write Matrix.")
 
 _Startup()

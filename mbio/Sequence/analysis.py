@@ -12,11 +12,12 @@ def _Startup():
     global _path__
     _path__ = _ABSpath()
 
+
 def CombineMSA(msa1, msa2, spi=1, prot=0, **kwargs):
-	from numpy import concatenate
-	# try:
-	# 	seq=concatenate(msa1.seq,msa2.seq,ax)
-	return 0
+    from numpy import concatenate
+    # try:
+    # 	seq=concatenate(msa1.seq,msa2.seq,ax)
+    return 0
 
 
 _Startup()
