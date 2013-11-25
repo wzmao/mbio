@@ -221,7 +221,7 @@ def CalcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
     return meff
 
 
-def apc(mutinfo):
+def apc(mutinfo, **kwargs):
     """Return a copy of *mutinfo* array after average product correction
     (default) or average sum correction is applied."""
 

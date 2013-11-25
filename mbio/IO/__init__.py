@@ -14,10 +14,6 @@ def _Startup():
 _Startup()
 
 
-from . import matrix
-from .matrix import *
-__all__.extend(matrix.__all__)
-
 from . import error
 from .error import *
 __all__.extend(error.__all__)

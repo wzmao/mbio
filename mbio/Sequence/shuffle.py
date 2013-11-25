@@ -15,7 +15,7 @@ def _Startup():
     _path__ = _ABSpath()
 
 
-def ShuffleOMES(msa, times=10000, ambiguity=True):
+def ShuffleOMES(msa, times=10000, ambiguity=True, **kwargs):
     msa = getMSA(msa)
     from .Cshuffle import shuffleomes
     length = msa.shape[1]
@@ -24,7 +24,7 @@ def ShuffleOMES(msa, times=10000, ambiguity=True):
     return p
 
 
-def ShuffleMI(msa, times=10000, ambiguity=True):
+def ShuffleMI(msa, times=10000, ambiguity=True, **kwargs):
     msa = getMSA(msa)
     from .Cshuffle import shufflemi
     length = msa.shape[1]
@@ -33,7 +33,7 @@ def ShuffleMI(msa, times=10000, ambiguity=True):
     return p
 
 
-def ShuffleMIp(msa, times=10000, ambiguity=True):
+def ShuffleMIp(msa, times=10000, ambiguity=True, **kwargs):
     msa = getMSA(msa)
     from .Cshuffle import shufflemip
     length = msa.shape[1]
@@ -42,7 +42,7 @@ def ShuffleMIp(msa, times=10000, ambiguity=True):
     return p
 
 
-def ShuffleAll(msa, times=10000, ambiguity=True, mi=1, mip=1, omes=1):
+def ShuffleAll(msa, times=10000, ambiguity=True, mi=1, mip=1, omes=1, **kwargs):
     msa = getMSA(msa)
     from .Cshuffle import shuffleall
     length = msa.shape[1]
