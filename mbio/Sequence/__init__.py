@@ -21,3 +21,7 @@ __all__.extend(correlation.__all__)
 from . import shuffle
 from .shuffle import *
 __all__.extend(shuffle.__all__)
+
+from . import msa
+from .msa import *
+__all__.extend(msa.__all__)
