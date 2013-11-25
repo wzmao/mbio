@@ -29,3 +29,7 @@ __all__.extend(msa.__all__)
 from . import msaio
 from .msaio import *
 __all__.extend(msaio.__all__)
+
+from . import analysis
+from .analysis import *
+__all__.extend(analysis.__all__)
