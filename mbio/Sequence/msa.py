@@ -36,6 +36,12 @@ class MSA(object):
 
         self.seq = msa
         self.label = labels
+        self._dict = {}
+        for i in xrange(numseq):
+            if not labels[i] in self._dict.keys():
+                self._dict[labels[i]] = [i]
+            else:
+                self._dict[labels[i]] = self._dict[labels[i]] + [i]
         self.numseq = numseq
         self.numres = numres
 
@@ -47,8 +53,8 @@ class MSA(object):
         if type(index) == int:
             return self.seq[index]
         if type(index) == str:
-            if str in self.label:
-                return self.seq[self.label.index(index)]
+            if index in self._dict.keys():
+                return array([self.seq[i] for i in self._dict[index]])
         raise ValueError('Cannot index.')
 
     def __iter__(self):
