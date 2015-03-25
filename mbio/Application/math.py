@@ -6,13 +6,6 @@ __author__ = 'Wenzhi Mao'
 __all__ = ['issquare']
 
 
-def _Startup():
-    '''Get _path__.'''
-    from mbio import _ABSpath
-    global _path__
-    _path__ = _ABSpath()
-
-
 def issquare(x):
     '''It is a function to determine if the integer is a square of another integer.'''
     try:
@@ -33,6 +26,3 @@ def issquare(x):
         return True
     else:
         return False
-
-
-_Startup()

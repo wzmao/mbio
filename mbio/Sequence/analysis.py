@@ -7,12 +7,6 @@ __all__ = ['CombineMSA']
 from numpy import dtype, array
 
 
-def _Startup():
-    from mbio import _ABSpath
-    global _path__
-    _path__ = _ABSpath()
-
-
 def CombineMSA(msas, spi=1, prot=0, **kwargs):
     from numpy import concatenate
     from numpy.core.shape_base import vstack
@@ -41,12 +35,12 @@ def CombineMSA(msas, spi=1, prot=0, **kwargs):
         for i in range(len(label)):
             temp = ''
             for j in range(n):
-                temp += '+'+msas[j].label[dicts[j][label[i]]].split('/')[1]
-            label[i] += '/'+temp.strip('+')
+                temp += '+' + msas[j].label[dicts[j][label[i]]].split('/')[1]
+            label[i] += '/' + temp.strip('+')
         label = array(label)
         newMSA = MSA(seq, label)
     elif ((spi) and (not prot)):
-        freqs = [[(msas[i].seq[:, j] == '-').sum()*1./msas[
+        freqs = [[(msas[i].seq[:, j] == '-').sum() * 1. / msas[
                   i].numseq for j in range(msas[i].numres)]for i in range(n)]
         score = [[0 for j in range(msas[i].numseq)]for i in range(n)]
         for i in range(n):
@@ -77,11 +71,8 @@ def CombineMSA(msas, spi=1, prot=0, **kwargs):
         for i in range(len(label)):
             temp = ''
             for j in range(n):
-                temp += '---'+msas[j].label[dicts[j][label[i]]]
+                temp += '---' + msas[j].label[dicts[j][label[i]]]
             label[i] = temp.strip('---')
         label = array(label)
         newMSA = MSA(seq, label)
     return newMSA
-
-
-_Startup()

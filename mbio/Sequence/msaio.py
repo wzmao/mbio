@@ -7,12 +7,6 @@ __all__ = ['ReadFasta', 'WriteFasta', 'ReadMatrix', 'WriteMatrix']
 from numpy import dtype, array
 
 
-def _Startup():
-    from mbio import _ABSpath
-    global _path__
-    _path__ = _ABSpath()
-
-
 def ReadFasta(filename, **kwargs):
     '''This a function to read Fasta file.
     Given a filename and the function will return a list of sequences.'''
@@ -98,5 +92,3 @@ def WriteMatrix(m, filename, **kwargs):
         m.tofile(filename)
     except:
         raise TypeError("Couldn't write Matrix.")
-
-_Startup()

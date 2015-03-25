@@ -9,13 +9,6 @@ __all__ = ['CalcMI', 'CalcMIp', 'CalcOMES',
 from numpy import dtype, zeros, empty, ones
 
 
-def _Startup():
-    '''Get _path__.'''
-    from mbio import _ABSpath
-    global _path__
-    _path__ = _ABSpath()
-
-
 def getMSA(msa):
     """Return MSA character array."""
 
@@ -241,5 +234,3 @@ def apc(mutinfo, **kwargs):
         for j, j_avg in enumerate(avg_mipos):
             mi[i, j] -= (i_avg * j_avg) / avg_mi
     return mi
-
-_Startup()

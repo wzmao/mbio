@@ -7,12 +7,6 @@ __all__ = ['MSA']
 from numpy import dtype, array
 
 
-def _Startup():
-    from mbio import _ABSpath
-    global _path__
-    _path__ = _ABSpath()
-
-
 class MSA(object):
 
     def __init__(self, msa, labels=None, **kwargs):
@@ -61,5 +55,3 @@ class MSA(object):
 
         for i in range(self.numseq):
             yield self.seq[i]
-
-_Startup()

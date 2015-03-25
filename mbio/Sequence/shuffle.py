@@ -9,12 +9,6 @@ from .correlation import getMSA
 from numpy import dtype, zeros, empty, ones
 
 
-def _Startup():
-    from mbio import _ABSpath
-    global _path__
-    _path__ = _ABSpath()
-
-
 def ShuffleOMES(msa, times=10000, ambiguity=True, **kwargs):
     msa = getMSA(msa)
     from .Cshuffle import shuffleomes
@@ -62,5 +56,3 @@ def ShuffleAll(msa, times=10000, ambiguity=True, mi=1, mip=1, omes=1, **kwargs):
     if not omes:
         p.pop('OMES')
     return p
-
-_Startup()
