@@ -1,5 +1,8 @@
 '''Get job organized in Sun Grid Engine.
 It also contains some allover functions for job organization.
+
+
+This file have been discarded. But keep it just in case.
 '''
 
 __author__ = 'Wenzhi Mao'

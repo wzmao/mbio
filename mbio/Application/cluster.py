@@ -1,5 +1,8 @@
 '''It is a module could get some information about current computer.
-Sun Grid Engine could be monitored by this module.'''
+Sun Grid Engine could be monitored by this module.
+
+
+This file have been discarded. But keep it just in case.'''
 
 __author__ = 'Wenzhi Mao'
 __all__ = []
