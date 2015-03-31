@@ -23,11 +23,22 @@ except ImportError:
                      'http://numpy.scipy.org\n')
     sys.exit()
 
-if [int(dgt) for dgt in numpy.__version__.split('.')[:2]] < [1, 4]:
-    sys.stderr.write('numpy v1.4 or later is required, you can find it at: '
+if [int(dgt) for dgt in numpy.__version__.split('.')[:2]] < [1, 9]:
+    sys.stderr.write('numpy v1.9 or later is required, you can find it at: '
                      'http://numpy.scipy.org\n')
     sys.exit()
 
+try:
+    import scipy
+except ImportError:
+    sys.stderr.write('scipy is not installed, you can find it at: '
+                     'http://www.scipy.org/\n')
+    sys.exit()
+
+if [int(dgt) for dgt in scipy.__version__.split('.')[:2]] < [0, 15]:
+    sys.stderr.write('scipy v0.15 or later is required, you can find it at: '
+                     'http://numpy.scipy.org\n')
+    sys.exit()
 
 __version__ = ''
 with open('mbio/__init__.py') as inp:
@@ -40,10 +51,8 @@ PACKAGES = ['mbio',
             'mbio.IO',
             'mbio.Application',
             'mbio.Sequence', ]
-PACKAGE_DATA = {
-    'mbio': ['Scripts/*.c',
-             'Scripts/*.job', ]
-}
+
+PACKAGE_DATA={}
 
 PACKAGE_DIR = {}
 for pkg in PACKAGES:
@@ -69,11 +78,11 @@ setup(
     version=__version__,
     author='Wenzhi Mao',
     author_email='mao.doudoudou@gmail.com',
-    description='A Python Package for Biology Self Usage',
+    description='A Python Package for Biology from Wenzhi Mao',
     packages=PACKAGES,
     package_dir=PACKAGE_DIR,
     package_data=PACKAGE_DATA,
     ext_modules=EXTENSIONS,
-    requires=['NumPy (>=1.5)', ],
+    requires=['NumPy (>=1.9)', 'Scipy (>=0.15)'],
     provides=['mbio ({0:s})'.format(__version__)]
 )

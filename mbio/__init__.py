@@ -2,16 +2,8 @@ __author__ = 'Wenzhi Mao'
 __version__ = '1.0.0'
 
 release = [int(x) for x in __version__.split('.')]
-del x, release
+del x
 __all__ = []
-
-
-def _ABSpath():
-    '''Get absolute path for the script.'''
-    import inspect
-    import os.path
-    caller_file = inspect.stack()[1][1]
-    return os.path.abspath(os.path.dirname(caller_file))
 
 
 from . import Application
@@ -32,7 +24,15 @@ __all__.extend(IO.__all__)
 __all__.append('IO')
 
 
-def _clearSo(searchpath=_path__):
+def _ABSpath():
+    '''Get absolute path for the script.'''
+    import inspect
+    import os.path
+    caller_file = inspect.stack()[1][1]
+    return os.path.abspath(os.path.dirname(caller_file))
+
+
+def _clearSo(searchpath):
     '''Delete all .so file and .pyc in mbio.
     Could affect some functions. Restart the program for normal usage.'''
     import os
