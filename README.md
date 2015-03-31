@@ -29,3 +29,8 @@ If you think some algorithms should be added into this package, you could also e
 ----
 ## thanks
 * [wzmao](https://github.com/wzmao) (Only me now)
+
+----
+## License
+
+See the [LICENSE](LICENSE.rst) file for license rights and limitations (MIT).
