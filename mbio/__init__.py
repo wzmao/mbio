@@ -6,35 +6,6 @@ del x, release
 __all__ = []
 
 
-def _StartupPath():
-    '''Get _path__'''
-    from mbio import _ABSpath
-    global _path__
-    _path__ = _ABSpath()
-
-
-def _Startup():
-    '''Do some startup initialization. Check the hostname for compilation.'''
-    global _hostname
-    import os
-    _hostname = os.popen('hostname').read().replace('\n', '')
-    if not os.path.exists(os.path.join(_path__, '.Info')):
-        os.mkdir(os.path.join(_path__, '.Info'))
-    if not os.path.exists(os.path.join(_path__, '.Info', 'com_name.bak')):
-        f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'w')
-        f.write(_hostname)
-        f.close()
-        _clear()
-    else:
-        f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'r')
-        if f.read() != _hostname:
-            f.close()
-            f = open(os.path.join(_path__, '.Info', 'com_name.bak'), 'w')
-            f.write(_hostname)
-            _clear()
-        f.close()
-
-
 def _ABSpath():
     '''Get absolute path for the script.'''
     import inspect
@@ -42,8 +13,6 @@ def _ABSpath():
     caller_file = inspect.stack()[1][1]
     return os.path.abspath(os.path.dirname(caller_file))
 
-
-_StartupPath()
 
 from . import Application
 from .Application import *
@@ -92,6 +61,3 @@ def _clear():
     '''Make the package back to start status.'''
     _clearSo()
     _clearData()
-
-
-_Startup()
