@@ -20,9 +20,11 @@ def autop(x):
 def check(x):
     l = os.listdir(x)
     for i in l:
-        if os.path.isfile(os.path.join(x, i)) and os.path.join(x, i).endswith('.py'):
+        if os.path.isfile(os.path.join(x, i)) and os.path.join(x, i).endswith('.py') and not i.startswith('.'):
             autop(os.path.join(x, i))
-        if os.path.isdir(os.path.join(x, i)):
+        if os.path.isdir(os.path.join(x, i)) and not i.startswith('.'):
             check(os.path.join(x, i))
 
+print '#' * int(os.popen('stty size').read().split()[-1])
 check(os.path.abspath(os.path.dirname(sys.argv[0])))
+print '#' * int(os.popen('stty size').read().split()[-1])
