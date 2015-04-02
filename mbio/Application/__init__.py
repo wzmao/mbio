@@ -1,6 +1,16 @@
-'''General applications for mbio.
-We have math and sort now. If math lib are too big in the future.
-We could set math to a alone lib.'''
+"""This module contains features for general applications in mbio.
+
+Math (If it grows too big in the future, make it alone)
+========
+
+	* :func:`.isSquare` - check if a integer is a square
+
+Sort
+========
+
+	* :func:`.quickSort` - Quick Sort a list of float/int
+
+"""
 
 __author__ = 'Wenzhi Mao'
 

@@ -1,24 +1,27 @@
-'''Some math functions.
-'''
+"""This module contains some math functions.
+In the future plan: Eigenvalue, Inverse, Matrix Multiplication,
+                    SVD, PCA
+"""
 
 __author__ = 'Wenzhi Mao'
 
-__all__ = ['issquare']
+__all__ = ['isSquare']
 
 
-def issquare(x):
-    '''It is a function to determine if the integer is a square of another integer.'''
+def isSquare(x):
+    """It is a function to determine if the given integer is a square integer."""
+
     try:
         xi = int(x)
     except:
         return None
     if xi != x:
-        from mbio.IO import error
-        error.errorprint('The number is not integer.')
+        from ..IO.output import printError
+        printError('The number is not integer.')
         return None
     if x < 0:
-        from mbio.IO import error
-        error.errorprint('The number is negative.')
+        from ..IO.output import printError
+        printError('The number is negative.')
         return None
     x = xi
     sq = x ** .5

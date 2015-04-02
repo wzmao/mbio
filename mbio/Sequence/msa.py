@@ -1,15 +1,16 @@
-'''MSA
-'''
+"""MSA class to store MSA sequence.
+"""
 
 __author__ = 'Wenzhi Mao'
 __all__ = ['MSA']
 
-from numpy import dtype, array
-
 
 class MSA(object):
 
+    """A MSA class to store sequences indexed by labels."""
+
     def __init__(self, msa, labels=None, **kwargs):
+        from numpy import dtype, array
         if type(msa) == list:
             msa = [list(i) for i in msa]
             msa = array(msa, dtype='|S1')
@@ -44,6 +45,7 @@ class MSA(object):
         return "MSA = {0} sequences with {1} residues.".format(self.numseq, self.numres)
 
     def __getitem__(self, index):
+        from numpy import array
         if type(index) == int:
             return self.seq[index]
         if type(index) == str:

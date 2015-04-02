@@ -1,15 +1,16 @@
-'''Some sort functions.
-'''
+"""This module contains some sorting functions.
+"""
 
 __author__ = 'Wenzhi Mao'
 
-__all__ = ['QuickSort']
+__all__ = ['quickSort']
 
 
-def QuickSort(l):
-    '''This is a quick sort function based on language C.
-    Given a list of integer or float numbers, the function will return a sorted list.
-    It has faster speed than the default sort function in python.'''
+def quickSort(l):
+    """This is a quick sort function based on language C.
+    Given a list of integer or float numbers, the function will return a sorted array.
+    It will not change the given variable directly.
+    It has faster speed than the default python sort function."""
 
     from .c_sort import quicksort
     from numpy import array

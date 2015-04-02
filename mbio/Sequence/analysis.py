@@ -1,14 +1,14 @@
-'''Some MSA and correlation matrix analysis functions.
-'''
+"""This module contains some MSA asistance functions.
+"""
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['CombineMSA']
-
-from numpy import dtype, array
+__all__ = ['combineMSA']
 
 
-def CombineMSA(msas, spi=1, prot=0, **kwargs):
-    from numpy import concatenate
+def combineMSA(msas, spi=1, prot=0, **kwargs):
+    """Combine 2 or more MSAs by the labels."""
+
+    from numpy import concatenate, dtype, array
     from numpy.core.shape_base import vstack
     from .msa import MSA
     try:

@@ -1,17 +1,20 @@
-'''Different algorithm could identify protein position correlation.
-We have MI, MIp, OMES and SCA now.
-'''
+"""This module contains some protein sequence correlation algorithms.
+Protein sequence correlation analysis could provide the evolutionary 
+information about structure, contact and so on.
+Now, this module includes MI, MIp, OMES, SCA and DI.
+There are also APC and BND correction to refine the correlation matrix further.
+"""
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['CalcMI', 'CalcMIp', 'CalcOMES',
-           'CalcSCA', 'CalcDI', 'CalcMeff', 'ApplyAPC', 'ApplyBND']
-
-from numpy import dtype, zeros, empty, ones
+__all__ = ['buildMI', 'buildMIp', 'buildOMES',
+           'buildSCA', 'buildDI', 'buildDCA',
+           'calcMeff', 'applyAPC', 'applyBND']
 
 
 def getMSA(msa):
     """Return MSA character array."""
 
+    from numpy import dtype
     try:
         msa = msa._getArray()
     except AttributeError:
@@ -29,7 +32,7 @@ def getMSA(msa):
     return msa
 
 
-def CalcMI(msa, ambiguity=True, turbo=True, **kwargs):
+def buildMI(msa, ambiguity=True, turbo=True, **kwargs):
     """Return mutual information matrix calculated for *msa*, which may be an
     :class:`.MSA` instance or a 2D Numpy character array.  Implementation
     is case insensitive and handles ambiguous amino acids as follows:
@@ -50,12 +53,15 @@ def CalcMI(msa, ambiguity=True, turbo=True, **kwargs):
     are considered as gaps.
 
     Mutual information matrix can be normalized or corrected using
-    :func:`applyMINormalization` and :func:`applyMICorrection` methods,
-    respectively.  Normalization by joint entropy can performed using this
-    function with *norm* option set **True**."""
+    :func:`applyAPC` and :func:`applyBND` methods, respectively.
+
+    [GGB05] Gloor, Gregory B., et al. "Mutual information in protein multiple 
+    sequence alignments reveals two classes of coevolving positions." 
+    Biochemistry 44.19 (2005): 7156-7165."""
 
     msa = getMSA(msa)
 
+    from numpy import empty
     from .Ccorrelation import msamutinfo
     length = msa.shape[1]
     mutinfo = empty((length, length), float)
@@ -67,13 +73,19 @@ def CalcMI(msa, ambiguity=True, turbo=True, **kwargs):
     return mutinfo
 
 
-def CalcMIp(msa, ambiguity=True, turbo=True, **kwargs):
-    '''It is a function to calculate the MIp matrix.
-    '''
-    return ApplyAPC(CalcMI(msa, ambiguity=True, turbo=True, **kwargs))
+def buildMIp(msa, ambiguity=True, turbo=True, **kwargs):
+    """It is a function to calculate the MIp matrix.
+    MIp is a APC corrected form of MI matrix.
+    It could provide better information than MI.
+
+    [DSD08] Dunn SD, Wahl LM, Gloor GB. Mutual information without the 
+    influence of phylogeny or entropy dramatically improves residue 
+    contact prediction. Bioinformatics 2008 24(3):333-340."""
+
+    return ApplyAPC(buildMI(msa, ambiguity=True, turbo=True, **kwargs))
 
 
-def CalcOMES(msa, ambiguity=True, turbo=True, **kwargs):
+def buildOMES(msa, ambiguity=True, turbo=True, **kwargs):
     """Return OMES (Observed Minus Expected Squared) covariance matrix
     calculated for *msa*, which may be an :class:`.MSA` instance or a 2D
     NumPy character array. OMES is defined as::
@@ -98,10 +110,15 @@ def CalcOMES(msa, ambiguity=True, turbo=True, **kwargs):
     Selenocysteine (**U**, Sec) and pyrrolysine (**O**, Pyl) are considered
     as distinct amino acids.  When *ambiguity* is set **False**, all alphabet
     characters as considered as distinct types.  All non-alphabet characters
-    are considered as gaps."""
+    are considered as gaps.
+
+    [KI02] Kass, Itamar, and Amnon Horovitz. "Mapping pathways of allosteric 
+    communication in GroEL by analysis of correlated mutations." Proteins: 
+    Structure, Function, and Bioinformatics 48.4 (2002): 611-617."""
 
     msa = getMSA(msa)
 
+    from numpy import empty
     from .Ccorrelation import msaomes
     length = msa.shape[1]
     omes = empty((length, length), float)
@@ -111,7 +128,7 @@ def CalcOMES(msa, ambiguity=True, turbo=True, **kwargs):
     return omes
 
 
-def CalcSCA(msa, turbo=True, **kwargs):
+def buildSCA(msa, turbo=True, **kwargs):
     """Return SCA matrix calculated for *msa*, which may be an :class:`.MSA`
     instance or a 2D Numpy character array.
 
@@ -131,9 +148,18 @@ def CalcSCA(msa, turbo=True, **kwargs):
     Selenocysteine (**U**, Sec) and pyrrolysine (**O**, Pyl) are considered
     as distinct amino acids.  When *ambiguity* is set **False**, all alphabet
     characters as considered as distinct types.  All non-alphabet characters
-    are considered as gaps."""
+    are considered as gaps.
+
+    [LSW99] Lockless, Steve W., and Rama Ranganathan. "Evolutionarily conserved 
+    pathways of energetic connectivity in protein families." Science 286.5438 
+    (1999): 295-299.
+
+    [HN09] Halabi, Najeeb, et al. "Protein sectors: evolutionary units of 
+    three-dimensional structure." Cell 138.4 (2009): 774-786."""
 
     msa = getMSA(msa)
+
+    from numpy import zeros
     from .Ccorrelation import msasca
     length = msa.shape[1]
     sca = zeros((length, length), float)
@@ -141,8 +167,8 @@ def CalcSCA(msa, turbo=True, **kwargs):
     return sca
 
 
-def CalcDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
-           **kwargs):
+def buildDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
+            **kwargs):
     """Return direct information matrix calculated for *msa*, which may be an
     :class:`.MSA` instance or a 2D Numpy character array.
 
@@ -155,9 +181,19 @@ def CalcDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
     Sequences are not refined by default. When *refine* is set **True**,
     the MSA will be refined by the first sequence and the shape of direct
     information matrix will be smaller.
-    """
+
+    [WM09] Weigt, Martin, et al. "Identification of direct residue contacts 
+    in protein–protein interaction by message passing." Proceedings of the 
+    National Academy of Sciences 106.1 (2009): 67-72.
+
+    [MF11] Morcos, Faruck, et al. "Direct-coupling analysis of residue 
+    coevolution captures native contacts across many protein families." 
+    Proceedings of the National Academy of Sciences 108.49 
+    (2011): E1293-E1301."""
 
     msa = getMSA(msa)
+
+    from numpy import zeros
     from .Ccorrelation import msadipretest, msadirectinfo1, msadirectinfo2
     from numpy import matrix
 
@@ -181,7 +217,14 @@ def CalcDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
     return di
 
 
-def CalcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
+def buildDCA(msa, seqid=.8, pseudo_weight=.5, refine=False,
+             **kwargs):
+    """Same as buildDI."""
+
+    return buildDI(msa, seqid, pseudo_weight, refine, **kwargs)
+
+
+def calcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
     """Return the Meff for *msa*, which may be an :class:`.MSA`
     instance or a 2D Numpy character array.
 
@@ -199,9 +242,20 @@ def CalcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
     Sequences are not refined by default. When *refine* is set **True**, the
     MSA will be refined by the first sequence.
 
-    The weight for each sequence are returned when *weight* is **True**."""
+    The weight for each sequence are returned when *weight* is **True**.
+
+    [WM09] Weigt, Martin, et al. "Identification of direct residue contacts 
+    in protein–protein interaction by message passing." Proceedings of the 
+    National Academy of Sciences 106.1 (2009): 67-72.
+
+    [MF11] Morcos, Faruck, et al. "Direct-coupling analysis of residue 
+    coevolution captures native contacts across many protein families." 
+    Proceedings of the National Academy of Sciences 108.49 
+    (2011): E1293-E1301."""
 
     msa = getMSA(msa)
+
+    from numpy import zeros
     from .Ccorrelation import msameff
     refine = 1 if refine else 0
     weight = 0 if weight else 1  # A Mark for return weighted array.
@@ -214,9 +268,13 @@ def CalcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
     return meff
 
 
-def ApplyAPC(mutinfo, **kwargs):
+def applyAPC(mutinfo, **kwargs):
     """Return a copy of *mutinfo* array after average product correction
-    (default) or average sum correction is applied."""
+    (default) or average sum correction is applied.
+
+    [DSD08] Dunn SD, Wahl LM, Gloor GB. Mutual information without the 
+    influence of phylogeny or entropy dramatically improves residue 
+    contact prediction. Bioinformatics 2008 24(3):333-340."""
 
     try:
         ndim, shape = mutinfo.ndim, mutinfo.shape
@@ -236,10 +294,15 @@ def ApplyAPC(mutinfo, **kwargs):
     return mi
 
 
-def ApplyBND(mat, **kwargs):
-    '''Return a BND refinement of a symetric matrix.
-    If the matrix is not symetric. The calculation for mat+mat.T will be performanced.
-    It has comparable speed with the original MATLAB code.'''
+def applyBND(mat, **kwargs):
+    """Return a BND refinement of a symetric matrix.
+    If the matrix is not symetric. The calculation for mat+mat.T will be 
+    performanced.
+    It has comparable speed with the original MATLAB code.
+
+    [SUP15] Sun, Hai‐Ping, et al. "Improving accuracy of protein contact 
+    prediction using balanced network deconvolution." Proteins: Structure, 
+    Function, and Bioinformatics (2015)."""
 
     try:
         ndim, shape = mat.ndim, mat.shape
@@ -255,8 +318,8 @@ def ApplyBND(mat, **kwargs):
     if mat.min() != mat.max():
         mat = (mat - mat.min()) / (mat.max() - mat.min())
     else:
-        from ..IO.error import infoprint
-        infoprint("The input matrix is a constant matrix.")
+        from ..IO.output import printInfo
+        printInfo("The input matrix is a constant matrix.")
         return mat
     n = mat.shape[0]
     fill_diagonal(mat, 0.)

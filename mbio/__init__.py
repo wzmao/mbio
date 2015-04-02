@@ -1,7 +1,7 @@
 __author__ = 'Wenzhi Mao'
 __version__ = '1.0.0'
 
-release = [int(x) for x in __version__.split('.')]
+__release__ = [int(x) for x in __version__.split('.')]
 del x
 __all__ = []
 
@@ -25,7 +25,7 @@ __all__.append('IO')
 
 
 def _ABSpath():
-    '''Get absolute path for the script.'''
+    """Get absolute path for the script."""
     import inspect
     import os.path
     caller_file = inspect.stack()[1][1]
@@ -33,8 +33,8 @@ def _ABSpath():
 
 
 def _clearSo(searchpath):
-    '''Delete all .so file and .pyc in mbio.
-    Could affect some functions. Restart the program for normal usage.'''
+    """Delete all .so file and .pyc in mbio.
+    Could affect some functions. Restart the program for normal usage."""
     import os
     dirl = os.listdir(searchpath)
     for d in dirl:
@@ -45,7 +45,7 @@ def _clearSo(searchpath):
 
 
 def _clearData():
-    '''Delete all running job files.'''
+    """Delete all running job files."""
     import os
     if os.path.exists(os.path.join(_path__, '.Cache')):
         for i in os.listdir(os.path.join(_path__, '.Cache')):
@@ -58,6 +58,6 @@ def _clearData():
 
 
 def _clear():
-    '''Make the package back to start status.'''
+    """Make the package back to start status."""
     _clearSo()
     _clearData()
