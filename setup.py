@@ -52,7 +52,7 @@ PACKAGES = ['mbio',
             'mbio.Application',
             'mbio.Sequence', ]
 
-PACKAGE_DATA={}
+PACKAGE_DATA = {}
 
 PACKAGE_DIR = {}
 for pkg in PACKAGES:

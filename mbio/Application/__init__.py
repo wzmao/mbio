@@ -1,3 +1,7 @@
+'''General applications for mbio.
+We have math and sort now. If math lib are too big in the future.
+We could set math to a alone lib.
+'''
 __author__ = 'Wenzhi Mao'
 
 __all__ = []
