@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This module contains some math functions.
 In the future plan: Eigenvalue, Inverse, Matrix Multiplication,
                     SVD, PCA

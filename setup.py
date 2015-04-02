@@ -77,7 +77,7 @@ setup(
     name='mbio',
     version=__version__,
     author='Wenzhi Mao',
-    author_email='mao.doudoudou@gmail.com',
+    author_email='maowenzhi@yandex.com',
     description='A Python Package for Biology from Wenzhi Mao',
     packages=PACKAGES,
     package_dir=PACKAGE_DIR,

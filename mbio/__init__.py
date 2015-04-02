@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 __author__ = 'Wenzhi Mao'
 __version__ = '1.0.0'
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This module contains some protein sequence correlation algorithms.
 Protein sequence correlation analysis could provide the evolutionary 
 information about structure, contact and so on.

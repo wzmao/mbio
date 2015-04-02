@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This module contains some shuffle algorithms for protein sequence analysis.
 Shuffle could be a good method to eliminate some false positive signals.
 This module include the shuffle function for OMES, MI and MIp.

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This module contains features for general applications in mbio.
 
 Math (If it grows too big in the future, make it alone)

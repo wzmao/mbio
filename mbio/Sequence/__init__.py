@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """This module contains features for analyzing protein sequences.
 
 Classes
