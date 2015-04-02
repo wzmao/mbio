@@ -4,7 +4,7 @@ We have MI, MIp, OMES and SCA now.
 
 __author__ = 'Wenzhi Mao'
 __all__ = ['CalcMI', 'CalcMIp', 'CalcOMES',
-           'CalcSCA', 'CalcDI', 'CalcMeff', 'apc']
+           'CalcSCA', 'CalcDI', 'CalcMeff', 'ApplyAPC', 'ApplyBND']
 
 from numpy import dtype, zeros, empty, ones
 
@@ -70,7 +70,7 @@ def CalcMI(msa, ambiguity=True, turbo=True, **kwargs):
 def CalcMIp(msa, ambiguity=True, turbo=True, **kwargs):
     '''It is a function to calculate the MIp matrix.
     '''
-    return apc(CalcMI(msa, ambiguity=True, turbo=True, **kwargs))
+    return ApplyAPC(CalcMI(msa, ambiguity=True, turbo=True, **kwargs))
 
 
 def CalcOMES(msa, ambiguity=True, turbo=True, **kwargs):
@@ -214,7 +214,7 @@ def CalcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
     return meff
 
 
-def apc(mutinfo, **kwargs):
+def ApplyAPC(mutinfo, **kwargs):
     """Return a copy of *mutinfo* array after average product correction
     (default) or average sum correction is applied."""
 
@@ -234,3 +234,48 @@ def apc(mutinfo, **kwargs):
         for j, j_avg in enumerate(avg_mipos):
             mi[i, j] -= (i_avg * j_avg) / avg_mi
     return mi
+
+
+def ApplyBND(mat, **kwargs):
+    '''Return a BND refinement of a symetric matrix.
+    If the matrix is not symetric. The calculation for mat+mat.T will be performanced.
+    It has comparable speed with the original MATLAB code.'''
+
+    try:
+        ndim, shape = mat.ndim, mat.shape
+    except AttributeError:
+        raise TypeError('Matrix must be a 2D square array')
+
+    from numpy import fill_diagonal
+    from scipy.linalg import eigh
+    from scipy.linalg.blas import dgemm
+    if ndim != 2 or shape[0] != shape[1]:
+        raise ValueError('Matrix must be a 2D square array')
+
+    if mat.min() != mat.max():
+        mat = (mat - mat.min()) / (mat.max() - mat.min())
+    else:
+        from ..IO.error import infoprint
+        infoprint("The input matrix is a constant matrix.")
+        return mat
+    n = mat.shape[0]
+    fill_diagonal(mat, 0.)
+    mat_th = (mat + mat.T) / 2.
+    d, u = eigh(mat_th)
+    for i in range(n):
+        if d[i] != 0:
+            d[i] = (-1. + (1 + 4 * d[i] * d[i])**.5) / 2. / d[i]
+    mat_new1 = dgemm(alpha=1.0, a=(u * d), b=u, trans_b=True)
+    # mat_new1 = (u*d).dot(u.T) #old numpy dot,slower
+    ind_edges = (mat_th > 0) * 1.0
+    ind_nonedges = (mat_th == 0) * 1.0
+    m1 = (mat * ind_nonedges).max()
+    m2 = mat_new1.min()
+    mat_new2 = (mat_new1 + max(m1 - m2, 0)) * ind_edges + (mat * ind_nonedges)
+    m1 = mat_new2.min()
+    m2 = mat_new2.max()
+    if m1 != m2:
+        mat_bnd = (mat_new2 - m1) / (m2 - m1)
+    else:
+        mat_bnd = mat_new2
+    return mat_bnd
