@@ -311,7 +311,7 @@ def applyBND(mat, **kwargs):
         raise TypeError('Matrix must be a 2D square array')
 
     from numpy import fill_diagonal
-    from scipy.linalg import eigh
+    from scipy.linalg.lapack import dsyevr
     from scipy.linalg.blas import dgemm
     if ndim != 2 or shape[0] != shape[1]:
         raise ValueError('Matrix must be a 2D square array')
@@ -325,10 +325,12 @@ def applyBND(mat, **kwargs):
     n = mat.shape[0]
     fill_diagonal(mat, 0.)
     mat_th = (mat + mat.T) / 2.
-    d, u = eigh(mat_th)
+    # Double symetric eigvector relatively robust representation (RRR)
+    [d, u, t] = dsyevr(mat_th)
     for i in range(n):
         if d[i] != 0:
             d[i] = (-1. + (1 + 4 * d[i] * d[i])**.5) / 2. / d[i]
+    # Double general matrix multiply
     mat_new1 = dgemm(alpha=1.0, a=(u * d), b=u, trans_b=True)
     # mat_new1 = (u*d).dot(u.T) #old numpy dot,slower
     ind_edges = (mat_th > 0) * 1.0
