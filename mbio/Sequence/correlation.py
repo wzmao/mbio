@@ -197,6 +197,7 @@ def buildDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
     from numpy import zeros
     from .Ccorrelation import msadipretest, msadirectinfo1, msadirectinfo2
     from numpy import matrix
+    # from scipy.linalg.lapack import dgetrf, dgetri
 
     refine = 1 if refine else 0
     # msadipretest get some parameter from msa to set matrix size
@@ -210,11 +211,15 @@ def buildDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
                                               refine=refine, q=q + 1)
 
     c = c.I
+    # Another way:faster than normal,slower than atlas
+    # d, e = dgetrf(c)[:2]
+    # c = dgetri(d, e)[0]
 
     di = zeros((length, length), float)
     # get final DI
     di = msadirectinfo2(n, length, c, prob, di, q + 1)
     del prob, c
+
     return di
 
 

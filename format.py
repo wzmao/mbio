@@ -22,7 +22,7 @@ def check(x):
     for i in l:
         if os.path.isfile(os.path.join(x, i)) and os.path.join(x, i).endswith('.py') and not i.startswith('.'):
             autop(os.path.join(x, i))
-        if os.path.isdir(os.path.join(x, i)) and not i.startswith('.'):
+        if os.path.isdir(os.path.join(x, i)) and not i.startswith('.') and i != 'build':
             check(os.path.join(x, i))
 
 print '#' * int(os.popen('stty size').read().split()[-1])
