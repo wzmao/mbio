@@ -11,7 +11,7 @@ Now, I have
 * DI
 * SCA
 * APC
-* BND(Working on)
+* BND
 * Sequence shuffle
 
 ----
