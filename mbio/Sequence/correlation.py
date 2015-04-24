@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """This module contains some protein sequence correlation algorithms.
-Protein sequence correlation analysis could provide the evolutionary 
+Protein sequence correlation analysis could provide the evolutionary
 information about structure, contact and so on.
 Now, this module includes MI, MIp, OMES, SCA and DI.
 There are also APC and BND correction to refine the correlation matrix further.
@@ -9,7 +9,8 @@ There are also APC and BND correction to refine the correlation matrix further.
 __author__ = 'Wenzhi Mao'
 __all__ = ['buildMI', 'buildMIp', 'buildOMES',
            'buildSCA', 'buildDI', 'buildDCA',
-           'calcMeff', 'applyAPC', 'applyBND']
+           'calcMeff', 'applyAPC', 'applyBND',
+           'buildPSICOV_expert']
 
 
 def getMSA(msa):
@@ -56,8 +57,8 @@ def buildMI(msa, ambiguity=True, turbo=True, **kwargs):
     Mutual information matrix can be normalized or corrected using
     :func:`applyAPC` and :func:`applyBND` methods, respectively.
 
-    [GGB05] Gloor, Gregory B., et al. "Mutual information in protein multiple 
-    sequence alignments reveals two classes of coevolving positions." 
+    [GGB05] Gloor, Gregory B., et al. "Mutual information in protein multiple
+    sequence alignments reveals two classes of coevolving positions."
     Biochemistry 44.19 (2005): 7156-7165."""
 
     msa = getMSA(msa)
@@ -79,8 +80,8 @@ def buildMIp(msa, ambiguity=True, turbo=True, **kwargs):
     MIp is a APC corrected form of MI matrix.
     It could provide better information than MI.
 
-    [DSD08] Dunn SD, Wahl LM, Gloor GB. Mutual information without the 
-    influence of phylogeny or entropy dramatically improves residue 
+    [DSD08] Dunn SD, Wahl LM, Gloor GB. Mutual information without the
+    influence of phylogeny or entropy dramatically improves residue
     contact prediction. Bioinformatics 2008 24(3):333-340."""
 
     return ApplyAPC(buildMI(msa, ambiguity=True, turbo=True, **kwargs))
@@ -113,8 +114,8 @@ def buildOMES(msa, ambiguity=True, turbo=True, **kwargs):
     characters as considered as distinct types.  All non-alphabet characters
     are considered as gaps.
 
-    [KI02] Kass, Itamar, and Amnon Horovitz. "Mapping pathways of allosteric 
-    communication in GroEL by analysis of correlated mutations." Proteins: 
+    [KI02] Kass, Itamar, and Amnon Horovitz. "Mapping pathways of allosteric
+    communication in GroEL by analysis of correlated mutations." Proteins:
     Structure, Function, and Bioinformatics 48.4 (2002): 611-617."""
 
     msa = getMSA(msa)
@@ -151,11 +152,11 @@ def buildSCA(msa, turbo=True, **kwargs):
     characters as considered as distinct types.  All non-alphabet characters
     are considered as gaps.
 
-    [LSW99] Lockless, Steve W., and Rama Ranganathan. "Evolutionarily conserved 
-    pathways of energetic connectivity in protein families." Science 286.5438 
+    [LSW99] Lockless, Steve W., and Rama Ranganathan. "Evolutionarily conserved
+    pathways of energetic connectivity in protein families." Science 286.5438
     (1999): 295-299.
 
-    [HN09] Halabi, Najeeb, et al. "Protein sectors: evolutionary units of 
+    [HN09] Halabi, Najeeb, et al. "Protein sectors: evolutionary units of
     three-dimensional structure." Cell 138.4 (2009): 774-786."""
 
     msa = getMSA(msa)
@@ -183,13 +184,13 @@ def buildDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
     the MSA will be refined by the first sequence and the shape of direct
     information matrix will be smaller.
 
-    [WM09] Weigt, Martin, et al. "Identification of direct residue contacts 
-    in protein–protein interaction by message passing." Proceedings of the 
+    [WM09] Weigt, Martin, et al. "Identification of direct residue contacts
+    in protein–protein interaction by message passing." Proceedings of the
     National Academy of Sciences 106.1 (2009): 67-72.
 
-    [MF11] Morcos, Faruck, et al. "Direct-coupling analysis of residue 
-    coevolution captures native contacts across many protein families." 
-    Proceedings of the National Academy of Sciences 108.49 
+    [MF11] Morcos, Faruck, et al. "Direct-coupling analysis of residue
+    coevolution captures native contacts across many protein families."
+    Proceedings of the National Academy of Sciences 108.49
     (2011): E1293-E1301."""
 
     msa = getMSA(msa)
@@ -229,7 +230,7 @@ def buildDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
 
 def buildDCA(msa, seqid=.8, pseudo_weight=.5, refine=False,
              **kwargs):
-    """Same as buildDI."""
+    """The DCA matrix function see buildDI for more information."""
 
     return buildDI(msa, seqid, pseudo_weight, refine, **kwargs)
 
@@ -254,13 +255,13 @@ def calcMeff(msa, seqid=.8, refine=False, weight=False, **kwargs):
 
     The weight for each sequence are returned when *weight* is **True**.
 
-    [WM09] Weigt, Martin, et al. "Identification of direct residue contacts 
-    in protein–protein interaction by message passing." Proceedings of the 
+    [WM09] Weigt, Martin, et al. "Identification of direct residue contacts
+    in protein–protein interaction by message passing." Proceedings of the
     National Academy of Sciences 106.1 (2009): 67-72.
 
-    [MF11] Morcos, Faruck, et al. "Direct-coupling analysis of residue 
-    coevolution captures native contacts across many protein families." 
-    Proceedings of the National Academy of Sciences 108.49 
+    [MF11] Morcos, Faruck, et al. "Direct-coupling analysis of residue
+    coevolution captures native contacts across many protein families."
+    Proceedings of the National Academy of Sciences 108.49
     (2011): E1293-E1301."""
 
     msa = getMSA(msa)
@@ -282,8 +283,8 @@ def applyAPC(mutinfo, **kwargs):
     """Return a copy of *mutinfo* array after average product correction
     (default) or average sum correction is applied.
 
-    [DSD08] Dunn SD, Wahl LM, Gloor GB. Mutual information without the 
-    influence of phylogeny or entropy dramatically improves residue 
+    [DSD08] Dunn SD, Wahl LM, Gloor GB. Mutual information without the
+    influence of phylogeny or entropy dramatically improves residue
     contact prediction. Bioinformatics 2008 24(3):333-340."""
 
     try:
@@ -306,12 +307,12 @@ def applyAPC(mutinfo, **kwargs):
 
 def applyBND(mat, **kwargs):
     """Return a BND refinement of a symetric matrix.
-    If the matrix is not symetric. The calculation for mat+mat.T will be 
+    If the matrix is not symetric. The calculation for mat+mat.T will be
     performanced.
     It has comparable speed with the original MATLAB code.
 
-    [SUP15] Sun, Hai‐Ping, et al. "Improving accuracy of protein contact 
-    prediction using balanced network deconvolution." Proteins: Structure, 
+    [SUP15] Sun, Hai‐Ping, et al. "Improving accuracy of protein contact
+    prediction using balanced network deconvolution." Proteins: Structure,
     Function, and Bioinformatics (2015)."""
 
     try:
@@ -354,3 +355,71 @@ def applyBND(mat, **kwargs):
     else:
         mat_bnd = mat_new2
     return mat_bnd
+
+
+def buildPSICOV_expert(msa,
+                        approx_lasso_flag=0,
+                        pre_shrink_flag=1,
+                        force=0,
+                        use_raw_not_ppv=1,
+                        filter_low_flag=0,
+                        apply_apc_flg=1,
+                        set_default_rho=-1,
+                        target_fraction_of_none_zero=0,
+                        set_lasso_convergence_threshold=1e-4,
+                        identity_threshold=-1,
+                        set_pseudocount_value=1,
+                        set_minimum_sequence_separation=5,
+                        rho_parameter_file="",
+                        maximum_fraction_of_gaps=0.9,
+                        maxthread=-1,
+                        **kwargs):
+    """Return PSICOV matrix calculated for *msa*, which may be an
+    :class:`.MSA` instance or a 2D Numpy character array.
+
+    [JDT12] Jones, David T., et al. "PSICOV: precise structural contact
+    prediction using sparse inverse covariance estimation on large multiple
+    sequence alignments." Bioinformatics 28.2 (2012): 184-190."""
+
+    msa = getMSA(msa)
+
+    if (not 5e-5<float(target_fraction_of_none_zero)<1) and (target_fraction_of_none_zero!=0):
+        from ..IO.output import printError
+        printError("target_fraction_of_none_zero must between 5e-5 and 1.")
+        return None
+    from numpy import zeros
+    from .Ccorrelation_p import msapsicov
+    length = msa.shape[1]
+    psicov = zeros((length, length), float)
+    psicov = msapsicov(msa, psicov,
+                       approxflg=bool(approx_lasso_flag),
+                       shrinkflg=bool(pre_shrink_flag),
+                       overrideflg=bool(force),
+                       rawscflg=bool(use_raw_not_ppv),
+                       filtflg=bool(filter_low_flag),
+                       apcflg=bool(apply_apc_flg),
+                       rhodefault=float(set_default_rho),
+                       targfnzero=float(target_fraction_of_none_zero),
+                       thresh=float(set_lasso_convergence_threshold),
+                       idthresh=float(identity_threshold),
+                       pseudoc=int(set_pseudocount_value),
+                       minseqsep=int(set_minimum_sequence_separation),
+                       blockfn=str(rho_parameter_file),
+                       maxgapf=float(maximum_fraction_of_gaps),
+                       maxthread=int(maxthread))
+
+    if isinstance(psicov,tuple) and psicov[0]==None:
+        if psicov[1]==0:
+            return psicov
+        elif psicov[1]==1:
+            from ..IO.output import printError
+            printError("Out of memory!")
+            return None
+        elif psicov[1]==2:
+            from ..IO.output import printError
+            printError("Not enough sequences or sequence diversity to proceed!")
+            printError("Neff ({0}) < MINEFSEQS ({1})".format(psicov[2],msa.shape[1]))
+            printError("If you want to force a calculation at your own risk, use force=1.")
+            return None
+
+    return psicov
