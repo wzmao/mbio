@@ -10,7 +10,7 @@ __author__ = 'Wenzhi Mao'
 __all__ = ['buildMI', 'buildMIp', 'buildOMES',
            'buildSCA', 'buildDI', 'buildDCA',
            'calcMeff', 'applyAPC', 'applyBND',
-           'buildPSICOV_expert']
+           'buildPSICOV']
 
 
 def getMSA(msa):
@@ -230,7 +230,7 @@ def buildDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
 
 def buildDCA(msa, seqid=.8, pseudo_weight=.5, refine=False,
              **kwargs):
-    """The DCA matrix function see buildDI for more information."""
+    """The DCA matrix function see `buildDI` for more information."""
 
     return buildDI(msa, seqid, pseudo_weight, refine, **kwargs)
 
@@ -358,24 +358,52 @@ def applyBND(mat, **kwargs):
 
 
 def buildPSICOV_expert(msa,
-                        approx_lasso_flag=0,
-                        pre_shrink_flag=1,
-                        force=0,
-                        use_raw_not_ppv=1,
-                        filter_low_flag=0,
-                        apply_apc_flg=1,
-                        set_default_rho=-1,
-                        target_fraction_of_none_zero=0,
-                        set_lasso_convergence_threshold=1e-4,
-                        identity_threshold=-1,
-                        set_pseudocount_value=1,
-                        set_minimum_sequence_separation=5,
-                        rho_parameter_file="",
-                        maximum_fraction_of_gaps=0.9,
-                        maxthread=-1,
-                        **kwargs):
+                       approx_lasso_flag=0,
+                       pre_shrink_flag=1,
+                       force=0,
+                       use_raw_not_ppv=1,
+                       apply_apc_flg=1,
+                       set_default_rho=-1,
+                       target_fraction_of_none_zero=0,
+                       set_lasso_convergence_threshold=1e-4,
+                       identity_threshold=-1,
+                       set_pseudocount_value=1,
+                       set_minimum_sequence_separation=5,
+                       rho_parameter_file="",
+                       maximum_fraction_of_gaps=0.9,
+                       maxthread=-1,
+                       **kwargs):
     """Return PSICOV matrix calculated for *msa*, which may be an
     :class:`.MSA` instance or a 2D Numpy character array.
+
+    You could use `buildPSICOV` for normal usage. `buildPSICOV_expert` provide
+    more options.
+
+    Options:
+        `approx_lasso_flag`: use approximate LASSO algorithm, default as 0.
+        `pre_shrink_flag`: Shrink the sample covariance matrix towards 
+            shrinkage target F = Diag(1,1,1,...,1), default as 1.
+        `force`: force the calculation if the sequence is not sufficient,
+            default as 0.
+        `use_raw_not_ppv`: return the raw PSICOV result instead of the PPV
+            result(A model from [JDT12]), default as 1.
+        `apply_apc_flg`: apply the APC after the calculation, default as 1.
+            The result after APC could be negtive, but the original lowest
+            score remains 0.
+        `set_default_rho`: set the initial rho parameter, default as -1 (not
+            specified)
+        `target_fraction_of_none_zero`: set the target matrix density value 
+            (none-zero fraction), should be in range 5e-5 - 1. default as 0
+            (not specified)
+        `set_lasso_convergence_threshold`: set Lasso convergence threshold,
+            default as 1e-4.
+        `identity_threshold`: select BLOSUM-like weighting with given identity
+            threshold, default as -1(selects threshold automatically)
+        `set_pseudocount_value`: set pseudocount value, default as 1.
+        `set_minimum_sequence_separation`: set pseudocount value, default as 5.
+        `rho_parameter_file`: give the rho parameter file, default ""(no file)
+        `maximum_fraction_of_gaps`: maximum fraction of gaps, default as 0.9.
+        `maxthread`: the max number of threads, default as -1(choose max).
 
     [JDT12] Jones, David T., et al. "PSICOV: precise structural contact
     prediction using sparse inverse covariance estimation on large multiple
@@ -383,7 +411,7 @@ def buildPSICOV_expert(msa,
 
     msa = getMSA(msa)
 
-    if (not 5e-5<float(target_fraction_of_none_zero)<1) and (target_fraction_of_none_zero!=0):
+    if (not 5e-5 < float(target_fraction_of_none_zero) < 1) and (target_fraction_of_none_zero != 0):
         from ..IO.output import printError
         printError("target_fraction_of_none_zero must between 5e-5 and 1.")
         return None
@@ -396,7 +424,6 @@ def buildPSICOV_expert(msa,
                        shrinkflg=bool(pre_shrink_flag),
                        overrideflg=bool(force),
                        rawscflg=bool(use_raw_not_ppv),
-                       filtflg=bool(filter_low_flag),
                        apcflg=bool(apply_apc_flg),
                        rhodefault=float(set_default_rho),
                        targfnzero=float(target_fraction_of_none_zero),
@@ -408,18 +435,103 @@ def buildPSICOV_expert(msa,
                        maxgapf=float(maximum_fraction_of_gaps),
                        maxthread=int(maxthread))
 
-    if isinstance(psicov,tuple) and psicov[0]==None:
-        if psicov[1]==0:
+    if isinstance(psicov, tuple) and psicov[0] == None:
+        if psicov[1] == 0:
             return psicov
-        elif psicov[1]==1:
+        elif psicov[1] == 1:
             from ..IO.output import printError
             printError("Out of memory!")
             return None
-        elif psicov[1]==2:
+        elif psicov[1] == 2:
             from ..IO.output import printError
-            printError("Not enough sequences or sequence diversity to proceed!")
-            printError("Neff ({0}) < MINEFSEQS ({1})".format(psicov[2],msa.shape[1]))
-            printError("If you want to force a calculation at your own risk, use force=1.")
+            printError(
+                "Not enough sequences or sequence diversity to proceed!")
+            printError(
+                "Neff ({0}) < MINEFSEQS ({1})".format(psicov[2], msa.shape[1]))
+            printError(
+                "If you want to force a calculation at your own risk, use force=1.")
+            return None
+
+    return psicov
+
+
+def buildPSICOV(msa,
+                approx_lasso_flag=0,
+                force=0,
+                target_fraction_of_none_zero=0,
+                set_minimum_sequence_separation=5,
+                maxthread=-1,
+                **kwargs):
+    """Return PSICOV matrix calculated for *msa*, which may be an
+    :class:`.MSA` instance or a 2D Numpy character array.
+
+    You could use `buildPSICOV_expert` for more detail usage.
+
+    Options:
+        `approx_lasso_flag`: use approximate LASSO algorithm, default as 0.
+        `force`: force the calculation if the sequence is not sufficient,
+            default as 0.
+        `target_fraction_of_none_zero`: set the target matrix density value 
+            (none-zero fraction), should be in range 5e-5 - 1. default as 0
+            (not specified)
+        `set_minimum_sequence_separation`: set pseudocount value, default as 5.
+        `maxthread`: the max number of threads, default as -1(choose max).
+
+    [JDT12] Jones, David T., et al. "PSICOV: precise structural contact
+    prediction using sparse inverse covariance estimation on large multiple
+    sequence alignments." Bioinformatics 28.2 (2012): 184-190."""
+
+    msa = getMSA(msa)
+
+    pre_shrink_flag = 1
+    use_raw_not_ppv = 1
+    apply_apc_flg = 1
+    set_default_rho = -1
+    set_lasso_convergence_threshold = 1e-4
+    identity_threshold = -1
+    set_pseudocount_value = 1
+    rho_parameter_file = ""
+    maximum_fraction_of_gaps = 0.9
+
+    if (not 5e-5 < float(target_fraction_of_none_zero) < 1) and (target_fraction_of_none_zero != 0):
+        from ..IO.output import printError
+        printError("target_fraction_of_none_zero must between 5e-5 and 1.")
+        return None
+    from numpy import zeros
+    from .Ccorrelation_p import msapsicov
+    length = msa.shape[1]
+    psicov = zeros((length, length), float)
+    psicov = msapsicov(msa, psicov,
+                       approxflg=bool(approx_lasso_flag),
+                       shrinkflg=bool(pre_shrink_flag),
+                       overrideflg=bool(force),
+                       rawscflg=bool(use_raw_not_ppv),
+                       apcflg=bool(apply_apc_flg),
+                       rhodefault=float(set_default_rho),
+                       targfnzero=float(target_fraction_of_none_zero),
+                       thresh=float(set_lasso_convergence_threshold),
+                       idthresh=float(identity_threshold),
+                       pseudoc=int(set_pseudocount_value),
+                       minseqsep=int(set_minimum_sequence_separation),
+                       blockfn=str(rho_parameter_file),
+                       maxgapf=float(maximum_fraction_of_gaps),
+                       maxthread=int(maxthread))
+
+    if isinstance(psicov, tuple) and psicov[0] == None:
+        if psicov[1] == 0:
+            return psicov
+        elif psicov[1] == 1:
+            from ..IO.output import printError
+            printError("Out of memory!")
+            return None
+        elif psicov[1] == 2:
+            from ..IO.output import printError
+            printError(
+                "Not enough sequences or sequence diversity to proceed!")
+            printError(
+                "Neff ({0}) < MINEFSEQS ({1})".format(psicov[2], msa.shape[1]))
+            printError(
+                "If you want to force a calculation at your own risk, use force=1.")
             return None
 
     return psicov

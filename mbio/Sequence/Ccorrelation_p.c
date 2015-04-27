@@ -6,11 +6,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-// #include <unistd.h>
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
+/* This program mainly comes from http://bioinfadmin.cs.ucl.ac.uk/downloads/PSICOV/psicov21.c
+I correct a minor mistake and make the memory more safety. */
 
 #define FALSE 0
 #define TRUE 1
@@ -296,7 +297,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
 {
   PyArrayObject *msa, *psicov;
 
-  int approxflg, shrinkflg, overrideflg, rawscflg, filtflg, apcflg,  
+  int approxflg, shrinkflg, overrideflg, rawscflg, apcflg,  
       minseqsep, maxthread, pseudoc;
   double rhodefault, targfnzero, thresh, idthresh, maxgapf;
   char *blockfn = NULL;
@@ -311,15 +312,15 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
   FILE *ifp;
 
   static char *kwlist[] = {"msa", "psicov", "approxflg", "shrinkflg", 
-                           "overrideflg", "rawscflg", "filtflg", "apcflg", 
+                           "overrideflg", "rawscflg", "apcflg", 
                            "rhodefault", "targfnzero", "thresh", "idthresh", 
                            "pseudoc", "minseqsep", "blockfn", "maxgapf", 
                            "maxthread", NULL};
 
-  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|iiiiiiddddiisdi", kwlist,
+  if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO|iiiiiddddiisdi", kwlist,
                                    &msa, &psicov,
                                    &approxflg, &shrinkflg, &overrideflg, 
-                                   &rawscflg, &filtflg, &apcflg,
+                                   &rawscflg, &apcflg,
                                    &rhodefault,&targfnzero,&thresh,&idthresh,
                                    &pseudoc,&minseqsep,
                                    &blockfn,
