@@ -10,6 +10,7 @@ Now, I have
 * MIp
 * DI
 * SCA
+* PSICOV
 * APC
 * BND
 * Sequence shuffle

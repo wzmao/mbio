@@ -50,7 +50,7 @@ void* allocmat(int rows, int columns, int size)
     if ((p[i] = calloc(columns, size)) == NULL){
       for (j=0;j<i;j++)
         free(p[j]);
-      free(p);
+      free((void *)(p-sizeof(int)));
       return NULL;
     }
 
@@ -305,9 +305,9 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
   double *weight, **pa, **pcmat, *pcsum;
   char **aln;
 
-  int a, b, i, j, k, ndim, maxit=10000, initflg=0, npair, nnzero;
+  int a, b, i, j, k, ndim, maxit=10000, initflg=0, npair, nnzero, ncon;
   double wtsum, smean, lambda, lastfnzero, trialrho, rfact, score, fnzero, pcmean,
-         pc;
+         pc, scsum, scsumsq, mean, sd, zscore, ppv;
   FILE *ifp;
 
   static char *kwlist[] = {"msa", "psicov", "approxflg", "shrinkflg", 
@@ -482,7 +482,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
       free(wtcount);
       for (j=0;j<seqlen;j++)
         free(pa[j]);
-      free(pa);
+      free((void *)pa - sizeof(int));
       return Py_BuildValue("Oi", Py_None, 1);
   }
 
@@ -495,10 +495,10 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
       free(wtcount);
       for (j=0;j<seqlen;j++)
         free(pa[j]);
-      free(pa);
+      free((void *)pa - sizeof(int));
       for (j=0;j<ndim;j++)
         free(cmat[j]);
-      free(cmat);
+      free((void *)cmat - sizeof(int));
       return Py_BuildValue("Oi", Py_None, 1);
   }
 
@@ -581,13 +581,13 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free(wtcount);
     for (j=0;j<seqlen;j++)
       free(pa[j]);
-    free(pa);
+    free((void *)pa - sizeof(int));
     for (j=0;j<ndim;j++)
       free(cmat[j]);
-    free(cmat);
+    free((void *)cmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(tempmat[j]);
-    free(tempmat);
+    free((void *)tempmat - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
 
@@ -600,13 +600,13 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free(wtcount);
     for (j=0;j<seqlen;j++)
       free(pa[j]);
-    free(pa);
+    free((void *)pa - sizeof(int));
     for (j=0;j<ndim;j++)
       free(cmat[j]);
-    free(cmat);
+    free((void *)cmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(tempmat[j]);
-    free(tempmat);
+    free((void *)tempmat - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
   ww = allocmat(ndim, ndim, sizeof(double));
@@ -618,16 +618,16 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free(wtcount);
     for (j=0;j<seqlen;j++)
       free(pa[j]);
-    free(pa);
+    free((void *)pa - sizeof(int));
     for (j=0;j<ndim;j++)
       free(cmat[j]);
-    free(cmat);
+    free((void *)cmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(tempmat[j]);
-    free(tempmat);
+    free((void *)tempmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(rho[j]);
-    free(rho);
+    free((void *)rho - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
   wwi = allocmat(ndim, ndim, sizeof(double));
@@ -639,19 +639,19 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free(wtcount);
     for (j=0;j<seqlen;j++)
       free(pa[j]);
-    free(pa);
+    free((void *)pa - sizeof(int));
     for (j=0;j<ndim;j++)
       free(cmat[j]);
-    free(cmat);
+    free((void *)cmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(tempmat[j]);
-    free(tempmat);
+    free((void *)tempmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(rho[j]);
-    free(rho);
+    free((void *)rho - sizeof(int));
     for(j=0;j<ndim;j++)
       free(ww[j]);
-    free(ww);
+    free((void *)ww - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
 
@@ -765,22 +765,22 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free(wtcount);
     for (j=0;j<seqlen;j++)
       free(pa[j]);
-    free(pa);
+    free((void *)pa - sizeof(int));
     for (j=0;j<ndim;j++)
       free(cmat[j]);
-    free(cmat);
+    free((void *)cmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(tempmat[j]);
-    free(tempmat);
+    free((void *)tempmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(rho[j]);
-    free(rho);
+    free((void *)rho - sizeof(int));
     for(j=0;j<ndim;j++)
       free(ww[j]);
-    free(ww);
+    free((void *)ww - sizeof(int));
     for(j=0;j<ndim;j++)
       free(wwi[j]);
-    free(wwi);
+    free((void *)wwi - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
   pcsum = allocvec(seqlen, sizeof(double));
@@ -792,25 +792,25 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free(wtcount);
     for (j=0;j<seqlen;j++)
       free(pa[j]);
-    free(pa);
+    free((void *)pa - sizeof(int));
     for (j=0;j<ndim;j++)
       free(cmat[j]);
-    free(cmat);
+    free((void *)cmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(tempmat[j]);
-    free(tempmat);
+    free((void *)tempmat - sizeof(int));
     for(j=0;j<ndim;j++)
       free(rho[j]);
-    free(rho);
+    free((void *)rho - sizeof(int));
     for(j=0;j<ndim;j++)
       free(ww[j]);
-    free(ww);
+    free((void *)ww - sizeof(int));
     for(j=0;j<ndim;j++)
       free(wwi[j]);
-    free(wwi);
+    free((void *)wwi - sizeof(int));
     for(j=0;j<seqlen;j++)
       free(pcmat[j]);
-    free(pcmat);
+    free((void *)pcmat - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
   
@@ -834,72 +834,69 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
 
   /* Build final list of predicted contacts */
   for (scsum=scsumsq=ncon=i=0; i<seqlen; i++)
-    for (j=i+minseqsep; j<seqlen; j++)
+  {
+    for (j=i; j<seqlen; j++)
       if (pcmat[i][j] > 0.0)
       {
         /* Calculate APC score */
         if (apcflg)
-          pcmat[i][j] = pcmat[i][j] - pcsum[i] * pcsum[j] / SQR(seqlen - 1.0) / pcmean;
-        scsum += sclist[ncon].sc;
-        scsumsq += SQR(sclist[ncon].sc);
-        sclist[ncon].i = i;
-        sclist[ncon++].j = j;
+          pcmat[i][j] = pcmat[j][i] = pcmat[i][j] - pcsum[i] * pcsum[j] / SQR(seqlen - 1.0) / pcmean;
+        if (j>=i+minseqsep){
+          scsum += pcmat[i][j];
+          scsumsq += SQR(pcmat[i][j]);
+          ncon++;
+        }
       }
       else{
-        pcmat[i][j]=0.;
+        pcmat[i][j]=pcmat[j][i]=0.;
       }
+  }
 
-  // if (pcsum==NULL){
-  //   for (j=0;j<nseqs;j++)
-  //     free(aln[j]);
-  //   free(aln);
-  //   free(weight);
-  //   free(wtcount);
-  //   for (j=0;j<seqlen;j++)
-  //     free(pa[j]);
-  //   free(pa);
-  //   for (j=0;j<ndim;j++)
-  //     free(cmat[j]);
-  //   free(cmat);
-  //   for(j=0;j<ndim;j++)
-  //     free(tempmat[j]);
-  //   free(tempmat);
-  //   for(j=0;j<ndim;j++)
-  //     free(rho[j]);
-  //   free(rho);
-  //   for(j=0;j<ndim;j++)
-  //     free(ww[j]);
-  //   free(ww);
-  //   for(j=0;j<ndim;j++)
-  //     free(wwi[j]);
-  //   free(wwi);
-  //   for(j=0;j<seqlen;j++)
-  //     free(pcmat[j]);
-  //   free(pcmat);
-  //   free(pcsum);
-  //   return Py_BuildValue("Oi", Py_None, 1);
-  // }
+  mean = scsum / ncon;
+  sd = 1.25 * sqrt(scsumsq / ncon - SQR(mean)); /* Corrected for extreme-value bias */
 
+  if (!rawscflg)
+    for (i=0; i<seqlen; i++)
+      for (j=i+minseqsep; j<seqlen; j++)
+      {
+        zscore = (pcmat[i][j] - mean) / sd;
+        ppv = 0.904 / (1.0 + 16.61 * exp(-0.8105 * zscore));
+        mut[i*seqlen+j]=mut[j*seqlen+i]=ppv;
+      }
+  else
+    for (i=0; i<seqlen; i++)
+      for (j=i+minseqsep; j<seqlen; j++)
+          mut[i*seqlen+j]=mut[j*seqlen+i]=pcmat[i][j];
 
+  for (j=0;j<nseqs;j++)
+    free(aln[j]);
+  free(aln);
+  free(weight);
+  free(wtcount);
+  for (j=0;j<seqlen;j++)
+    free(pa[j]);
+  free((void *)pa - sizeof(int));
+  for (j=0;j<ndim;j++)
+    free(cmat[j]);
+  free((void *)cmat - sizeof(int));
+  for(j=0;j<ndim;j++)
+    free(tempmat[j]);
+  free((void *)tempmat - sizeof(int));
+  for(j=0;j<ndim;j++)
+    free(rho[j]);
+  free((void *)rho - sizeof(int));
+  for(j=0;j<ndim;j++)
+    free(ww[j]);
+  free((void *)ww - sizeof(int));
+  for(j=0;j<ndim;j++)
+    free(wwi[j]);
+  free((void *)wwi - sizeof(int));
+  for(j=0;j<seqlen;j++)
+    free(pcmat[j]);
+  free((void *)pcmat - sizeof(int));
+  free(pcsum);
 
-  // int nthreads, tid;
- 
-  // /* Fork a team of threads giving them their own copies of variables */
-  // #pragma omp parallel private(nthreads, tid)
-  // {
-  // /* Obtain thread number */
-  // tid = omp_get_thread_num();
-  // printf("Hello World from thread = %d\n", tid);
-
-  // /* Only master thread does this */
-  // if (tid == 0) 
-  //   {
-  //   nthreads = omp_get_num_threads();
-  //   printf("Number of threads = %d\n", nthreads);
-  //   }
-  // }  /* All threads join master thread and disband */
-
-  return Py_BuildValue("Oi", Py_None, 0);
+  return Py_BuildValue("O", psicov);
 }
 
 static PyMethodDef Ccorrelation_p_methods[] =
