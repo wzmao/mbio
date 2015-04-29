@@ -10,7 +10,7 @@ __author__ = 'Wenzhi Mao'
 __all__ = ['buildMI', 'buildMIp', 'buildOMES',
            'buildSCA', 'buildDI', 'buildDCA',
            'calcMeff', 'applyAPC', 'applyBND',
-           'buildPSICOV']
+           'buildPSICOV', 'applyPPV']
 
 
 def getMSA(msa):
@@ -535,3 +535,26 @@ def buildPSICOV(msa,
             return None
 
     return psicov
+
+
+def applyPPV(psicov, **kwargs):
+    """Apply the PPV test for PSICOV. If you have used `use_raw_not_ppv`=0 in
+    `buildPSICOV_expert`, you could skip this step. The PPV model was built in
+    [TN12]. The PPV refinement scales the PSICOV scores to 0-0.904 (which is
+    the positive predictive values in statistics).
+
+    [TN12] Nugent T, Jones D T. Accurate de novo structure prediction of large
+    transmembrane protein domains using fragment-assembly and correlated mutation
+    analysis[J]. Proceedings of the National Academy of Sciences, 2012,109(24):
+    E1540-E1547."""
+
+    from ..IO.output import printInfo
+    printInfo("The given matrix should be the PSICOV matrix with no `use_raw_not_ppv`=0 "
+              "option in `buildPSICOV_expert` or any from `buildPSICOV`.")
+
+    from numpy import e, zeros_like
+
+    r = zeros_like(psicov)
+    r[psicov != 0] = 0.904 / (1. +
+                              16.61 * (e**(psicov[psicov != 0] * (-0.8105))))
+    return r
