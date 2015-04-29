@@ -12,8 +12,10 @@ Now, I have
 * SCA
 * DI
 * PSICOV
+* DICOV
 * APC
 * BND
+* PPV(for PSICOV)
 * Sequence shuffle
 
 ----
