@@ -25,6 +25,12 @@ __all__.extend(IO.__all__)
 __all__.append('IO')
 
 
+from . import Constant
+from .Constant import *
+__all__.extend(Constant.__all__)
+__all__.append('Constant')
+
+
 def _ABSpath():
     """Get absolute path for the script."""
     import inspect

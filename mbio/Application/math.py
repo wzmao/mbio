@@ -30,3 +30,9 @@ def isSquare(x):
         return True
     else:
         return False
+
+
+def eigh(x):
+    """It is a function to calculate eigenvalues and eigenvectors."""
+
+    from os import popen

@@ -50,7 +50,8 @@ with open('mbio/__init__.py') as inp:
 PACKAGES = ['mbio',
             'mbio.IO',
             'mbio.Application',
-            'mbio.Sequence', ]
+            'mbio.Sequence',
+            'mbio.Constant']
 
 PACKAGE_DATA = {}
 

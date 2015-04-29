@@ -9,8 +9,10 @@ There are also APC and BND correction to refine the correlation matrix further.
 __author__ = 'Wenzhi Mao'
 __all__ = ['buildMI', 'buildMIp', 'buildOMES',
            'buildSCA', 'buildDI', 'buildDCA',
-           'calcMeff', 'applyAPC', 'applyBND',
-           'buildPSICOV', 'applyPPV']
+           'buildPSICOV',
+           'calcMeff', 'calcContactFrac',
+           'applyAPC', 'applyBND', 'applyPPV',
+           'applyDICOV']
 
 
 def getMSA(msa):
@@ -558,3 +560,162 @@ def applyPPV(psicov, **kwargs):
     r[psicov != 0] = 0.904 / (1. +
                               16.61 * (e**(psicov[psicov != 0] * (-0.8105))))
     return r
+
+
+def calcContactFrac(n, **kwargs):
+    """Return the proportion of contact for a n-residue protein.
+    This proportion is utilized in the DICOV as the prior probability of 3D
+    contact, P(+), by a regression analysis of a training set of 162 structurally
+    known protein sequences.
+
+    [MW15] Mao W, Kaya C, Dutta A, et al. Comparative study of the effectiveness
+    and limitations of current methods for detecting sequence coevolution[J].
+    Bioinformatics, 2015: btv103."""
+
+    return 8.88332505338 * (n**-0.825688603083)
+
+
+def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
+    """This function use a naïve Bayes classifier to combine DCA and PSICOV as
+    described in [MW15]. The calculation is based on DI and PSICOV. You could
+    provide these two matrices or the MSA. The PSICOV matrix should be the PPV
+    scaled. You could use `buildPSICOV_expert` and use `use_raw_not_ppv`=0 option
+    or use `applyPPV` to build it from the pre-PPV PSICOV matrix.
+
+    [MW15] Mao W, Kaya C, Dutta A, et al. Comparative study of the effectiveness
+    and limitations of current methods for detecting sequence coevolution[J].
+    Bioinformatics, 2015: btv103."""
+
+    from numpy import zeros_like, log, mgrid, fromfile, array, cov, diag, e, pi, trunc
+    from numpy.linalg.linalg import inv
+    from ..IO.output import printError
+    from ..Constant import getconstantfunc
+
+    if ((di == None and dca == None) or (psicov == None)) and msa == None:
+        printError("DI and PSICOV matrices or MSA should be provided.")
+        return None
+    if di != None and dca != None and not (di == dca).all():
+        printError(
+            "DI and DCA matrices are not the same, check it or just use one.")
+        return None
+
+    d = di if di != None else dca if dca != None else None
+    p = psicov if psicov != None else None
+
+    if d != None:
+        if d.ndim != 2:
+            printError("The dimension of DI matrix is wrong.")
+            return None
+        elif d.shape[0] != d.shape[1]:
+            printError("DI matrix is not square.")
+            return None
+        elif p == None and getMSA(msa).shape[1] != d.shape[0]:
+            printError("DI matrix does not fit the MSA.")
+            return None
+    if p != None:
+        if p.ndim != 2:
+            printError("The dimension of PSICOV matrix is wrong.")
+            return None
+        elif p.shape[0] != p.shape[1]:
+            printError("PSICOV matrix is not square.")
+            return None
+        elif d == None and getMSA(msa).shape[1] != p.shape[0]:
+            printError("PSICOV matrix does not fit the MSA.")
+            return None
+    if p != None and d != None:
+        if p.shape[0] != d.shape[0]:
+            printError("DI and PSICOV matrices have different sizes.")
+            return None
+
+    d = buildDI(msa) if d == None else d
+    p = buildPSICOV_expert(msa, use_raw_not_ppv=0) if p == None else p
+
+    n = di.shape[0]
+
+    dicov = zeros_like(d)
+    pplus = getconstantfunc('pplus')
+    pminus = getconstantfunc('pminus')
+    X, Y = mgrid[-5:0.05:0.05, -3:0.05:0.05]
+    pplus.resize(X.shape)
+    pminus.resize(X.shape)
+
+    psigplus = getconstantfunc('psigplus')
+    psigminus = getconstantfunc('psigminus')
+    XX = mgrid[-5:0.05:0.05]
+    psigplus.resize(XX.shape)
+    psigminus.resize(XX.shape)
+
+    prate = calcContactFrac(d.shape[0])
+    qrate = 1.0 - prate
+
+    pplus = pplus * prate
+    psigplus = psigplus * prate
+    pminus = pminus * qrate
+    psigminus = psigminus * qrate
+
+    cdouble = zeros_like(pplus)
+
+    pos = []
+    val = []
+    for i in range(pplus.shape[0]):
+        for j in range(pplus.shape[1]):
+            if pplus[i][j] <= 1e-3 or pminus[i][j] <= 1e-3:
+                cdouble[i][j] = -1
+            else:
+                cdouble[i][j] = pplus[i][j] / (pplus[i][j] + pminus[i][j])
+                pos.append([X[i][j], Y[i][j]])
+                val.append(cdouble[i][j])
+    pos = array(pos).T
+    val = array(val)
+    nn = val.shape[0]
+    s = cov(pos)
+    invs = inv(s)
+    h = (nn**(-1.0 / 6.0)) * (((2.0**(-1.0)) * (diag(s).sum())) ** .5)
+    para1 = (-.5) * (h**-2.)
+    for i in range(pplus.shape[0]):
+        for j in range(pplus.shape[1]):
+            if cdouble[i][j] == -1:
+                temp = array([X[i][j], Y[i][j]]).reshape((2, 1))
+                temp = e**(para1 *
+                           ((invs.dot((pos - temp)) * (pos - temp)).sum(0)))
+                cdouble[i][j] = (temp.dot(val).sum()) / temp.sum()
+
+    csingle = zeros_like(psigplus)
+    pos = []
+    val = []
+    for i in range(psigplus.shape[0]):
+        if psigplus[i] <= 1e-8 or psigminus[i] <= 1e-8:
+            csingle[i] = -1
+        else:
+            csingle[i] = psigplus[i] / (psigplus[i] + psigminus[i])
+            pos.append(XX[i])
+            val.append(csingle[i])
+    pos = array(pos).T
+    val = array(val)
+    nn = val.shape[0]
+    s = pos.std()
+    h = ((4.0 / 3)**(.2)) * s * (nn**-.2)
+    para1 = 1. / (nn * h * ((2 * pi)**.5))
+    for i in range(psigplus.shape[0]):
+        if csingle[i] == -1:
+            temp = para1 * (e**(-.5 * (((pos - XX[i]) / h)**2)))
+            csingle[i] = (temp.dot(val).sum()) / temp.sum()
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            if psicov[i][j] == 0:
+                ldi = log(di[i][j]) / log(10)
+                temp = int(trunc((ldi + 5) / .05))
+                dicov[i][j] = dicov[j, i] = csingle[
+                    temp] + (ldi - XX[temp]) / .05 * (csingle[temp + 1] - csingle[temp])
+            else:
+                ldi = log(di[i][j]) / log(10)
+                lps = log(psicov[i][j]) / log(10)
+                temp1 = int(trunc((ldi + 5) / .05))
+                temp2 = int(trunc((lps + 3) / .05))
+                val = array([[cdouble[temp1, temp2], cdouble[
+                            temp1, temp2 + 1]], [cdouble[temp1 + 1, temp2], cdouble[temp1 + 1, temp2 + 1]]])
+                dicov[i, j] = dicov[j, i] = array([X[temp1 + 1][temp2] - ldi, ldi - X[temp1][temp2]]).dot(
+                    val).dot(array([Y[temp1][temp2 + 1] - lps, lps - Y[temp1][temp2]])) * 400
+
+    return dicov
