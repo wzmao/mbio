@@ -33,6 +33,27 @@ def isSquare(x):
 
 
 def eigh(x):
-    """It is a function to calculate eigenvalues and eigenvectors."""
+    """This is a function to calculate eigenvalues and eigenvectors."""
 
-    from os import popen
+    try:
+        from scipy.linalg.lapack import dsyevr
+        return dsyevr(x)[:2]
+    except:
+        from numpy.linalg import eigh as n_eigh
+        return n_eigh(x)
+
+def invsp(x):
+    """This is a function to inverse a sumetric postive definite matrix."""
+
+    try:
+        from numpy.linalg import inv
+        return inv(x)
+    except:
+        try:
+            from scipy.linalg.lapack import dgetrf, dgetri
+            d, e = dgetrf(x)[:2]
+            return dgetri(d, e)[0]
+        except:
+            from ..IO.output import printError
+            printError("There is no `inv` function found.")
+            return None

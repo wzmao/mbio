@@ -200,8 +200,7 @@ def buildDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
     from numpy import zeros
     from .Ccorrelation import msadipretest, msadirectinfo1, msadirectinfo2
     from numpy import matrix
-    # from scipy.linalg.lapack import dgetrf, dgetri
-    # from scipy.linalg.lapack import dpotri
+    from ..Application.math import invsp
 
     refine = 1 if refine else 0
     # msadipretest get some parameter from msa to set matrix size
@@ -214,13 +213,7 @@ def buildDI(msa, seqid=.8, pseudo_weight=.5, refine=False,
                                               pseudocount_weight=pseudo_weight,
                                               refine=refine, q=q + 1)
 
-    c = c.I
-
-    # Another way:faster than normal,slower than atlas
-    # d, e = dgetrf(c)[:2]
-    # c = dgetri(d, e)[0]
-
-    # c=spotri(c,)[0]
+    c = invsp(c)
 
     di = zeros((length, length), float)
     # get final DI
@@ -323,7 +316,7 @@ def applyBND(mat, **kwargs):
         raise TypeError('Matrix must be a 2D square array')
 
     from numpy import fill_diagonal
-    from scipy.linalg.lapack import dsyevr
+    from ..Application.math import eigh
     from scipy.linalg.blas import dgemm
     if ndim != 2 or shape[0] != shape[1]:
         raise ValueError('Matrix must be a 2D square array')
@@ -338,7 +331,7 @@ def applyBND(mat, **kwargs):
     fill_diagonal(mat, 0.)
     mat_th = (mat + mat.T) / 2.
     # Double symetric eigvector relatively robust representation (RRR)
-    [d, u, t] = dsyevr(mat_th)
+    d, u = eigh(mat_th)
     for i in range(n):
         if d[i] != 0:
             d[i] = (-1. + (1 + 4 * d[i] * d[i])**.5) / 2. / d[i]
