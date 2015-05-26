@@ -1672,6 +1672,123 @@ static PyObject *msadirectinfo2(PyObject *self, PyObject *args, PyObject *kwargs
     return Py_BuildValue("O", diinfo);
 }
 
+static int letter2number(char c){
+    if (c=='-')
+        return 1;
+    if (c=='A')
+        return 2;
+    if (c=='C')
+        return 3;
+    if (c=='D')
+        return 4;
+    if (c=='E')
+        return 5;
+    if (c=='F')
+        return 6;
+    if (c=='G')
+        return 7;
+    if (c=='H')
+        return 8;
+    if (c=='I')
+        return 9;
+    if (c=='K')
+        return 10;
+    if (c=='L')
+        return 11;
+    if (c=='M')
+        return 12;
+    if (c=='N')
+        return 13;
+    if (c=='P')
+        return 14;
+    if (c=='Q')
+        return 15;
+    if (c=='R')
+        return 16;
+    if (c=='S')
+        return 17;
+    if (c=='T')
+        return 18;
+    if (c=='V')
+        return 19;
+    if (c=='W')
+        return 20;
+    if (c=='Y')
+        return 21;
+    return 1;
+}
+
+static PyObject *msaplmdca(PyObject *self, PyObject *args, PyObject *kwargs) {
+
+    PyArrayObject *msa, *plmdca;
+    double weighting=0.2;
+
+    static char *kwlist[] = {"msa", "plmdca", "weighting", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OO", kwlist,
+                                     &msa, &plmdca,
+                                     &weighting))
+        return NULL;
+
+    /* make sure to have a contiguous and well-behaved array */
+    msa = PyArray_GETCONTIGUOUS(msa);
+
+    /* check dimensions */
+    long number = msa->dimensions[0], length = msa->dimensions[1];
+
+    /* get pointers to data */
+    char *seq = (char *) PyArray_DATA(msa); /*size: number x length */
+    double *mut = (double *) PyArray_DATA(plmdca);
+
+    int i,j,k,p,q=0;
+    int *intseq=malloc(number * length * sizeof(int));
+    if (!intseq)
+        return PyErr_NoMemory();
+
+    for (i=0;i<number;i++)
+        for (j=0;j<length;j++){
+            intseq[i*length+j]=letter2number(seq[i*length+j]);
+            q = intseq[i*length+j]>q?intseq[i*length+j]:q;
+        }
+
+    double *weight,B_eff=0.0;
+    weight=malloc(number * sizeof(double));
+    if (!weight){
+        free(intseq);
+        return PyErr_NoMemory();
+    }
+    for (i=0;i<number;i++)
+        weight[i]=0;
+    for (i=0;i<number;i++){
+        weight[i]++;
+        for (j=i+1;j<number;j++){
+            p=0;
+            for(k=0;k<length;k++){
+                if (intseq[i*length+k]==intseq[j*length+k])
+                    p++;
+            }
+            if (p>=(1-weighting)*length){
+                weight[i]++;
+                weight[j]++;
+            }
+        }
+        weight[i]=1.0/weight[i];
+        B_eff+=weight[i];
+    }
+
+    double lambda_J=0,lambda_h=0,scaled_lambda_h=0,scaled_lambda_J=0;
+    if (B_eff>500)
+        lambda_J=0.01;
+    else
+        lambda_J=0.1-(0.1-0.01)*B_eff/500.0;
+    lambda_h=lambda_J;
+    scaled_lambda_h=lambda_h*B_eff;   
+    scaled_lambda_J=lambda_J*B_eff/2.;
+
+
+    return Py_BuildValue("O", plmdca);
+    /*This program is not finished, I will finish it in the future.*/
+}
 
 static PyMethodDef Ccorrelation_methods[] = {
 
@@ -1708,6 +1825,10 @@ static PyMethodDef Ccorrelation_methods[] = {
 
     {"msadipretest",  (PyCFunction)msadipretest, METH_VARARGS | METH_KEYWORDS,
      "Return some DI parameter to set array size."},
+
+    {"msaplmdca",  (PyCFunction)msaplmdca, METH_VARARGS | METH_KEYWORDS,
+     "Return plmDCA matrix calculated for given character array that contains\n"
+      "an MSA."},
 
     {NULL, NULL, 0, NULL}
 };

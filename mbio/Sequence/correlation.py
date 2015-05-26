@@ -712,3 +712,34 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
                     val).dot(array([Y[temp1][temp2 + 1] - lps, lps - Y[temp1][temp2]])) * 400
 
     return dicov
+
+# def buildplmDCA(msa,refine=0,unique=0,weighting=0.2,maxthread=-1,**kwargs):
+
+#     msa = getMSA(msa)
+
+#     from numpy import empty,ones
+#     from .Ccorrelation import msaplmdca
+
+#     if refine:
+#         mark = msa[0]!='-'
+#         for i in range(len(mark)):
+#             if mark[i] and msa[0,i].isupper():
+#                 mark[i]=True
+#             else:
+#                 mark[i]=False
+#         msa=msa[:,mark]
+#     if unique:
+#         mark=ones(msa.shape[0],dtype=bool)
+#         for i in range(msa.shape[0]):
+#             if not mark[i]:
+#                 continue
+#             for j in range(i+1,msa.shape[0]):
+#                 if (msa[i]==msa[j]).all():
+#                     mark[j]=False
+#         msa=msa[mark]
+
+#     length = msa.shape[1]
+#     plmdca = empty((length, length), float)
+#     plmdca = msaplmdca(msa, plmdca, weighting=weighting)
+
+#     return plmdca
