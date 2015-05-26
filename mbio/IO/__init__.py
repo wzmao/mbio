@@ -21,3 +21,7 @@ __all__ = []
 from . import output
 from .output import *
 __all__.extend(output.__all__)
+
+from . import mrc
+from .mrc import *
+__all__.extend(mrc.__all__)

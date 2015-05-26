@@ -77,6 +77,9 @@ EXTENSIONS = [
     Extension('mbio.Sequence.Cfasta',
               [join('mbio', 'Sequence', 'Cfasta.c'), ],
               include_dirs=[numpy.get_include()]),
+    Extension('mbio.IO.Cmrc',
+              [join('mbio', 'IO', 'Cmrc.c'), ],
+              include_dirs=[numpy.get_include()]),
 ]
 
 setup(
