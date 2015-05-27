@@ -1739,6 +1739,7 @@ static PyObject *msaplmdca(PyObject *self, PyObject *args, PyObject *kwargs) {
     /* get pointers to data */
     char *seq = (char *) PyArray_DATA(msa); /*size: number x length */
     double *mut = (double *) PyArray_DATA(plmdca);
+    mut[0]=mut[0];
 
     int i,j,k,p,q=0;
     int *intseq=malloc(number * length * sizeof(int));
@@ -1785,7 +1786,8 @@ static PyObject *msaplmdca(PyObject *self, PyObject *args, PyObject *kwargs) {
     scaled_lambda_h=lambda_h*B_eff;   
     scaled_lambda_J=lambda_J*B_eff/2.;
 
-
+    double  just_remove_warn=scaled_lambda_h+scaled_lambda_J;
+    just_remove_warn=just_remove_warn;
     return Py_BuildValue("O", plmdca);
     /*This program is not finished, I will finish it in the future.*/
 }

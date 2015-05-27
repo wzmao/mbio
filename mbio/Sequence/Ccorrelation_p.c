@@ -669,9 +669,10 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
   if (blockfn[0]=='\0')
     blockfn=NULL;
 
+  double besttd = BIG, bestrho=trialrho;
   for (;;)
   {
-    double targdiff, besttd = BIG, bestrho;
+    double targdiff;
     
     if (trialrho <= 0.0 || trialrho >= 1.0)
     {
