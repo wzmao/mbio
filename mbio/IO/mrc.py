@@ -12,24 +12,24 @@ class MRCHeader():
     """A header class for mrc file."""
 
     def __init__(self, **kwargs):
-        self.nx = self.ny = self.nz = 0
-        self.mode = 2
-        self.nxstart = self.nystart = self.nzstart = 0
-        self.mx = self.my = self.mz = 0
-        self.cella = [0.] * 3
-        self.cellb = [90.] * 3
-        self.mapc = 1
-        self.mapr = 2
-        self.maps = 3
-        self.dmin = self.dmax = self.dmean = 0.
-        self.ispg = 0
-        self.nsymbt = 0
-        self.extra = "\0"
-        self.origin = [0.] * 3
-        self.maps = "MAP\0"
-        self.machst = 0
-        self.rms = 0.
-        self.nlabels = 0
+        self.nx = self.ny = self.nz = None
+        self.mode = None
+        self.nxstart = self.nystart = self.nzstart = None
+        self.mx = self.my = self.mz = None
+        self.cella = [None] * 3
+        self.cellb = [None] * 3
+        self.mapc = None
+        self.mapr = None
+        self.maps = None
+        self.dmin = self.dmax = self.dmean = None
+        self.ispg = None
+        self.nsymbt = None
+        self.extra = None
+        self.origin = [None] * 3
+        self.map = None
+        self.machst = None
+        self.rms = None
+        self.nlabels = None
         self.labels = [""] * 10
 
     def __repr__(self):
@@ -57,7 +57,7 @@ class MRC():
             if exists(filename) and isfile(filename):
                 from .Cmrc import readHeader
                 self.header = MRCHeader()
-                readHeader(filename=filename, mode=mode, header=self.header)
+                self.header = readHeader(filename=filename, mode=mode, header=self.header)
             else:
                 from .output import printError
                 printError("The file doesn't exists or is not a file.")

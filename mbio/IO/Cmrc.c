@@ -50,9 +50,10 @@ typedef struct MRCHeader
 static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
 
     char *filename, *mode;
-    PyObject header;
+    PyObject *header;
     FILE *m_fp;
     MRCHeader m_header;
+    int i;
 
     static char *kwlist[] = {"filename", "mode", "header", NULL};
 
@@ -69,7 +70,43 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
 
     if(fread(&m_header,1,1024,m_fp)<1024)
         return Py_BuildValue("OS", Py_None,"File header is not complete.");
-    /*unfinished*/
+    
+    PyObject_SetAttrString(header, "nx", PyInt_FromLong(m_header.nx));
+    PyObject_SetAttrString(header, "ny", PyInt_FromLong(m_header.ny));
+    PyObject_SetAttrString(header, "nz", PyInt_FromLong(m_header.nz));
+    PyObject_SetAttrString(header, "mode", PyInt_FromLong(m_header.mode));
+    PyObject_SetAttrString(header, "nxstart", PyInt_FromLong(m_header.nxstart));
+    PyObject_SetAttrString(header, "nystart", PyInt_FromLong(m_header.nystart));
+    PyObject_SetAttrString(header, "nzstart", PyInt_FromLong(m_header.nzstart));
+    PyObject_SetAttrString(header, "mx", PyInt_FromLong(m_header.mx));
+    PyObject_SetAttrString(header, "my", PyInt_FromLong(m_header.my));
+    PyObject_SetAttrString(header, "mz", PyInt_FromLong(m_header.mz));
+    PyObject_SetAttrString(header, "mapc", PyInt_FromLong(m_header.mapc));
+    PyObject_SetAttrString(header, "mapr", PyInt_FromLong(m_header.mapr));
+    PyObject_SetAttrString(header, "maps", PyInt_FromLong(m_header.maps));
+    PyObject_SetAttrString(header, "ispg", PyInt_FromLong(m_header.ispg));
+    PyObject_SetAttrString(header, "nsymbt", PyInt_FromLong(m_header.nsymbt));
+    PyObject_SetAttrString(header, "machst", PyInt_FromLong(m_header.machst));
+    PyObject_SetAttrString(header, "nlabels", PyInt_FromLong(m_header.nlabels));
+
+    PyObject_SetAttrString(header, "dmin", PyFloat_FromDouble(m_header.dmin));
+    PyObject_SetAttrString(header, "dmax", PyFloat_FromDouble(m_header.dmax));
+    PyObject_SetAttrString(header, "dmean", PyFloat_FromDouble(m_header.dmean));
+    PyObject_SetAttrString(header, "rms", PyFloat_FromDouble(m_header.rms));
+
+    PyObject_SetAttrString(header, "map", PyString_FromStringAndSize(m_header.map,4));
+    PyObject_SetAttrString(header, "extra", PyString_FromString(m_header.extra));
+
+    for (i=0;i<3;i++){
+      PyList_SetItem(PyObject_GetAttrString(header,"cella"), i, PyFloat_FromDouble(m_header.cella[i]));
+      PyList_SetItem(PyObject_GetAttrString(header,"cellb"), i, PyFloat_FromDouble(m_header.cellb[i]));
+      PyList_SetItem(PyObject_GetAttrString(header,"origin"), i, PyFloat_FromDouble(m_header.origin[i]));
+    }
+
+    for (i=0;i<10;i++){
+      PyList_SetItem(PyObject_GetAttrString(header,"labels"), i, PyString_FromString(m_header.label[i]));
+    }
+    // printf("%ld\n", PyInt_AsLong(PyObject_GetAttrString(header,"maps")));
     return Py_BuildValue("O", header);
 }
 
