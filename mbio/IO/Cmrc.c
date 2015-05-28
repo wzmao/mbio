@@ -1,5 +1,4 @@
 #include "Python.h"
-// #include "stdio.h"
 #include "numpy/arrayobject.h"
 
 typedef struct MRCHeader
@@ -49,27 +48,25 @@ typedef struct MRCHeader
 
 static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
 
-    char *filename, *mode;
+    char *filename, SymData[80];
     PyObject *header;
     FILE *m_fp;
     MRCHeader m_header;
     int i;
 
-    static char *kwlist[] = {"filename", "mode", "header", NULL};
+    static char *kwlist[] = {"filename", "header", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "ssO", kwlist,
-                                     &filename, &mode, &header))
-        return NULL;
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sO", kwlist,
+                                     &filename, &header))
+        return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
-
-    m_fp=fopen(filename,mode);
+    m_fp=fopen(filename,"r");
 
     if(m_fp==NULL)
-        return Py_BuildValue("OS", Py_None,"Couldn't read file.");
-    rewind(m_fp);
+        return Py_BuildValue("Os", Py_None,"Couldn't read file.");
 
     if(fread(&m_header,1,1024,m_fp)<1024)
-        return Py_BuildValue("OS", Py_None,"File header is not complete.");
+        return Py_BuildValue("Os", Py_None,"File header is not complete.");
     
     PyObject_SetAttrString(header, "nx", PyInt_FromLong(m_header.nx));
     PyObject_SetAttrString(header, "ny", PyInt_FromLong(m_header.ny));
@@ -104,18 +101,75 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     for (i=0;i<10;i++){
-      PyList_SetItem(PyObject_GetAttrString(header,"labels"), i, PyString_FromString(m_header.label[i]));
+      PyList_SetItem(PyObject_GetAttrString(header,"label"), i, PyString_FromString(m_header.label[i]));
     }
+
+    if (m_header.nsymbt==0){
+        PyObject_SetAttrString(header, "symdata", Py_None);
+    }
+    else if (m_header.nsymbt==80){
+        if(fseek(m_fp, 1024, SEEK_SET)!=0)
+            return Py_BuildValue("Os", Py_None,"Symmetry data couldn't be located.");
+        if (fread(SymData, 80, sizeof(char), m_fp)!=0)
+            return Py_BuildValue("Os", Py_None,"Couldn't parse symmetry data from file."); 
+        PyObject_SetAttrString(header, "symdata", PyString_FromString(SymData));
+    }
+    else{
+        return Py_BuildValue("Os", Py_None,"Symmetry data size is not 0 or 80.");
+    }
+    fclose(m_fp);
     // printf("%ld\n", PyInt_AsLong(PyObject_GetAttrString(header,"maps")));
     return Py_BuildValue("O", header);
 }
 
+static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
+
+    char *filename=NULL;
+    PyArrayObject *data;
+    FILE *m_fp=NULL;
+    int nsymbt=0, datamode=-1,size=0,bytesize=4;
+
+    static char *kwlist[] = {"filename", "nsymbt", "datamode", "data", "size", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "siiOi", kwlist,
+                                     &filename, &nsymbt, &datamode, &data, &size))
+        return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
+
+    data = PyArray_GETCONTIGUOUS(data);
+    float *c = (float *) PyArray_DATA(data);
+    m_fp=fopen(filename,"r");
+    if(m_fp==NULL)
+        return Py_BuildValue("Os", Py_None,"Couldn't read file.");
+    if(fseek(m_fp, (size_t)(1024+nsymbt), SEEK_SET)!=0)
+        return Py_BuildValue("Os", Py_None,"Matrix data couldn't be located.");
+    switch(datamode)
+    {
+        case 0:
+            bytesize=1;
+        case 1:
+            bytesize=2;
+        case 2:
+            bytesize=4;
+        case 5:
+            bytesize=1;
+        case 6:
+            bytesize=2;
+    }
+    if(fread(c, bytesize,size, m_fp)!=size)
+        return Py_BuildValue("Os", Py_None,"Parsing data Error.");
+    fclose(m_fp);
+    return Py_BuildValue("O", data);
+}
 
 static PyMethodDef Cmrc_methods[] = {
 
     {"readHeader",  (PyCFunction)readHeader,
      METH_VARARGS | METH_KEYWORDS,
      "Read the MRC file header into a header variable.\n"},
+
+    {"readData",  (PyCFunction)readData,
+     METH_VARARGS | METH_KEYWORDS,
+     "Read the MRC Data into a Numpy variable.\n"},
 
     {NULL, NULL, 0, NULL}
 };
