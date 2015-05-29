@@ -164,7 +164,7 @@ class MRC():
                         return None
                     printInfo(
                         "Parsing the Data from file {0}.".format(filename))
-                    self.data = self.data - 1.0
+                    self.data = self.data - 1
                     temp = readData(
                         filename=filename, nsymbt=self.header.nsymbt,
                         datamode=self.header.mode, data=self.data,
@@ -186,6 +186,50 @@ class MRC():
         else:
             from .output import printError
             printError("The filename must be provided.")
+
+    def writeData(self, filename, skipupdate=False, force=False, **kwargs):
+        """Write the MRC file into file.
+        The header and data format will automaticly update.
+        You could skip the update using `skipupdate` option.
+        You could force it to overwrite files with `force` option."""
+        from .output import printInfo, printError
+        from os.path import exists, isfile
+        if filename:
+            if exists(filename):
+                if not isfile(filename):
+                    printError("The path is not a file.")
+                    return None
+                else:
+                    if not force:
+                        back = raw_input(
+                            "* File {0} exists, do you want to overwrite it?(y/n)".format(filename))
+                        while back.strip().lower() not in ['y', 'n']:
+                            back = raw_input(
+                                "* File {0} exists, do you want to overwrite it?(y/n)".format(filename))
+                        if back.strip().lower() == 'n':
+                            printInfo("File not write.")
+                            return None
+        else:
+            printError("The filename must be provided.")
+            return None
+        if isinstance(self.data, type(None)):
+            printError("No data to write.")
+            return None
+        if not skipupdate:
+            self.update()
+        from .Cmrc import writeData
+        printInfo("Writing MRC to {0}".format(filename))
+        temp = writeData(header=self.header, data=self.data, filename=filename)
+        if isinstance(temp, tuple):
+            if temp[0] == None:
+                printError(temp[1])
+            else:
+                printError("Couldn't parse the Error information.")
+            return None
+        elif temp == 0:
+            return None
+        else:
+            printError("Couldn't parse the Error information.")
 
     def update(self, **kwargs):
         """Update the MRC header information from the data array.

@@ -1,5 +1,6 @@
 #include "Python.h"
 #include "numpy/arrayobject.h"
+#include <string.h>
 
 typedef struct MRCHeader
 {   
@@ -136,7 +137,7 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
     data = PyArray_GETCONTIGUOUS(data);
-    float *c = (float *) PyArray_DATA(data);
+    void *matrix = (void *) PyArray_DATA(data);
     m_fp=fopen(filename,"r");
     if(m_fp==NULL)
         return Py_BuildValue("Os", Py_None,"Couldn't read file.");
@@ -145,20 +146,145 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
     switch(datamode)
     {
         case 0:
-            bytesize=1;
+            bytesize=1;break;
         case 1:
-            bytesize=2;
+            bytesize=2;break;
         case 2:
-            bytesize=4;
+            bytesize=4;break;
         case 5:
-            bytesize=1;
+            bytesize=1;break;
         case 6:
-            bytesize=2;
+            bytesize=2;break;
     }
-    if(fread(c, bytesize,size, m_fp)!=size)
+    if(fread(matrix, 1,size*bytesize, m_fp)!=size*bytesize)
         return Py_BuildValue("Os", Py_None,"Parsing data Error.");
     fclose(m_fp);
     return Py_BuildValue("O", data);
+}
+
+static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
+
+    char *filename=NULL, SymData[80], *tempchar;
+    PyArrayObject *data;
+    PyObject *header;
+    MRCHeader m_header;
+    FILE *m_fp=NULL;
+    int i,j,k,bytesize=4;
+
+    static char *kwlist[] = {"header", "data", "filename", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOs", kwlist,
+                                     &header, &data, &filename))
+        return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
+
+    data = PyArray_GETCONTIGUOUS(data);
+    void *matrix = (void *) PyArray_DATA(data);
+    m_fp=fopen(filename,"w");
+    if(m_fp==NULL)
+        return Py_BuildValue("Os", Py_None,"Couldn't write file.");
+
+    m_header.nx=PyInt_AsLong(PyObject_GetAttrString(header, "nx"));
+    m_header.ny=PyInt_AsLong(PyObject_GetAttrString(header, "ny"));
+    m_header.nz=PyInt_AsLong(PyObject_GetAttrString(header, "nz"));
+    m_header.mode=PyInt_AsLong(PyObject_GetAttrString(header, "mode"));
+    m_header.nxstart=PyInt_AsLong(PyObject_GetAttrString(header, "nxstart"));
+    m_header.nystart=PyInt_AsLong(PyObject_GetAttrString(header, "nystart"));
+    m_header.nzstart=PyInt_AsLong(PyObject_GetAttrString(header, "nzstart"));
+    m_header.mx=PyInt_AsLong(PyObject_GetAttrString(header, "mx"));
+    m_header.my=PyInt_AsLong(PyObject_GetAttrString(header, "my"));
+    m_header.mz=PyInt_AsLong(PyObject_GetAttrString(header, "mz"));
+    m_header.mapc=PyInt_AsLong(PyObject_GetAttrString(header, "mapc"));
+    m_header.mapr=PyInt_AsLong(PyObject_GetAttrString(header, "mapr"));
+    m_header.maps=PyInt_AsLong(PyObject_GetAttrString(header, "maps"));
+    m_header.ispg=PyInt_AsLong(PyObject_GetAttrString(header, "ispg"));
+    m_header.nsymbt=PyInt_AsLong(PyObject_GetAttrString(header, "nsymbt"));
+    m_header.machst=PyInt_AsLong(PyObject_GetAttrString(header, "machst"));
+    m_header.nlabels=PyInt_AsLong(PyObject_GetAttrString(header, "nlabels"));
+
+    m_header.dmin=PyFloat_AsDouble(PyObject_GetAttrString(header, "dmin"));
+    m_header.dmax=PyFloat_AsDouble(PyObject_GetAttrString(header, "dmax"));
+    m_header.dmean=PyFloat_AsDouble(PyObject_GetAttrString(header, "dmean"));
+    m_header.rms=PyFloat_AsDouble(PyObject_GetAttrString(header, "rms"));
+
+    tempchar=PyString_AsString(PyObject_GetAttrString(header, "map"));
+    strncpy(m_header.map,tempchar,4);
+    for(i=0;i<4;i++)
+        if (m_header.map[i]=='\0'){
+            for(j=i+1;j<4;j++)
+                m_header.map[j]='\0';
+            break;
+        }
+
+    tempchar=PyString_AsString(PyObject_GetAttrString(header, "extra"));
+    strncpy(m_header.extra,tempchar,100);
+    for(i=0;i<100;i++)
+        if (m_header.extra[i]=='\0'){
+            for(j=i+1;j<100;j++)
+                m_header.extra[j]='\0';
+            break;
+        }
+
+    for (i=0;i<3;i++){
+      m_header.cella[i]=PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"cella"), i));
+      m_header.cellb[i]=PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"cellb"), i));
+      m_header.origin[i]=PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"origin"), i));
+    }
+
+    for (i=0;i<10;i++){
+      tempchar=PyString_AsString(PyList_GetItem(PyObject_GetAttrString(header,"label"), i));
+      strncpy(m_header.label[i],tempchar,80);
+        for(j=0;j<80;j++)
+            if (m_header.label[i][j]=='\0'){
+                for(k=j+1;k<80;k++)
+                    m_header.label[i][k]='\0';
+                break;
+            }
+    }
+
+    if (m_header.nsymbt==80){
+        tempchar=PyString_AsString(PyObject_GetAttrString(header, "symdata"));
+        strncpy(SymData,tempchar,80);
+        for(i=0;i<80;i++)
+            if (SymData[i]=='\0'){
+                for(j=i+1;j<80;j++)
+                    SymData[j]='\0';
+                break;
+            }
+    }
+    else
+        m_header.nsymbt=0;
+
+    switch(m_header.mode)
+    {
+        case 0:
+            bytesize=1;break;
+        case 1:
+            bytesize=2;break;
+        case 2:
+            bytesize=4;break;
+        case 5:
+            bytesize=1;break;
+        case 6:
+            bytesize=2;break;
+    }
+
+    // Write file.
+    if (fwrite(&m_header,1,1024,m_fp)!=1024){
+        fclose(m_fp);
+        return Py_BuildValue("Os", Py_None,"Couldn't write the header.");
+    }
+    if (m_header.nsymbt==80){
+        if (fwrite(SymData, 1, (size_t)80, m_fp)!=80){
+            fclose(m_fp);
+            return Py_BuildValue("Os", Py_None,"Couldn't write Symmetry Data.");
+        }
+    }
+    if (fwrite(matrix, bytesize, m_header.nz*m_header.ny*m_header.nx, m_fp)!=m_header.nz*m_header.ny*m_header.nx){
+        fclose(m_fp);
+        return Py_BuildValue("Os", Py_None,"Couldn't write Matrix.");
+    }
+    fclose(m_fp);
+    return Py_BuildValue("i", 0);
 }
 
 static PyMethodDef Cmrc_methods[] = {
@@ -170,6 +296,10 @@ static PyMethodDef Cmrc_methods[] = {
     {"readData",  (PyCFunction)readData,
      METH_VARARGS | METH_KEYWORDS,
      "Read the MRC Data into a Numpy variable.\n"},
+
+    {"writeData",  (PyCFunction)writeData,
+     METH_VARARGS | METH_KEYWORDS,
+     "Write MRC header and data into a file.\n"},
 
     {NULL, NULL, 0, NULL}
 };
@@ -198,3 +328,4 @@ PyMODINIT_FUNC initCmrc(void) {
     import_array();
 }
 #endif
+
