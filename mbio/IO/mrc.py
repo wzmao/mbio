@@ -246,7 +246,7 @@ class MRC():
                 from time import ctime
                 from .. import __version__
                 self.label[i]="Written by mbio {0} {1}".format(__version__,ctime())
-                self.label=self.label[:i]+self.label[i+1:]+self.label[i]
+                self.label=self.label[:i]+self.label[i+1:]+[self.label[i]]
                 self.label=[j for j in self.label if j!=""]
                 self.label=self.label+[""]*(10-len(self.label))
                 break
