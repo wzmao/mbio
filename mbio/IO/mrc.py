@@ -318,6 +318,12 @@ class MRC():
             except:
                 return None
 
+    def __repr__(self):
+        return "MRC"
+
+    def __str__(self):
+        return "MRC"
+
     def __dir__(self, **kwargs):
         return self.__dict__.keys() + self.header.__dict__.keys()
 
