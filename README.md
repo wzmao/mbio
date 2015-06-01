@@ -18,6 +18,12 @@ Now, I have
 * PPV(for PSICOV)
 * Sequence shuffle
 
+We also have some functions for different file formats.
+
+* Fasta
+* Numpy Matrix
+* MRC
+
 ----
 ## Usage
 
