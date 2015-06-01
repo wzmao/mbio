@@ -44,7 +44,7 @@ def eigh(x):
 
 
 def invsp(x):
-    """This is a function to inverse a sumetric postive definite matrix."""
+    """This is a function to inverse a symetric postive definite matrix."""
 
     try:
         from numpy.linalg import inv

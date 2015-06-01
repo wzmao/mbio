@@ -5,6 +5,8 @@ Math (If it grows too big in the future, make it alone)
 ========
 
 	* :func:`.isSquare` - check if a integer is a square
+	* :func:`.eigh` - return the eigenvalues and eigenvectors
+	* :func:`.invsp` - inverse a symetric postive definite matrix
 
 Sort
 ========

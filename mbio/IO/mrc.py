@@ -6,6 +6,7 @@ __author__ = 'Wenzhi Mao'
 
 __all__ = ['MRC']
 
+
 class MRCHeader():
 
     """A header class for mrc file."""
@@ -76,26 +77,34 @@ class MRCHeader():
     def printInfomation(self, **kwargs):
         """Print the information from the header."""
         from .output import printInfo as p
-        p("Num of columns, rows and sections: {0} {1} {2}".format(self.nx,self.ny,self.nz))
+        p("Num of columns, rows and sections: {0} {1} {2}".format(
+            self.nx, self.ny, self.nz))
         p("Mode:                              {0}".format(self.mode))
-        p("Num of First column, row, section: {0} {1} {2}".format(self.nxstart, self.nystart, self.nzstart))
-        p("Num of intervals along x, y, z:    {0} {1} {2}".format(self.mx,self.my,self.mz))
-        p("Cell dimensions in angstroms:      {0:.2f} {1:.2f} {2:.2f}".format(self.cella[0],self.cella[1],self.cella[2]))
-        p("Cell angles in degrees:            {0:.2f} {1:.2f} {2:.2f}".format(self.cellb[0],self.cellb[1],self.cellb[2]))
-        p("Axis for cols, rows, sections:     {0} {1} {2}".format(self.mapc, self.mapr, self.maps))
-        p("Min, max, mean density value:      {0:.6f} {1:.6f} {2:.6f}".format(self.dmin, self.dmax, self.dmean))
+        p("Num of First column, row, section: {0} {1} {2}".format(
+            self.nxstart, self.nystart, self.nzstart))
+        p("Num of intervals along x, y, z:    {0} {1} {2}".format(
+            self.mx, self.my, self.mz))
+        p("Cell dimensions in angstroms:      {0:.2f} {1:.2f} {2:.2f}".format(
+            self.cella[0], self.cella[1], self.cella[2]))
+        p("Cell angles in degrees:            {0:.2f} {1:.2f} {2:.2f}".format(
+            self.cellb[0], self.cellb[1], self.cellb[2]))
+        p("Axis for cols, rows, sections:     {0} {1} {2}".format(
+            self.mapc, self.mapr, self.maps))
+        p("Min, max, mean density value:      {0:.6f} {1:.6f} {2:.6f}".format(
+            self.dmin, self.dmax, self.dmean))
         p("Space group number:                {0}".format(self.ispg))
-        p("Origin in X,Y,Z:                   {0:.4f} {1:.4f} {2:.4f}".format(self.origin[0], self.origin[1], self.origin[2]))
+        p("Origin in X,Y,Z:                   {0:.4f} {1:.4f} {2:.4f}".format(
+            self.origin[0], self.origin[1], self.origin[2]))
         p("Machine stamp:                     {0}".format(self.machst))
         p("rms deviationfrom mean density:    {0}".format(self.rms))
         p("Num of labels being used:          {0}".format(self.nlabels))
-        if self.nlabels!=0:
+        if self.nlabels != 0:
             p("Labels:")
         for i in self.label:
-            if i!="":
+            if i != "":
                 p("\t{0}".format(i))
         p("Num of bytes for symmetry data:    {0}".format(self.nsymbt))
-        if self.nsymbt!=0:
+        if self.nsymbt != 0:
             p("\t{0}".format(self.symdata))
 
     def __repr__(self):
@@ -239,23 +248,26 @@ class MRC():
         if isinstance(self.data, type(None)):
             printError("No data to write.")
             return None
-        find=False
+        find = False
         for i in range(10):
             if self.label[i].startswith("Written by mbio"):
-                find=True
+                find = True
                 from time import ctime
                 from .. import __version__
-                self.label[i]="Written by mbio {0} {1}".format(__version__,ctime())
-                self.label=self.label[:i]+self.label[i+1:]+[self.label[i]]
-                self.label=[j for j in self.label if j!=""]
-                self.label=self.label+[""]*(10-len(self.label))
+                self.label[i] = "Written by mbio {0} {1}".format(
+                    __version__, ctime())
+                self.label = self.label[:i] + \
+                    self.label[i + 1:] + [self.label[i]]
+                self.label = [j for j in self.label if j != ""]
+                self.label = self.label + [""] * (10 - len(self.label))
                 break
         if not find:
-            if self.nlabels!=10:
+            if self.nlabels != 10:
                 from time import ctime
                 from .. import __version__
-                self.label[self.nlabels]="Written by mbio {0} {1}".format(__version__,ctime())
-                self.nlabels+=1
+                self.label[self.nlabels] = "Written by mbio {0} {1}".format(
+                    __version__, ctime())
+                self.nlabels += 1
         if not skipupdate:
             self.update()
         from .Cmrc import writeData

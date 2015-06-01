@@ -35,9 +35,13 @@ Sequence Correlation Analysis
     * :func:`.buildSCA` - build the SCA matrix from MSA
     * :func:`.buildDI` - build the DI(Direct Information) matrix from MSA
     * :func:`.buildDCA` - build the DCA(same as DI) matrix from MSA
-    * :func:`.calcMeff`- calc the effective number of sequences
+    * :func:`.buildPSICOV` - build the PSICOV matrix from MSA
+    * :func:`.calcMeff`- calculate the effective number of sequences
+    * :func:`.calcContactFrac`- calculate the contact fraction from the length of sequence
     * :func:`.applyAPC` - apply the APC correction
     * :func:`.applyBND` - apply the BND correction
+    * :func:`.applyDICOV` - apply the DICOV to combine PSICOV and DCA
+    * :func:`.applyPPV` - apply the PPV for the PSICOV
 
 Sequence
 ========
