@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Wenzhi Mao'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 __release__ = [int(x) for x in __version__.split('.')]
 del x
