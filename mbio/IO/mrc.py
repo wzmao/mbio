@@ -486,6 +486,8 @@ class MRC():
         self.header.xstart += xstart
         self.header.ystart += ystart
         self.header.zstart += zstart
+        self.header.nx, self.header.ny, self.header.nz = array(
+            self.data.shape)[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
         self.header.nxstart, self.header.nystart, self.header.nzstart = array(
             [self.header.xstart, self.header.ystart, self.header.zstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
 
@@ -500,6 +502,18 @@ class MRC():
             from .output import printError
             printError("There is no header information here.")
             return None
+
+    def getGridCoor(self, **kwargs):
+        """Return the x, y and z coordinate for the whole grid."""
+
+        from numpy import array, arange, argsort
+
+        xstep, ystep, zstep = array(self.header.cella)*1.0/array([self.header.mx,self.header.my,self.header.mz])
+        xcoor = (self.header.nxstart + arange(self.header.nx))*xstep
+        ycoor = (self.header.nystart + arange(self.header.ny))*ystep
+        zcoor = (self.header.nzstart + arange(self.header.nz))*zstep
+        coor = array([xcoor,ycoor,zcoor])[argsort([self.header.mapc, self.header.mapr, self.header.maps])]
+        return list(coor)
 
     def getArray(self, **kwargs):
         """Get the data from the MRC class"""
