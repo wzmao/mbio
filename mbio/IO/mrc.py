@@ -55,6 +55,10 @@ class MRCHeader():
                         self.symdata=self.symdata[:80]
                         if self.symdata.find('\0')!=-1:
                             self.symdata=self.symdata[:self.symdata.find('\0')]
+                    if self.extra:
+                        self.extra=self.extra[:80]
+                        if self.extra.find('\0')!=-1:
+                            self.extra=self.extra[:self.extra.find('\0')]
             else:
                 from .output import printError
                 printError("The file doesn't exists or is not a file.")
@@ -83,6 +87,10 @@ class MRCHeader():
                         self.symdata=self.symdata[:80]
                         if self.symdata.find('\0')!=-1:
                             self.symdata=self.symdata[:self.symdata.find('\0')]
+                    if self.extra:
+                        self.extra=self.extra[:80]
+                        if self.extra.find('\0')!=-1:
+                            self.extra=self.extra[:self.extra.find('\0')]
             else:
                 from .output import printError
                 printError("The file doesn't exists or is not a file.")
@@ -137,7 +145,8 @@ class MRCHeader():
 
 class MRC():
 
-    """This is a class to read and write MRC file."""
+    """This is a class to read and write MRC file.
+    The data will always been store as x,y,z oreder."""
 
     def __init__(self, filename=None, **kwargs):
         """Parse data from the given file."""
@@ -169,7 +178,7 @@ class MRC():
             if exists(filename) and isfile(filename):
                 from .Cmrc import readData
                 from numpy import zeros, int8, int16, float32, uint8, uint16
-                from .output import printInfo
+                from .output import printInfo, printError
 
                 if getattr(self, 'header', None):
                     del self.header
@@ -182,7 +191,6 @@ class MRC():
                     del self.data
 
                 if self.header.mode in [3, 4]:
-                    from .output import printError
                     printError(
                         "Sorry, we don't support the complex format yet.")
                     del self.data
@@ -191,21 +199,20 @@ class MRC():
                 else:
                     if self.header.mode == 0:
                         self.data = zeros(
-                            (self.header.nx, self.header.ny, self.header.nz), dtype=int8)
+                            (self.header.nz, self.header.ny, self.header.nx), dtype=int8)
                     elif self.header.mode == 1:
                         self.data = zeros(
-                            (self.header.nx, self.header.ny, self.header.nz), dtype=int16)
+                            (self.header.nz, self.header.ny, self.header.nx), dtype=int16)
                     elif self.header.mode == 2:
                         self.data = zeros(
-                            (self.header.nx, self.header.ny, self.header.nz), dtype=float32)
+                            (self.header.nz, self.header.ny, self.header.nx), dtype=float32)
                     elif self.header.mode == 5:
                         self.data = zeros(
-                            (self.header.nx, self.header.ny, self.header.nz), dtype=uint8)
+                            (self.header.nz, self.header.ny, self.header.nx), dtype=uint8)
                     elif self.header.mode == 6:
                         self.data = zeros(
-                            (self.header.nx, self.header.ny, self.header.nz), dtype=uint16)
+                            (self.header.nz, self.header.ny, self.header.nx), dtype=uint16)
                     else:
-                        from .output import printError
                         printError(
                             "Couldn't understand the mode {0}".format(self.header.mode))
                         del self.data
@@ -219,7 +226,6 @@ class MRC():
                         datamode=self.header.mode, data=self.data,
                         size=self.header.nz * self.header.ny * self.header.nx)
                     if isinstance(temp, tuple):
-                        from .output import printError
                         del self.data
                         self.data = None
                         if temp[0] == None:
@@ -228,13 +234,22 @@ class MRC():
                             printError("Couldn't parse the Error information.")
                         return None
                     else:
-                        self.data = temp
+                        from numpy import transpose, argsort
+                        if set([self.header.mapc,self.header.mapr,self.header.maps])!=set([1,2,3]):
+                            printError("The MRC header contains no clear axis.(mapc, mapr and maps must cotain all 1,2,3.)")
+                            printError("Keep the data as it.")
+                            self.data=temp
+                            return None
+                        else:
+                            temporder=[self.header.maps,self.header.mapr,self.header.mapc]
+                            self.data=transpose(temp, argsort(temporder))
+                            del temp
             else:
-                from .output import printError
                 printError("The file doesn't exists or is not a file.")
+                return None
         else:
-            from .output import printError
             printError("The filename must be provided.")
+            return None
 
     def writeData(self, filename, skipupdate=False, force=False, **kwargs):
         """Write the MRC file into file.
@@ -243,6 +258,7 @@ class MRC():
         You could force it to overwrite files with `force` option."""
         from .output import printInfo, printError
         from os.path import exists, isfile
+        from numpy import transpose
         if filename:
             if exists(filename):
                 if not isfile(filename):
@@ -287,8 +303,12 @@ class MRC():
         if not skipupdate:
             self.update()
         from .Cmrc import writeData
+        if set([self.header.mapc,self.header.mapr,self.header.maps])!=set([1,2,3]):
+            printError("The MRC header contains no clear axis.(mapc, mapr and maps must cotain all 1,2,3.)")
+            printError("Change it automaticly.")
+            self.header.mapc,self.header.mapr,self.header.maps=1,2,3
         printInfo("Writing MRC to {0}".format(filename))
-        temp = writeData(header=self.header, data=self.data, filename=filename)
+        temp = writeData(header=self.header, data=transpose(self.data,(self.header.maps-1,self.header.mapr-1,self.header.mapc-1)), filename=filename)
         if isinstance(temp, tuple):
             if temp[0] == None:
                 printError(temp[1])
@@ -303,9 +323,16 @@ class MRC():
     def update(self, **kwargs):
         """Update the MRC header information from the data array.
         Update the MRC data format based on the `header.mode`
-        Include: nx, ny, nz, dmin, dmax, dmean, rms, nsymbt, nlabels and sort label."""
+        Include: nx, ny, nz, dmin, dmax, dmean, rms, nsymbt, nlabels and sort label.
+        Correct mapc, mapr and maps automaticly."""
         from numpy import array, int8, int16, float32, uint8, uint16
-        self.header.nx, self.header.ny, self.header.nz = self.data.shape
+        from numpy import array
+        from .output import printError
+        if set([self.header.mapc,self.header.mapr,self.header.maps])!=set([1,2,3]):
+            printError("The MRC header contains no clear axis.(mapc, mapr and maps must cotain all 1,2,3.)")
+            printError("Change it automaticly.")
+            self.header.mapc,self.header.mapr,self.header.maps=1,2,3
+        self.header.nx, self.header.ny, self.header.nz = array(self.data.shape)[[self.header.mapc-1,self.header.mapr-1,self.header.maps-1]]
         self.header.dmin = self.data.min()
         self.header.dmax = self.data.max()
         self.header.dmean = self.data.mean()
@@ -333,6 +360,19 @@ class MRC():
                 return getattr(self.header, name)
             except:
                 return None
+
+    def __setattr__(self, name, value, **kwargs):
+        if name =='data':
+            self.__dict__[name]=value
+        elif name =='header':
+            self.__dict__[name]=value
+        else:
+            if name in self.header.__dict__.keys():
+                setattr(self.header, name, value)
+            elif name in self.__dict__.keys():
+                setattr(self, name, value)
+            else:
+                pass
 
     def __repr__(self):
         return "MRC"
