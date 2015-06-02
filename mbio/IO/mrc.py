@@ -420,7 +420,7 @@ class MRC():
             self.data = array(self.data,
                               dtype={0: int8, 1: int16, 2: float32, 5: uint8, 6: uint16}[self.header.mode])
 
-    def truncMatrix(self, index=[None,None,None,None,None,None] ,**kwargs):
+    def truncMatrix(self, index=[None, None, None, None, None, None], **kwargs):
         """Trunc the matrix by index. Related values will change accordingly.
         You need provide the start and end index(will be included) of x,y and z.
         Exapmle: 
@@ -430,62 +430,62 @@ class MRC():
 
         from .output import printError, printInfo
         from numpy import array
-        if len(index)!=6:
+        if len(index) != 6:
             printError("Must provide 6 indeces.")
             return None
-        if index==[None]*6:
+        if index == [None] * 6:
             printInfo("Nothing changed.")
             return None
         xstart, xend, ystart, yend, zstart, zend = index
-        if xstart==None:
-            xstart=0
-        if ystart==None:
-            ystart=0
-        if zstart==None:
-            zstart=0
-        if xend==None:
-            xend=self.data.shape[0]+1
+        if xstart == None:
+            xstart = 0
+        if ystart == None:
+            ystart = 0
+        if zstart == None:
+            zstart = 0
+        if xend == None:
+            xend = self.data.shape[0] + 1
         else:
-            xend+=1
-        if yend==None:
-            yend=self.data.shape[1]+1
+            xend += 1
+        if yend == None:
+            yend = self.data.shape[1] + 1
         else:
-            yend+=1
-        if zend==None:
-            zend=self.data.shape[2]+1
+            yend += 1
+        if zend == None:
+            zend = self.data.shape[2] + 1
         else:
-            zend+=1
-        if not 0<=xstart<self.data.shape[0]:
+            zend += 1
+        if not 0 <= xstart < self.data.shape[0]:
             printError("xstart is not in the range of x.")
             return None
-        if not 0<=xend<self.data.shape[0]:
+        if not 0 <= xend < self.data.shape[0]:
             printError("xend is not in the range of x.")
             return None
-        if not xstart<xend:
+        if not xstart < xend:
             printError("xstart must less than xend.")
             return None
-        if not 0<=ystart<self.data.shape[0]:
+        if not 0 <= ystart < self.data.shape[0]:
             printError("ystart is not in the range of y.")
             return None
-        if not 0<=yend<self.data.shape[0]:
+        if not 0 <= yend < self.data.shape[0]:
             printError("yend is not in the range of y.")
             return None
-        if not ystart<yend:
+        if not ystart < yend:
             printError("ystart must less than yend.")
             return None
-        if not 0<=zstart<self.data.shape[0]:
+        if not 0 <= zstart < self.data.shape[0]:
             printError("zstart is not in the range of z.")
             return None
-        if not 0<=zend<self.data.shape[0]:
+        if not 0 <= zend < self.data.shape[0]:
             printError("zend is not in the range of z.")
             return None
-        if not zstart<zend:
+        if not zstart < zend:
             printError("zstart must less than zend.")
             return None
-        self.data=self.data[xstart:xend,ystart:yend,zstart:zend]
-        self.header.xstart+=xstart
-        self.header.ystart+=ystart
-        self.header.zstart+=zstart
+        self.data = self.data[xstart:xend, ystart:yend, zstart:zend]
+        self.header.xstart += xstart
+        self.header.ystart += ystart
+        self.header.zstart += zstart
         self.header.nxstart, self.header.nystart, self.header.nzstart = array(
             [self.header.xstart, self.header.ystart, self.header.zstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
 
