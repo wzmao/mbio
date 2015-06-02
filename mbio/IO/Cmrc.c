@@ -93,7 +93,7 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject_SetAttrString(header, "rms", PyFloat_FromDouble(m_header.rms));
 
     PyObject_SetAttrString(header, "map", PyString_FromStringAndSize(m_header.map,4));
-    PyObject_SetAttrString(header, "extra", PyString_FromString(m_header.extra));
+    PyObject_SetAttrString(header, "extra", PyString_FromStringAndSize(m_header.extra,80));
 
     for (i=0;i<3;i++){
       PyList_SetItem(PyObject_GetAttrString(header,"cella"), i, PyFloat_FromDouble(m_header.cella[i]));
@@ -102,7 +102,7 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     for (i=0;i<10;i++){
-      PyList_SetItem(PyObject_GetAttrString(header,"label"), i, PyString_FromString(m_header.label[i]));
+      PyList_SetItem(PyObject_GetAttrString(header,"label"), i, PyString_FromStringAndSize(m_header.label[i],80));
     }
 
     if (m_header.nsymbt==0){
@@ -113,7 +113,7 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
             return Py_BuildValue("Os", Py_None,"Symmetry data couldn't be located.");
         if (fread(SymData, 80, sizeof(char), m_fp)!=0)
             return Py_BuildValue("Os", Py_None,"Couldn't parse symmetry data from file."); 
-        PyObject_SetAttrString(header, "symdata", PyString_FromString(SymData));
+        PyObject_SetAttrString(header, "symdata", PyString_FromStringAndSize(SymData,80));
     }
     else{
         return Py_BuildValue("Os", Py_None,"Symmetry data size is not 0 or 80.");

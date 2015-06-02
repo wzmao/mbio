@@ -47,6 +47,14 @@ class MRCHeader():
                     return None
                 else:
                     self = temp
+                    for i in range(10):
+                        self.label[i]=self.label[i][:80]
+                        if self.label[i].find('\0')!=-1:
+                            self.label[i]=self.label[i][:self.label[i].find("\0")]
+                    if self.symdata:
+                        self.symdata=self.symdata[:80]
+                        if self.symdata.find('\0')!=-1:
+                            self.symdata=self.symdata[:self.symdata.find('\0')]
             else:
                 from .output import printError
                 printError("The file doesn't exists or is not a file.")
@@ -67,6 +75,14 @@ class MRCHeader():
                     return None
                 else:
                     self = temp
+                    for i in range(10):
+                        self.label[i]=self.label[i][:80]
+                        if self.label[i].find('\0')!=-1:
+                            self.label[i]=self.label[i][:self.label[i].find("\0")]
+                    if self.symdata:
+                        self.symdata=self.symdata[:80]
+                        if self.symdata.find('\0')!=-1:
+                            self.symdata=self.symdata[:self.symdata.find('\0')]
             else:
                 from .output import printError
                 printError("The file doesn't exists or is not a file.")
@@ -201,7 +217,7 @@ class MRC():
                     temp = readData(
                         filename=filename, nsymbt=self.header.nsymbt,
                         datamode=self.header.mode, data=self.data,
-                        size=self.header.nx * self.header.ny * self.header.nz)
+                        size=self.header.nz * self.header.ny * self.header.nx)
                     if isinstance(temp, tuple):
                         from .output import printError
                         del self.data
