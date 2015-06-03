@@ -508,11 +508,13 @@ class MRC():
 
         from numpy import array, arange, argsort
 
-        xstep, ystep, zstep = array(self.header.cella)*1.0/array([self.header.mx,self.header.my,self.header.mz])
-        xcoor = (self.header.nxstart + arange(self.header.nx))*xstep
-        ycoor = (self.header.nystart + arange(self.header.ny))*ystep
-        zcoor = (self.header.nzstart + arange(self.header.nz))*zstep
-        coor = array([xcoor,ycoor,zcoor])[argsort([self.header.mapc, self.header.mapr, self.header.maps])]
+        xstep, ystep, zstep = array(
+            self.header.cella) * 1.0 / array([self.header.mx, self.header.my, self.header.mz])
+        xcoor = (self.header.nxstart + arange(self.header.nx)) * xstep
+        ycoor = (self.header.nystart + arange(self.header.ny)) * ystep
+        zcoor = (self.header.nzstart + arange(self.header.nz)) * zstep
+        coor = array([xcoor, ycoor, zcoor])[
+            argsort([self.header.mapc, self.header.mapr, self.header.maps])]
         return list(coor)
 
     def getArray(self, **kwargs):
