@@ -503,7 +503,7 @@ class MRC():
             printError("There is no header information here.")
             return None
 
-    def getGridCoor(self, **kwargs):
+    def getGridCoords(self, **kwargs):
         """Return the x, y and z coordinate for the whole grid."""
 
         from numpy import array, arange, argsort
@@ -516,6 +516,17 @@ class MRC():
         coor = array([xcoor, ycoor, zcoor])[
             argsort([self.header.mapc, self.header.mapr, self.header.maps])]
         return list(coor)
+
+    def getGridSteps(self, **kwargs):
+        """Return the x, y and z coordinate steps."""
+
+        from numpy import array, arange, argsort
+
+        step = array(array(self.header.cella) * 1.0 /
+                     array([self.header.mx, self.header.my, self.header.mz]))
+        step = step[
+            argsort([self.header.mapc, self.header.mapr, self.header.maps])]
+        return step
 
     def getArray(self, **kwargs):
         """Get the data from the MRC class"""
