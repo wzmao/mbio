@@ -55,6 +55,8 @@ class MRCHeader():
                         if self.label[i].find('\0') != -1:
                             self.label[i] = self.label[i][
                                 :self.label[i].find("\0")]
+                        elif self.label[i] == ' ' * 80:
+                            self.label[i] = ''
                     if self.symdata:
                         self.symdata = self.symdata[:80]
                         if self.symdata.find('\0') != -1:
@@ -92,6 +94,8 @@ class MRCHeader():
                         if self.label[i].find('\0') != -1:
                             self.label[i] = self.label[i][
                                 :self.label[i].find("\0")]
+                        elif self.label[i] == ' ' * 80:
+                            self.label[i] = ''
                     if self.symdata:
                         self.symdata = self.symdata[:80]
                         if self.symdata.find('\0') != -1:
