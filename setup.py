@@ -48,10 +48,11 @@ with open('mbio/__init__.py') as inp:
             break
 
 PACKAGES = ['mbio',
-            'mbio.IO',
             'mbio.Application',
-            'mbio.Sequence',
-            'mbio.Constant']
+            'mbio.Constant',
+            'mbio.EM',
+            'mbio.IO',
+            'mbio.Sequence',]
 
 PACKAGE_DATA = {}
 
