@@ -31,6 +31,12 @@ __all__.extend(Constant.__all__)
 __all__.append('Constant')
 
 
+from . import EM
+from .EM import *
+__all__.extend(EM.__all__)
+__all__.append('EM')
+
+
 def _ABSpath():
     """Get absolute path for the script."""
     import inspect
