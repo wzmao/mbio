@@ -6,6 +6,57 @@ __author__ = 'Wenzhi Mao'
 __all__ = ['genPvalue']
 
 
+def interpolationball(matrix, index, step, r, **kwarg):
+    """Interpolation the value by the radius(ball).
+    The Inverse distance weighting is used to weight each value."""
+
+    from numpy import array, arange, floor, ceil
+
+    position = index * step
+    w = []
+    v = []
+    for i in arange(ceil(index[0] - (r / step[0])) // 1, floor(index[0] + (r / step[0])) // 1 + 1):
+        for j in arange(ceil(index[1] - (r / step[1])) // 1, floor(index[1] + (r / step[1])) // 1 + 1):
+            for k in arange(ceil(index[2] - (r / step[2])) // 1, floor(index[2] + (r / step[2])) // 1 + 1):
+                if (((index[0] - i) * step[0])**2 + ((index[1] - j) * step[1])**2 + ((index[2] - k) * step[2])**2) <= r**2:
+                    w.append(1.0 / ((((index[0] - i) * step[0])**2 + (
+                        (index[1] - j) * step[1])**2 + ((index[2] - k) * step[2])**2)**2)**.5)
+                    v.append(matrix[i, j, k])
+    w = array(w)
+    v = array(v)
+    w = w / w.sum()
+    return (w * v).sum()
+
+
+def interpolationcube(m, p, way, *kwarg):
+    """Interpolation the value by the smallest box.
+    The Inverse distance weighting or Trilinear interpolation is
+    used to weight each value."""
+
+    from numpy import array
+
+    if way == 'idw':
+        tt = array([[[0, 0], [0, 0]], [[0, 0], [0, 0]]], dtype=float)
+        tt[0, :, :] += p[0]**2
+        tt[1, :, :] += (1 - p[0])**2
+        tt[:, 0, :] += p[1]**2
+        tt[:, 1, :] += (1 - p[1])**2
+        tt[:, :, 0] += p[2]**2
+        tt[:, :, 1] += (1 - p[2])**2
+        tt = tt**.5
+        tt = 1. / tt
+        tt = tt / tt.sum()
+    elif way == 'interpolation':
+        tt = array([[[1, 1], [1, 1]], [[1, 1], [1, 1]]], dtype=float)
+        tt[0, :, :] *= 1 - p[0]
+        tt[1, :, :] *= p[0]
+        tt[:, 0, :] *= 1 - p[1]
+        tt[:, 1, :] *= p[1]
+        tt[:, :, 0] *= 1 - p[2]
+        tt[:, :, 1] *= p[2]
+    return (tt * m).sum()
+
+
 def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), sampleradius=3.0,
               **kwarg):
     """`method` must be a tuple or list.
@@ -19,6 +70,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
 
     from ..IO.output import printError, printInfo
     from ..IO.mrc import MRC as MRCclass
+    from ..Application.algorithm import binarySearch
     from prody import AtomGroup as pdbclass
     from numpy import ndarray, zeros_like, array, floor, ceil, rint
 
@@ -110,22 +162,21 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
         findset = mrc.data[mark != 0]
     printInfo("Sorting the sample set.")
     findset.sort(kind='quicksort')
+    findsetlength = len(findset)
 
+    printInfo("Interpolating the data and assigning p-value.")
     beta = pdb.getBetas()
     coor = pdb.getCoords()
-    # if method=='ball':
-    #     for i in range(len(coor)):
-    #         if i % 100 == 0:
-    #             # print i
-    #             pass
-    #         beta[i] = interpolation3_1(mrc.data, index[i], step, r=3)
-    #         beta[i] = 1 - find(findset, 0, len(findset), beta[i]) * 1.0 / len(findset)
-    #         beta[i] = interpolation3_1(mrc.data, index[i], step, r=1)
-    #         beta[i] = 1 - \
-    #             find(findset, 0, len(findset), beta1[i]) * 1.0 / len(findset)
-    #         beta_small[i] = interpolation3_2(mrc.data[index[i][0]:index[i][
-    #             0] + 2, index[i][1]:index[i][1] + 2, index[i][2]:index[i][2] + 2], coor[i] % array(step) / array(step))
-    #         beta_small[i] = 1 - \
-    #             find(findset, 0, len(findset), beta_small[i]) * 1.0 / len(findset)
-    # elif method=='cube'
-    return findset
+    if method == 'ball':
+        index = (coor - gridstart) / step
+        for i in range(len(coor)):
+            beta[i] = interpolationball(mrc.data, index[i], step, r=way)
+            beta[i] = 1. - binarySearch(findset, beta[i]) * 1.0 / findsetlength
+    elif method == 'cube':
+        index = (coor - gridstart) // step
+        for i in range(len(coor)):
+            beta[i] = interpolationcube(mrc.data[index[i][0]:index[i][
+                0] + 2, index[i][1]:index[i][1] + 2, index[i][2]:index[i][2] + 2], coor[i] % array(step) / array(step), way)
+            beta[i] = 1. - binarySearch(findset, beta[i]) * 1.0 / findsetlength
+    pdb.setBetas(beta)
+    return pdb
