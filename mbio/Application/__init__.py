@@ -8,7 +8,7 @@ Math (If it grows too big in the future, make it alone)
 	* :func:`.eigh` - return the eigenvalues and eigenvectors
 	* :func:`.invsp` - inverse a symetric postive definite matrix
 
-Sort
+Algorithm
 ========
 
 	* :func:`.quickSort` - Quick Sort a list of float/int
@@ -20,9 +20,9 @@ __author__ = 'Wenzhi Mao'
 __all__ = []
 
 
-from . import sort
-from .sort import *
-__all__.extend(sort.__all__)
+from . import algorithm
+from .algorithm import *
+__all__.extend(algorithm.__all__)
 
 # from . import cluster
 # from .cluster import *

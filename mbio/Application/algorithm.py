@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""This module contains some sorting functions.
+"""This module contains some algorithm functions.
 """
 
 __author__ = 'Wenzhi Mao'
 
-__all__ = ['quickSort']
+__all__ = ['algorithm']
 
 
 def quickSort(l):
@@ -13,7 +13,7 @@ def quickSort(l):
     It will not change the given variable directly.
     It has faster speed than the default python sort function."""
 
-    from .c_sort import quicksort
+    from .c_algorithm import quicksort
     from numpy import array
     l = quicksort(array(l, dtype=float))
     return l

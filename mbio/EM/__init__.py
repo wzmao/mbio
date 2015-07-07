@@ -6,6 +6,6 @@ __author__ = 'Wenzhi Mao'
 
 __all__ = []
 
-from . import anlysis
-from .anlysis import *
-__all__.extend(anlysis.__all__)
+from . import analysis
+from .analysis import *
+__all__.extend(analysis.__all__)

@@ -52,7 +52,7 @@ PACKAGES = ['mbio',
             'mbio.Constant',
             'mbio.EM',
             'mbio.IO',
-            'mbio.Sequence',]
+            'mbio.Sequence', ]
 
 PACKAGE_DATA = {}
 
@@ -76,8 +76,8 @@ EXTENSIONS = [
               include_dirs=[numpy.get_include()],
               extra_compile_args=['-O3'],
               extra_link_args=['-O3']),
-    Extension('mbio.Application.c_sort',
-              [join('mbio', 'Application', 'c_sort.c'), ],
+    Extension('mbio.Application.c_algorithm',
+              [join('mbio', 'Application', 'c_algorithm.c'), ],
               include_dirs=[numpy.get_include()],
               extra_compile_args=['-O3'],
               extra_link_args=['-O3']),

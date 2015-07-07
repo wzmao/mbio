@@ -73,7 +73,7 @@ static PyObject *quicksort(PyObject *self, PyObject *args, PyObject *kwargs){
 
 }
 
-static PyMethodDef c_sort_methods[] = {
+static PyMethodDef c_algorithm_methods[] = {
 
     {"quicksort",  (PyCFunction)quicksort,
      METH_VARARGS | METH_KEYWORDS,
@@ -86,21 +86,21 @@ static PyMethodDef c_sort_methods[] = {
 
 #if PY_MAJOR_VERSION >= 3
 
-static struct PyModuleDef c_sort = {
+static struct PyModuleDef c_algorithm = {
         PyModuleDef_HEAD_INIT,
-        "c_sort",
-        "Multiple sequence alignment analysis tools.",
+        "c_algorithm",
+        "Algorithm.",
         -1,
         sort_methods,
 };
-PyMODINIT_FUNC PyInit_c_sort(void) {
+PyMODINIT_FUNC PyInit_c_algorithm(void) {
     import_array();
-    return PyModule_Create(&c_sort);
+    return PyModule_Create(&c_algorithm);
 }
 #else
-PyMODINIT_FUNC initc_sort(void) {
+PyMODINIT_FUNC initc_algorithm(void) {
 
-    Py_InitModule3("c_sort", c_sort_methods,
+    Py_InitModule3("c_algorithm", c_algorithm_methods,
         "Sort tools.");
 
     import_array();
