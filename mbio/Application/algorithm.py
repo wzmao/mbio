@@ -4,7 +4,7 @@
 
 __author__ = 'Wenzhi Mao'
 
-__all__ = ['algorithm']
+__all__ = ['quickSort']
 
 
 def quickSort(l):
