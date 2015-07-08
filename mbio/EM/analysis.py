@@ -444,3 +444,58 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
             printError(
                 "The plot type wrong. Must be 1 or 2 `matplotlib.axes.Axes`.")
             return None
+
+def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwarg):
+    """Given the `mrc` and a sample structure, return the sample set around the sample
+    structure with radius `sampleradius`.
+    """
+
+    from ..IO.output import printError, printInfo
+    from ..IO.mrc import MRC as MRCclass
+    from prody import AtomGroup as pdbclass
+    from numpy import ndarray, zeros_like, array, floor, ceil, rint
+
+    if not isinstance(mrc, MRCclass):
+        printError("Only mbio.MRC class supported for `mrc`.")
+        return None
+
+    if type(sample) == type(None):
+        sample = None
+    elif isinstance(sample, ndarray):
+        if not (sample.shape == (3,) or (len(sample.shape) == 2 and sample.shape[1] == 3)):
+            printError("The sample coordinates must has 3 columns.")
+            return None
+        if sample.shape == (3,):
+            sample = array([sample])
+    elif isinstance(sample, pdbclass):
+        sample = sample.getCoords()
+
+    printInfo("Getting the sample set.")
+    mark = zeros_like(mrc.data)
+    grid = array(mrc.getGridCoords())
+    gridstart = array([grid[0, 0], grid[1, 0], grid[2, 0]])
+    step = mrc.getGridSteps()
+    if type(sample) == type(None):
+        findset = mrc.data.flatten()
+    else:
+        tempindex = array(
+            rint(array(((sample - grid[:, 0]) / step), dtype=float)), dtype=int)
+        ballindex = ([], [], [])
+        for i in range(int(floor(-sampleradius / step[0])), int(ceil(sampleradius / step[0]) + 1)):
+            for j in range(int(floor(-sampleradius / step[1])), int(ceil(sampleradius / step[1]) + 1)):
+                for k in range(int(floor(-sampleradius / step[2])), int(ceil(sampleradius / step[2]) + 1)):
+                    if (i * step[0])**2 + (j * step[1])**2 + (k * step[2])**2 <= sampleradius**2:
+                        ballindex[0].append(i)
+                        ballindex[1].append(j)
+                        ballindex[2].append(k)
+        ballindex = [array(i, dtype=int) for i in ballindex]
+        k = array([[len(grid[0])], [len(grid[1])], [len(grid[2])]])
+        for i in range(len(sample)):
+            t = array([ballindex[0] + tempindex[i][0], ballindex[1] +
+                       tempindex[i][1], ballindex[2] + tempindex[i][2]])
+            t = t[:, (t >= 0).all(0) & (t < k).all()]
+            mark[(t[0], t[1], t[2])] = 1
+        findset = mrc.data[mark != 0]
+    printInfo("Sorting the sample set.")
+    findset.sort(kind='quicksort')
+    return findset
