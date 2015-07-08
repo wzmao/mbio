@@ -3,7 +3,7 @@
 """
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['genPvalue']
+__all__ = ['genPvalue', 'calcPcutoff']
 
 
 def interpolationball(matrix, index, step, r, **kwarg):
@@ -55,7 +55,6 @@ def interpolationcube(m, p, way, *kwarg):
         tt[:, :, 0] *= 1 - p[2]
         tt[:, :, 1] *= p[2]
     return (tt * m).sum()
-
 
 def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), sampleradius=3.0,
               **kwarg):
@@ -180,3 +179,63 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
             beta[i] = 1. - binarySearch(findset, beta[i]) * 1.0 / findsetlength
     pdb.setBetas(beta)
     return pdb
+
+def chainsort(x, y):
+    """Chain id sort function. A-Z then number."""
+    if x == y:
+        return cmp(0, 0)
+    elif x.isdigit() == y.isdigit() == True:
+        return cmp(float(x), float(y))
+    elif x.isdigit() == y.isdigit() == False:
+        return cmp(x, y)
+    elif x.isdigit():
+        return cmp(2, 1)
+    else:
+        return cmp(1, 2)
+
+def calcPcutoff(data, scale=5.0, **kwarg):
+    """This is a function to calculate the cutoff for high p-values.
+
+        `data` would be a `prody.AtomGroup` with p-values in the Beta, the
+    backbone average is calculated to perform analysis. It could also be raw
+    number array.
+
+        A linear regression is performed by the first half data and the sigma
+    is calculated.
+        Cutoff is set to be the first one accepted by `scale`*sigma in the
+    tail of data.
+
+        We suggest the cutoff is set for each chain. You need select atom and
+    then use this function."""
+
+    from ..IO.output import printError, printInfo
+    from prody import AtomGroup as pdbclass
+    from numpy import ndarray, array, arange
+
+    if isinstance(data,pdbclass):
+        data=[i for i in data.iterResidues()]
+        # data.sort(cmp=lambda x,y:chainsort(x.getChid(),y.getChid()) if x.getChid()!=y.getChid() else cmp(x.getResnum(),y.getResnum()))
+        data=array([i.select('backbone').getBetas().mean() for i in data])
+        data.sort()
+    elif isinstance(data,ndarray):
+        data.sort()
+    else:
+        printError("The data format is not supported.(`prody.AtomGroup` or `numpy.ndarray`)")
+        return None
+
+    index = arange(len(data))
+    firsthalfdata = array(data[:len(data) // 2])
+    firsthalfindex = arange(len(firsthalfdata))
+    n = len(firsthalfdata)
+    # Regression the line
+    beta1 = ((firsthalfindex * firsthalfdata).sum() - n * firsthalfindex.mean() * firsthalfdata.mean()) / \
+        ((firsthalfindex * firsthalfindex).sum() - n *
+         firsthalfindex.mean() * firsthalfindex.mean())
+    beta0 = firsthalfdata.mean() - beta1 * firsthalfindex.mean()
+    # Determine the RMSE
+    rmse = (((firsthalfindex * beta1 + beta0 - firsthalfdata)**2).sum()/(n-1))**.5
+    # Test the
+    print len(index),len(data)
+    tvalue = abs(index * beta1 + beta0 - data)
+    tbigset = (tvalue <= scale*rmse).nonzero()[0]
+    return data[max(tbigset)]
