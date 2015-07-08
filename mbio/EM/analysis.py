@@ -3,7 +3,7 @@
 """
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['genPvalue', 'calcPcutoff']
+__all__ = ['genPvalue', 'calcPcutoff', 'showPcutoff']
 
 
 def interpolationball(matrix, index, step, r, **kwarg):
@@ -55,6 +55,7 @@ def interpolationcube(m, p, way, *kwarg):
         tt[:, :, 0] *= 1 - p[2]
         tt[:, :, 1] *= p[2]
     return (tt * m).sum()
+
 
 def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), sampleradius=3.0,
               **kwarg):
@@ -180,6 +181,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
     pdb.setBetas(beta)
     return pdb
 
+
 def chainsort(x, y):
     """Chain id sort function. A-Z then number."""
     if x == y:
@@ -193,10 +195,11 @@ def chainsort(x, y):
     else:
         return cmp(1, 2)
 
+
 def calcPcutoff(data, scale=5.0, **kwarg):
     """This is a function to calculate the cutoff for high p-values.
 
-        `data` would be a `prody.AtomGroup` with p-values in the Beta, the
+        `data` could be a `prody.AtomGroup` with p-values in the Beta, the
     backbone average is calculated to perform analysis. It could also be raw
     number array.
 
@@ -208,19 +211,21 @@ def calcPcutoff(data, scale=5.0, **kwarg):
         We suggest the cutoff is set for each chain. You need select atom and
     then use this function."""
 
-    from ..IO.output import printError, printInfo
+    from ..IO.output import printError
     from prody import AtomGroup as pdbclass
+    from prody.atomic.selection import Selection as selectionclass
     from numpy import ndarray, array, arange
 
-    if isinstance(data,pdbclass):
-        data=[i for i in data.iterResidues()]
+    if isinstance(data, (pdbclass, selectionclass)):
+        data = [i for i in data.getHierView().iterResidues()]
         # data.sort(cmp=lambda x,y:chainsort(x.getChid(),y.getChid()) if x.getChid()!=y.getChid() else cmp(x.getResnum(),y.getResnum()))
-        data=array([i.select('backbone').getBetas().mean() for i in data])
+        data = array([i.select('backbone').getBetas().mean() for i in data])
         data.sort()
-    elif isinstance(data,ndarray):
+    elif isinstance(data, ndarray):
         data.sort()
     else:
-        printError("The data format is not supported.(`prody.AtomGroup` or `numpy.ndarray`)")
+        printError(
+            "The data format is not supported.(`prody.AtomGroup` or `numpy.ndarray`)")
         return None
 
     index = arange(len(data))
@@ -233,9 +238,209 @@ def calcPcutoff(data, scale=5.0, **kwarg):
          firsthalfindex.mean() * firsthalfindex.mean())
     beta0 = firsthalfdata.mean() - beta1 * firsthalfindex.mean()
     # Determine the RMSE
-    rmse = (((firsthalfindex * beta1 + beta0 - firsthalfdata)**2).sum()/(n-1))**.5
-    # Test the
-    print len(index),len(data)
+    rmse = (
+        ((firsthalfindex * beta1 + beta0 - firsthalfdata)**2).sum() / (n - 1))**.5
+    # Test the second half and get cutoff
     tvalue = abs(index * beta1 + beta0 - data)
-    tbigset = (tvalue <= scale*rmse).nonzero()[0]
+    tbigset = (tvalue <= scale * rmse).nonzero()[0]
     return data[max(tbigset)]
+
+
+def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
+    """This is a function to plot the p-value cutoff.
+
+        `data` must be a `prody.AtomGroup` with p-values in the Beta, the
+    backbone average is calculated to perform analysis. 
+        `color` could set to draw in specific color.
+        `detail` could be used to plot more detail information.
+            1 to plot the error bar. Provide color list.
+            2 to also plot sidechain information. Provide 2 colors.
+
+        A linear regression is performed by the first half data and the sigma
+    is calculated.
+        Cutoff is set to be the first one accepted by `scale`*sigma in the
+    tail of data.
+
+        We suggest the cutoff is set for each chain. You need select atom and
+    then use this function."""
+
+    from ..IO.output import printError, printInfo
+    from prody import AtomGroup as pdbclass
+    from prody.atomic.selection import Selection as selectionclass
+    from matplotlib.axes import Axes
+    from numpy import ndarray, array, arange
+
+    if isinstance(data, (pdbclass, selectionclass)):
+        data = [i for i in data.getHierView().iterResidues()]
+        data.sort(cmp=lambda x, y: chainsort(x.getChid(), y.getChid()) if x.getChid(
+        ) != y.getChid() else cmp(x.getResnum(), y.getResnum()))
+        labelindex = array([i.getResnum() for i in data])
+    else:
+        printError("The data format is not supported.(`prody.AtomGroup`)")
+        return None
+
+    data1 = array([i.select('backbone').getBetas().mean() for i in data])
+    data1.sort()
+    index = arange(len(data1))
+    firsthalfdata = array(data1[:len(data1) // 2])
+    firsthalfindex = arange(len(firsthalfdata))
+    n = len(firsthalfdata)
+    # Regression the line
+    beta1 = ((firsthalfindex * firsthalfdata).sum() - n * firsthalfindex.mean() * firsthalfdata.mean()) / \
+        ((firsthalfindex * firsthalfindex).sum() - n *
+         firsthalfindex.mean() * firsthalfindex.mean())
+    beta0 = firsthalfdata.mean() - beta1 * firsthalfindex.mean()
+    # Determine the RMSE
+    rmse = (
+        ((firsthalfindex * beta1 + beta0 - firsthalfdata)**2).sum() / (n - 1))**.5
+    # Test the second half and get cutoff
+    tvalue = abs(index * beta1 + beta0 - data1)
+    tbigset = (tvalue <= scale * rmse).nonzero()[0]
+    cutoff = data1[max(tbigset)]
+
+    if isinstance(plot, Axes):
+        if not detail:
+            if type(color) != type(None):
+                plot.plot(labelindex, array(
+                    [i.select('backbone').getBetas().mean() for i in data]), '-', c=color, zorder=10)
+            else:
+                plot.plot(labelindex, array(
+                    [i.select('backbone').getBetas().mean() for i in data]), '-', zorder=10)
+            plot.plot(
+                list(plot.get_xlim()), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
+            dd = array([i.select('backbone').getBetas().mean() for i in data])
+            for i in range(len(dd) - 2):
+                if (dd[i:i + 3] > cutoff).all():
+                    plot.plot(
+                        labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
+            x = plot.get_xlim()
+            y = plot.get_ylim()
+            plot.text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
+                      "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+        if detail:
+            if detail == 2:
+                dd = array([i.select('not backbone').getBetas().mean()
+                            for i in data])
+                yerr3 = dd - \
+                    array([i.select('not backbone').getBetas().min()
+                           for i in data])
+                yerr4 = array(
+                    [i.select('not backbone').getBetas().max() for i in data]) - dd
+                if type(color) != type(None):
+                    plot.plot(
+                        labelindex, dd, '-', c=color[1], zorder=10, alpha=0.5)
+                    plot.errorbar(labelindex, dd, yerr=[
+                                  yerr3, yerr4], capsize=0, elinewidth=0.2, c=color[1], zorder=1)
+                else:
+                    plot.plot(labelindex, dd, '-', zorder=10, alpha=0.5)
+                    plot.errorbar(
+                        labelindex, dd, yerr=[yerr3, yerr4], capsize=0, elinewidth=0.1, zorder=1)
+            if type(color) != type(None):
+                plot.plot(labelindex, array(
+                    [i.select('backbone').getBetas().mean() for i in data]), '-', c=color[0], zorder=10)
+            else:
+                plot.plot(labelindex, array(
+                    [i.select('backbone').getBetas().mean() for i in data]), '-', zorder=10)
+            plot.plot(
+                list(plot.get_xlim()), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
+            dd = array([i.select('backbone').getBetas().mean() for i in data])
+            for i in range(len(dd) - 2):
+                if (dd[i:i + 3] > cutoff).all():
+                    plot.plot(
+                        labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
+            yerr1 = dd - \
+                array([i.select('backbone').getBetas().min() for i in data])
+            yerr2 = array([i.select('backbone').getBetas().max()
+                           for i in data]) - dd
+            if type(color) != type(None):
+                plot.errorbar(labelindex, dd, yerr=[
+                              yerr1, yerr2], capsize=0, elinewidth=0.2, c=color[0], zorder=2)
+            else:
+                plot.errorbar(
+                    labelindex, dd, yerr=[yerr1, yerr2], capsize=0, elinewidth=0.2, zorder=2)
+            x = plot.get_xlim()
+            y = plot.get_ylim()
+            plot.text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
+                      "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+    else:
+        try:
+            if not detail:
+                if type(color) != type(None):
+                    plot[0].plot(labelindex, array(
+                        [i.select('backbone').getBetas().mean() for i in data]), '-', c=color, zorder=10)
+                    plot[1].plot(data1, '-', c=color, zorder=10)
+                else:
+                    plot[0].plot(labelindex, array(
+                        [i.select('backbone').getBetas().mean() for i in data]), '-', zorder=10)
+                    plot[1].plot(data1, '-', zorder=10)
+                plot[0].plot(
+                    list(plot[0].get_xlim()), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
+                dd = array([i.select('backbone').getBetas().mean()
+                            for i in data])
+                for i in range(len(dd) - 2):
+                    if (dd[i:i + 3] > cutoff).all():
+                        plot[0].plot(
+                            labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
+                plot[1].plot(
+                    plot[1].get_xlim(), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
+                plot[1].set_ylim(plot[0].get_ylim())
+                x = plot[1].get_xlim()
+                y = plot[1].get_ylim()
+                plot[1].text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
+                             "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+            if detail:
+                if detail == 2:
+                    dd = array(
+                        [i.select('not backbone').getBetas().mean() for i in data])
+                    yerr3 = dd - \
+                        array([i.select('not backbone').getBetas().min()
+                               for i in data])
+                    yerr4 = array(
+                        [i.select('not backbone').getBetas().max() for i in data]) - dd
+                    if type(color) != type(None):
+                        plot[0].plot(
+                            labelindex, dd, '-', c=color[1], zorder=10, alpha=0.5)
+                        plot[0].errorbar(labelindex, dd, yerr=[
+                                         yerr3, yerr4], capsize=0, elinewidth=0.2, c=color[1], zorder=1)
+                    else:
+                        plot[0].plot(labelindex, dd, '-', zorder=10, alpha=0.5)
+                        plot[0].errorbar(
+                            labelindex, dd, yerr=[yerr3, yerr4], capsize=0, elinewidth=0.1, zorder=1)
+                if type(color) != type(None):
+                    plot[0].plot(labelindex, array(
+                        [i.select('backbone').getBetas().mean() for i in data]), '-', c=color[0], zorder=10)
+                    plot[1].plot(data1, '-', c=color[0], zorder=10)
+                else:
+                    plot[0].plot(labelindex, array(
+                        [i.select('backbone').getBetas().mean() for i in data]), '-', zorder=10)
+                    plot[1].plot(data1, '-', zorder=10)
+                plot[0].plot(
+                    list(plot[0].get_xlim()), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
+                dd = array([i.select('backbone').getBetas().mean()
+                            for i in data])
+                for i in range(len(dd) - 2):
+                    if (dd[i:i + 3] > cutoff).all():
+                        plot[0].plot(
+                            labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
+                yerr1 = dd - \
+                    array([i.select('backbone').getBetas().min()
+                           for i in data])
+                yerr2 = array([i.select('backbone').getBetas().max()
+                               for i in data]) - dd
+                if type(color) != type(None):
+                    plot[0].errorbar(labelindex, dd, yerr=[
+                                     yerr1, yerr2], capsize=0, elinewidth=0.2, c=color[0], zorder=2)
+                else:
+                    plot[0].errorbar(
+                        labelindex, dd, yerr=[yerr1, yerr2], capsize=0, elinewidth=0.2, zorder=2)
+                plot[1].plot(
+                    plot[1].get_xlim(), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
+                plot[1].set_ylim(plot[0].get_ylim())
+                x = plot[1].get_xlim()
+                y = plot[1].get_ylim()
+                plot[1].text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
+                             "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+        except:
+            printError(
+                "The plot type wrong. Must be 1 or 2 `matplotlib.axes.Axes`.")
+            return None
