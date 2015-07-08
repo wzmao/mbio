@@ -445,6 +445,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                 "The plot type wrong. Must be 1 or 2 `matplotlib.axes.Axes`.")
             return None
 
+
 def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwarg):
     """Given the `mrc` and a sample structure, return the sample set around the sample
     structure with radius `sampleradius`.
