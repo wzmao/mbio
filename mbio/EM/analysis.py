@@ -299,7 +299,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
     cutoff = data1[max(tbigset)]
 
     if isinstance(plot, Axes):
-        if not detail:
+        if detail <= 0:
             if type(color) != type(None):
                 plot.plot(labelindex, array(
                     [i.select('backbone').getBetas().mean() for i in data]), '-', c=color, zorder=10)
@@ -315,9 +315,10 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                         labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
             x = plot.get_xlim()
             y = plot.get_ylim()
-            plot.text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
-                      "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
-        if detail:
+            if detail != -1:
+                plot.text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
+                          "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+        elif detail > 0:
             if detail == 2:
                 dd = array([i.select('not backbone').getBetas().mean()
                             for i in data])
@@ -364,7 +365,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                       "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
     else:
         try:
-            if not detail:
+            if detail <= 0:
                 if type(color) != type(None):
                     plot[0].plot(labelindex, array(
                         [i.select('backbone').getBetas().mean() for i in data]), '-', c=color, zorder=10)
@@ -386,9 +387,10 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                 plot[1].set_ylim(plot[0].get_ylim())
                 x = plot[1].get_xlim()
                 y = plot[1].get_ylim()
-                plot[1].text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
-                             "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
-            if detail:
+                if detail != -1:
+                    plot[1].text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
+                                 "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+            elif detail > 0:
                 if detail == 2:
                     dd = array(
                         [i.select('not backbone').getBetas().mean() for i in data])
