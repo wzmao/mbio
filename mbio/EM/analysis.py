@@ -58,13 +58,15 @@ def interpolationcube(m, p, way, *kwarg):
 
 
 def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), sampleradius=3.0,
-              **kwarg):
+              assumenorm=False, **kwarg):
     """`method` must be a tuple or list.
     There are 2 methods now: `cube` and `ball`.
     For the `cube` method, you should provide either ('cube','interpolation') or ('cube','idw').
         `idw` stand for `Inverse distance weighting`, and it is the default option.
     For the `ball` method, you should provide the radius(A) like ('ball',3).
     `sample` should be a `prody.AtomGroup` or a `numpy` n*3 array or `None` to indicate all data to sample.
+    `assumenorm` is set to be `False` in default which will get the sample p-value. If it is set
+    to `True`, the p-value will be the norm-p-value.
     The p-value will be set to the beta in the pdb.
     """
 
@@ -73,6 +75,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
     from ..Application.algorithm import binarySearch
     from prody import AtomGroup as pdbclass
     from numpy import ndarray, zeros_like, array, floor, ceil, rint
+    from scipy.stats import norm
 
     if isinstance(method, (tuple, list)):
         if len(method) == 0:
@@ -163,6 +166,12 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
     printInfo("Sorting the sample set.")
     findset.sort(kind='quicksort')
     findsetlength = len(findset)
+    if assumenorm:
+        mu = findset.mean()
+        sigma = (
+            ((findset - findset.mean())**2).sum() / (findsetlength - 1))**.5
+    else:
+        mu = sigma = 0.
 
     printInfo("Interpolating the data and assigning p-value.")
     beta = pdb.getBetas()
@@ -171,13 +180,21 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
         index = (coor - gridstart) / step
         for i in range(len(coor)):
             beta[i] = interpolationball(mrc.data, index[i], step, r=way)
-            beta[i] = 1. - binarySearch(findset, beta[i]) * 1.0 / findsetlength
+            if assumenorm:
+                beta[i] = norm.cdf(-(beta[i] - mu) / sigma)
+            else:
+                beta[i] = 1. - \
+                    binarySearch(findset, beta[i]) * 1.0 / findsetlength
     elif method == 'cube':
         index = (coor - gridstart) // step
         for i in range(len(coor)):
             beta[i] = interpolationcube(mrc.data[index[i][0]:index[i][
                 0] + 2, index[i][1]:index[i][1] + 2, index[i][2]:index[i][2] + 2], coor[i] % array(step) / array(step), way)
-            beta[i] = 1. - binarySearch(findset, beta[i]) * 1.0 / findsetlength
+            if assumenorm:
+                beta[i] = norm.cdf(-(beta[i] - mu) / sigma)
+            else:
+                beta[i] = 1. - \
+                    binarySearch(findset, beta[i]) * 1.0 / findsetlength
     pdb.setBetas(beta)
     return pdb
 
