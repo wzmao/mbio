@@ -313,6 +313,9 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                 if (dd[i:i + 3] > cutoff).all():
                     plot.plot(
                         labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
+                elif dd[i] > cutoff:
+                    plot.plot(
+                        labelindex[i:i + 1], dd[i:i + 1], '.-', c='red', zorder=11)
             x = plot.get_xlim()
             y = plot.get_ylim()
             if detail != -1:
@@ -349,6 +352,9 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                 if (dd[i:i + 3] > cutoff).all():
                     plot.plot(
                         labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
+                elif dd[i] > cutoff:
+                    plot.plot(
+                        labelindex[i:i + 1], dd[i:i + 1], '.-', c='red', zorder=11)
             yerr1 = dd - \
                 array([i.select('backbone').getBetas().min() for i in data])
             yerr2 = array([i.select('backbone').getBetas().max()
@@ -382,6 +388,9 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                     if (dd[i:i + 3] > cutoff).all():
                         plot[0].plot(
                             labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
+                    elif dd[i] > cutoff:
+                        plot[0].plot(
+                            labelindex[i:i + 1], dd[i:i + 1], '.-', c='red', zorder=11)
                 plot[1].plot(
                     plot[1].get_xlim(), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
                 plot[1].set_ylim(plot[0].get_ylim())
@@ -424,6 +433,9 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                     if (dd[i:i + 3] > cutoff).all():
                         plot[0].plot(
                             labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
+                    elif dd[i] > cutoff:
+                        plot[0].plot(
+                            labelindex[i:i + 1], dd[i:i + 1], '.-', c='red', zorder=11)
                 yerr1 = dd - \
                     array([i.select('backbone').getBetas().min()
                            for i in data])
