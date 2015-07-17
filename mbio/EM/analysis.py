@@ -74,6 +74,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
     from ..IO.mrc import MRC as MRCclass
     from ..Application.algorithm import binarySearch
     from prody import AtomGroup as pdbclass
+    from prody.atomic.selection import Selection as selectionclass
     from numpy import ndarray, zeros_like, array, floor, ceil, rint
     from scipy.stats import norm
 
@@ -122,7 +123,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
         printError("Only mbio.MRC class supported for `mrc`.")
         return None
 
-    if not isinstance(pdb, pdbclass):
+    if not isinstance(pdb, (pdbclass,selectionclass)):
         printError("Only prody.AtomGroup class supported for `pdb`.")
         return None
 
