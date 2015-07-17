@@ -422,7 +422,7 @@ class MRC():
         self.header.label = [i[:80] for i in self.header.label if i != ""]
         self.header.label = self.header.label + \
             [""] * (10 - len(self.header.label))
-        self.header.map="MAP "
+        self.header.map = "MAP "
         if {0: int8, 1: int16, 2: float32, 5: uint8, 6: uint16}[self.header.mode] != self.data.dtype:
             self.data = array(self.data,
                               dtype={0: int8, 1: int16, 2: float32, 5: uint8, 6: uint16}[self.header.mode])

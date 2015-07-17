@@ -123,7 +123,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
         printError("Only mbio.MRC class supported for `mrc`.")
         return None
 
-    if not isinstance(pdb, (pdbclass,selectionclass)):
+    if not isinstance(pdb, (pdbclass, selectionclass)):
         printError("Only prody.AtomGroup class supported for `pdb`.")
         return None
 
