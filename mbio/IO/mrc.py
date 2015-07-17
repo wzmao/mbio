@@ -373,7 +373,7 @@ class MRC():
             printError("Change it automaticly.")
             self.header.mapc, self.header.mapr, self.header.maps = 1, 2, 3
         self.header.nxstart, self.header.nystart, self.header.nzstart = array(
-            [self.header.xstart, self.header.ystart, self.header.zstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
+            [self.header.nxstart, self.header.nystart, self.header.nzstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
         printInfo("Writing MRC to {0}".format(filename))
         temp = writeData(header=self.header, data=transpose(
             self.data, (self.header.maps - 1, self.header.mapr - 1, self.header.mapc - 1)), filename=filename)
@@ -392,7 +392,7 @@ class MRC():
         """Update the MRC header information from the data array.
         Update the MRC data format based on the `header.mode`
         Include: nx, ny, nz, dmin, dmax, dmean, rms, nsymbt, nlabels and sort label
-            nxstart, nystart, nzstart.
+            nxstart, nystart, nzstart, map.
         Correct mapc, mapr and maps automaticly."""
 
         from numpy import array, int8, int16, float32, uint8, uint16
@@ -406,7 +406,7 @@ class MRC():
         self.header.nx, self.header.ny, self.header.nz = array(
             self.data.shape)[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
         self.header.nxstart, self.header.nystart, self.header.nzstart = array(
-            [self.header.xstart, self.header.ystart, self.header.zstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
+            [self.header.nxstart, self.header.nystart, self.header.nzstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
         self.header.dmin = self.data.min()
         self.header.dmax = self.data.max()
         self.header.dmean = self.data.mean()
@@ -422,6 +422,7 @@ class MRC():
         self.header.label = [i[:80] for i in self.header.label if i != ""]
         self.header.label = self.header.label + \
             [""] * (10 - len(self.header.label))
+        self.header.map="MAP "
         if {0: int8, 1: int16, 2: float32, 5: uint8, 6: uint16}[self.header.mode] != self.data.dtype:
             self.data = array(self.data,
                               dtype={0: int8, 1: int16, 2: float32, 5: uint8, 6: uint16}[self.header.mode])
