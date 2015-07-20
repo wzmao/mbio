@@ -67,8 +67,16 @@ class MRCHeader():
                         self.extra = self.extra[:80]
                         if self.extra.find('\0') != -1:
                             self.extra = self.extra[:self.extra.find('\0')]
-                    self.xstart, self.ystart, self.zstart = array(
-                        [self.nxstart, self.nystart, self.nzstart])[argsort([self.mapc, self.mapr, self.maps])]
+                    if self.origin == [0, 0, 0]:
+                        self.xstart, self.ystart, self.zstart = array(
+                            [self.nxstart * self.cella[0] / self.nx, self.nystart * self.cella[1] / self.ny, self.nzstart * self.cella[2] / self.nz])[argsort([self.mapc, self.mapr, self.maps])]
+                        self.origin = array([self.xstart, self.ystart, self.zstart])[
+                            [self.mapc - 1, self.mapr - 1, self.maps - 1]]
+                        self.nxstart = self.nystart = self.nzstart = 0
+                    else:
+                        self.nxstart = self.nystart = self.nzstart = 0
+                        self.xstart, self.ystart, self.zstart = array(
+                            self.origin)[argsort([self.mapc, self.mapr, self.maps])]
             else:
                 from .output import printError
                 printError("The file doesn't exists or is not a file.")
@@ -89,6 +97,7 @@ class MRCHeader():
                         printError("Couldn't parse the Error information.")
                     return None
                 else:
+                    from numpy import array, argsort
                     self = temp
                     for i in range(10):
                         self.label[i] = self.label[i][:80]
@@ -107,6 +116,16 @@ class MRCHeader():
                         self.extra = self.extra[:80]
                         if self.extra.find('\0') != -1:
                             self.extra = self.extra[:self.extra.find('\0')]
+                    if self.origin == [0, 0, 0]:
+                        self.xstart, self.ystart, self.zstart = array(
+                            [self.nxstart * self.cella[0] / self.nx, self.nystart * self.cella[1] / self.ny, self.nzstart * self.cella[2] / self.nz])[argsort([self.mapc, self.mapr, self.maps])]
+                        self.origin = array([self.xstart, self.ystart, self.zstart])[
+                            [self.mapc - 1, self.mapr - 1, self.maps - 1]]
+                        self.nxstart = self.nystart = self.nzstart = 0
+                    else:
+                        self.nxstart = self.nystart = self.nzstart = 0
+                        self.xstart, self.ystart, self.zstart = array(
+                            self.origin)[argsort([self.mapc, self.mapr, self.maps])]
             else:
                 from .output import printError
                 printError("The file doesn't exists or is not a file.")
@@ -392,7 +411,7 @@ class MRC():
         """Update the MRC header information from the data array.
         Update the MRC data format based on the `header.mode`
         Include: nx, ny, nz, dmin, dmax, dmean, rms, nsymbt, nlabels and sort label
-            nxstart, nystart, nzstart, map.
+            nxstart, nystart, nzstart, xstart, ystart, zstart, map.
         Correct mapc, mapr and maps automaticly."""
 
         from numpy import array, int8, int16, float32, uint8, uint16
@@ -407,6 +426,8 @@ class MRC():
             self.data.shape)[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
         self.header.nxstart, self.header.nystart, self.header.nzstart = array(
             [self.header.nxstart, self.header.nystart, self.header.nzstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
+        self.header.xstart, self.header.ystart, self.header.zstart = array(
+            self.header.origin)[argsort([self.header.mapc, self.header.mapr, self.header.maps])]
         self.header.dmin = self.data.min()
         self.header.dmax = self.data.max()
         self.header.dmean = self.data.mean()
@@ -490,13 +511,15 @@ class MRC():
             printError("zstart must less than zend.")
             return None
         self.data = self.data[xstart:xend, ystart:yend, zstart:zend]
-        self.header.xstart += xstart
-        self.header.ystart += ystart
-        self.header.zstart += zstart
+        xstep, ystep, zstep = array(
+            self.header.cella) * 1.0 / array([self.header.mx, self.header.my, self.header.mz])
+        self.header.xstart += xstart * xstep
+        self.header.ystart += ystart * ystep
+        self.header.zstart += zstart * zstep
         self.header.nx, self.header.ny, self.header.nz = array(
             self.data.shape)[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
-        self.header.nxstart, self.header.nystart, self.header.nzstart = array(
-            [self.header.xstart, self.header.ystart, self.header.zstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
+        self.header.origin = array([self.header.xstart, self.header.ystart, self.header.zstart])[
+            [self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
 
     def getMatrixShape(self, **kwargs):
         """Get the data shape from the header information.
@@ -517,12 +540,20 @@ class MRC():
 
         xstep, ystep, zstep = array(
             self.header.cella) * 1.0 / array([self.header.mx, self.header.my, self.header.mz])
-        xcoor = (self.header.nxstart + arange(self.header.nx)) * xstep
-        ycoor = (self.header.nystart + arange(self.header.ny)) * ystep
-        zcoor = (self.header.nzstart + arange(self.header.nz)) * zstep
-        coor = array([xcoor, ycoor, zcoor])[
-            argsort([self.header.mapc, self.header.mapr, self.header.maps])]
-        return list(coor)
+        if self.header.origin == [0, 0, 0]:
+            xcoor = (self.header.nxstart + arange(self.header.nx)) * xstep
+            ycoor = (self.header.nystart + arange(self.header.ny)) * ystep
+            zcoor = (self.header.nzstart + arange(self.header.nz)) * zstep
+            coor = array([xcoor, ycoor, zcoor])[
+                argsort([self.header.mapc, self.header.mapr, self.header.maps])]
+            return list(coor)
+        else:
+            xcoor = arange(self.header.nx) * xstep + self.header.origin[0]
+            ycoor = arange(self.header.ny) * ystep + self.header.origin[1]
+            zcoor = arange(self.header.nz) * zstep + self.header.origin[2]
+            coor = array([xcoor, ycoor, zcoor])[
+                argsort([self.header.mapc, self.header.mapr, self.header.maps])]
+            return list(coor)
 
     def getGridSteps(self, **kwargs):
         """Return the x, y and z coordinate steps."""
