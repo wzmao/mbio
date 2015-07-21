@@ -69,9 +69,9 @@ class MRCHeader():
                             self.extra = self.extra[:self.extra.find('\0')]
                     if self.origin == [0, 0, 0]:
                         self.xstart, self.ystart, self.zstart = array(
-                            [self.nxstart * self.cella[0] / self.nx, self.nystart * self.cella[1] / self.ny, self.nzstart * self.cella[2] / self.nz])[argsort([self.mapc, self.mapr, self.maps])]
-                        self.origin = array([self.xstart, self.ystart, self.zstart])[
-                            [self.mapc - 1, self.mapr - 1, self.maps - 1]]
+                            [self.nxstart * self.cella[0] / self.mx, self.nystart * self.cella[1] / self.my, self.nzstart * self.cella[2] / self.mz])[argsort([self.mapc, self.mapr, self.maps])]
+                        self.origin = list(array([self.xstart, self.ystart, self.zstart])[
+                            [self.mapc - 1, self.mapr - 1, self.maps - 1]])
                         self.nxstart = self.nystart = self.nzstart = 0
                     else:
                         self.nxstart = self.nystart = self.nzstart = 0
@@ -118,9 +118,9 @@ class MRCHeader():
                             self.extra = self.extra[:self.extra.find('\0')]
                     if self.origin == [0, 0, 0]:
                         self.xstart, self.ystart, self.zstart = array(
-                            [self.nxstart * self.cella[0] / self.nx, self.nystart * self.cella[1] / self.ny, self.nzstart * self.cella[2] / self.nz])[argsort([self.mapc, self.mapr, self.maps])]
-                        self.origin = array([self.xstart, self.ystart, self.zstart])[
-                            [self.mapc - 1, self.mapr - 1, self.maps - 1]]
+                            [self.nxstart * self.cella[0] / self.mx, self.nystart * self.cella[1] / self.my, self.nzstart * self.cella[2] / self.mz])[argsort([self.mapc, self.mapr, self.maps])]
+                        self.origin = list(array([self.xstart, self.ystart, self.zstart])[
+                            [self.mapc - 1, self.mapr - 1, self.maps - 1]])
                         self.nxstart = self.nystart = self.nzstart = 0
                     else:
                         self.nxstart = self.nystart = self.nzstart = 0
@@ -133,7 +133,7 @@ class MRCHeader():
             from .output import printError
             printError("The filename must be provided.")
 
-    def printInfomation(self, **kwargs):
+    def printInformation(self, **kwargs):
         """Print the information from the header."""
 
         from .output import printInfo as p
@@ -414,7 +414,7 @@ class MRC():
             nxstart, nystart, nzstart, xstart, ystart, zstart, map.
         Correct mapc, mapr and maps automaticly."""
 
-        from numpy import array, int8, int16, float32, uint8, uint16
+        from numpy import array, int8, int16, float32, uint8, uint16, argsort
         from .output import printError
 
         if set([self.header.mapc, self.header.mapr, self.header.maps]) != set([1, 2, 3]):
@@ -424,10 +424,17 @@ class MRC():
             self.header.mapc, self.header.mapr, self.header.maps = 1, 2, 3
         self.header.nx, self.header.ny, self.header.nz = array(
             self.data.shape)[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
-        self.header.nxstart, self.header.nystart, self.header.nzstart = array(
-            [self.header.nxstart, self.header.nystart, self.header.nzstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
-        self.header.xstart, self.header.ystart, self.header.zstart = array(
-            self.header.origin)[argsort([self.header.mapc, self.header.mapr, self.header.maps])]
+        if self.header.origin != [0., 0., 0.]:
+            self.header.nxstart = self.header.nystart = self.header.nzstart = 0
+            self.header.xstart, self.header.ystart, self.header.zstart = array(
+                self.header.origin)[argsort([self.header.mapc, self.header.mapr, self.header.maps])]
+        elif self.header.nxstart != 0 or self.header.nystart != 0 or self.header.nzstart != 0:
+            self.header.xstart, self.header.ystart, self.header.zstart = array(
+                [self.header.nxstart * self.header.cella[0] / self.header.mx, self.header.nystart * self.header.cella[1] / self.header.my, self.header.nzstart * self.header.cella[2] / self.header.mz])[argsort([self.header.mapc, self.header.mapr, self.header.maps])]
+            # self.header.nxstart, self.header.nystart, self.header.nzstart = array(
+            #     [self.header.nxstart, self.header.nystart, self.header.nzstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
+        else:
+            self.header.xstart, self.header.ystart, self.header.zstart = 0., 0., 0.
         self.header.dmin = self.data.min()
         self.header.dmax = self.data.max()
         self.header.dmean = self.data.mean()
@@ -516,10 +523,18 @@ class MRC():
         self.header.xstart += xstart * xstep
         self.header.ystart += ystart * ystep
         self.header.zstart += zstart * zstep
+        if self.header.origin == [0, 0, 0]:
+            self.header.nxstart += xstart
+            self.header.nystart += ystart
+            self.header.nzstart += zstart
+        else:
+            self.header.nxstart = 0
+            self.header.nystart = 0
+            self.header.nzstart = 0
+            self.header.origin = list(array([self.header.xstart, self.header.ystart, self.header.zstart])[
+                [self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]])
         self.header.nx, self.header.ny, self.header.nz = array(
             self.data.shape)[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
-        self.header.origin = array([self.header.xstart, self.header.ystart, self.header.zstart])[
-            [self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
 
     def getMatrixShape(self, **kwargs):
         """Get the data shape from the header information.
@@ -595,7 +610,7 @@ class MRC():
             self.data = array(self.data,
                               dtype={0: int8, 1: int16, 2: float32, 5: uint8, 6: uint16}[self.header.mode])
 
-    def printInfomation(self, **kwargs):
+    def printInformation(self, **kwargs):
         """Print the information from the header."""
 
-        self.header.printInfomation()
+        self.header.printInformation()
