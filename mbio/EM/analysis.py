@@ -54,12 +54,16 @@ def interpolationcube(m, p, way, *kwarg):
         tt[:, 1, :] *= p[1]
         tt[:, :, 0] *= 1 - p[2]
         tt[:, :, 1] *= p[2]
-    return (tt * m).sum()
+    if m.shape!=(2,2,2):
+        return -999999999999
+    else:
+        return (tt * m).sum()
 
 
 def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), sampleradius=3.0,
               assumenorm=False, **kwarg):
-    """`method` must be a tuple or list.
+    """This function assign p-value for pdb structure in mrc. sample is used to get the population values.
+    `method` must be a tuple or list.
     There are 2 methods now: `cube` and `ball`.
     For the `cube` method, you should provide either ('cube','interpolation') or ('cube','idw').
         `idw` stand for `Inverse distance weighting`, and it is the default option.
