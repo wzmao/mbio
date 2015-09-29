@@ -8,7 +8,6 @@ help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  build		to build extensions in place"
 	@echo "  remove 	to remove contributed modules"
-	@echo "  test		to clone, build and test"
 
 build2.6:
 	python2.6 setup.py build_ext --inplace --force
@@ -21,11 +20,3 @@ build:
 
 build3:
 	python3 setup.py build_ext --inplace --force
-
-test:
-	TMPDIR=`mktemp -d`; REPOPATH=`pwd`; echo $$TMPDIR; cd $$TMPDIR; \
-	git clone $$REPOPATH; cd ProDy; \
-	python setup.py build_ext --inplace --force; \
-	export PYTHONPATH=$$TMPDIR/ProDy/; \
-	nosetests prody -a '!slow'; \
-	rm -rf $$TMPDIR
