@@ -54,7 +54,7 @@ def interpolationcube(m, p, way, *kwarg):
         tt[:, 1, :] *= p[1]
         tt[:, :, 0] *= 1 - p[2]
         tt[:, :, 1] *= p[2]
-    if m.shape!=(2,2,2):
+    if m.shape != (2, 2, 2):
         return -999999999999
     else:
         return (tt * m).sum()
