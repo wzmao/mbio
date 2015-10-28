@@ -6,7 +6,7 @@ In the future plan: Eigenvalue, Inverse, Matrix Multiplication,
 
 __author__ = 'Wenzhi Mao'
 
-__all__ = ['isSquare', 'ANOVA', 'performRegression']
+__all__ = ['isSquare', 'ANOVA', 'performRegression', 'performPolyRegression']
 
 
 def isSquare(x):
@@ -245,3 +245,79 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
                                        abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) * 2,
                                    "Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No'))
     return beta
+
+
+def performPolyRegression(y, degree=2, **kwargs):
+    '''Build regression with higher degree of polynomial.
+    Use the index to build the polynomial.
+
+    The *orthogonal unit* scale is used up to 4 degrees. const is not included.
+    You could specific the `const=False` to disable the const.
+    '''
+
+    from numpy import ndarray, array, arange, zeros
+    from ..IO.output import printError, printInfo
+
+    if not isinstance(y, ndarray):
+        try:
+            y = array(y, dtype=float)
+        except:
+            printError(
+                "y must be numpy array or could be converted to numpy array.")
+            return None
+    y = array(y, dtype=float)
+    if y.ndim == 2:
+        if y.shape[1] != 1:
+            printInfo("Just take the first column of y.")
+            y = y[:, 0:1]
+    elif y.ndim == 1:
+        y.resize((y.size, 1))
+    else:
+        printError("y must be 1D or 2D data.")
+        return None
+    if not degree in [1, 2, 3, 4]:
+        printError("degree must between 1 and 4.")
+    if degree + 1 >= y.shape[0]:
+        printError("The degree must be less than the data size.")
+        return None
+
+    k = y.shape[0] * 1.0
+    poly = zeros((k, degree))
+    t = arange(k, dtype=float)
+    t = t - t.mean()
+    label = []
+    kwargs.pop('label', None)
+    for i in range(degree):
+        if i == 0:
+            label.append('x')
+        else:
+            label.append('x^' + str(i + 1))
+        if i == 0:
+            poly[:, i] = t
+            poly[:, i] = poly[:, i] / ((poly[:, i]**2).sum())**.5
+        elif i == 1:
+            poly[:, i] = t**2 - (k**2. - 1) / 12
+            poly[:, i] = poly[:, i] / ((poly[:, i]**2).sum())**.5
+        elif i == 2:
+            poly[:, i] = t**3 - t * ((3. * k**2 - 7) / 20)
+            poly[:, i] = poly[:, i] / ((poly[:, i]**2).sum())**.5
+        elif i == 3:
+            poly[:, i] = t**4 - (t**2) * ((3 * k**2 - 13) /
+                                          14.) + 3. * (k**2 - 1) * (k**2 - 9) / 560
+            poly[:, i] = poly[:, i] / ((poly[:, i]**2).sum())**.5
+    printInfo("The polynomial is listed.")
+    for i in range(degree):
+        if k > 6:
+            st = ""
+            for j in range(3):
+                st += " {0:>7.4f}".format(poly[j, i])
+            st += ' ...'
+            for j in range(-3, 0):
+                st += " {0:>7.4f}".format(poly[j, i])
+        else:
+            st = ""
+            for j in range(int(k)):
+                st += " {0:>7.4f}".format(poly[j, i])
+        printInfo("\t{0:^5s}:{1}".format(label[i], st))
+    result = performRegression(poly, y, label=label, **kwargs)
+    return poly, result
