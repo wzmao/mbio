@@ -146,7 +146,7 @@ class ANOVA(object):
         return None
 
 
-def performRegression(x, y, const=True, alpha=0.05, **kwargs):
+def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     """Make regression analysis of array data. And test each parameter using t-test.
 
     `x` must be a N*a array. `y` must be a N*b array.
@@ -155,7 +155,9 @@ def performRegression(x, y, const=True, alpha=0.05, **kwargs):
     `const` is `True` default and it will detect the are there constant in `x`.
     If no constant in `x`, it will add a new column at the end.
 
-    `alpha` is used to test each parameter."""
+    `alpha` is used to test each parameter.
+
+    `label` could be used for output."""
 
     from numpy import ndarray, array, hstack, ones
     from numpy.linalg.linalg import inv
@@ -189,6 +191,13 @@ def performRegression(x, y, const=True, alpha=0.05, **kwargs):
     if x.shape[0] != y.shape[0]:
         printError("x and y must have same first dimension.")
         return None
+    if type(label)==type(None):
+        label=['x'+str(i+1) for i in range(x.shape[1])]
+    else:
+        label=[str(i) for i in label]
+    if len(label)!=x.shape[1]:
+        printError("The length of label does not match data. Dismiss the label.")
+        label=['x'+str(i+1) for i in range(x.shape[1])]
 
     addconst = 0
     if const:
@@ -200,6 +209,7 @@ def performRegression(x, y, const=True, alpha=0.05, **kwargs):
         if not hasconst:
             x = hstack((x, ones((x.shape[0], 1))))
             addconst = 1
+            label.append('c')
             printInfo(
                 "Add const automatically. If you don't want to add const, use `const = False`")
 
@@ -211,40 +221,19 @@ def performRegression(x, y, const=True, alpha=0.05, **kwargs):
         sigma2 = 5e-324
     st = '\ty = '
     for i in range(x.shape[1] - 1):
-        st += "{0:+10.6f}*x{1:d} ".format(beta[i, 0], i + 1)
+        st += "{0:+10.6f}*{1:s} ".format(beta[i, 0], label[i])
     if addconst:
         st += "{0:+10.6f}".format(beta[-1, 0])
     else:
-        st += "{0:+10.6f} * x{1:d}".format(beta[-1, 0], i + 2)
+        st += "{0:+10.6f}*{1:s}".format(beta[-1, 0], label[i+1])
     printInfo("The result is :")
     printInfo(st)
     printInfo("Test each parameter.")
-    printInfo("\t{0:^4s}{1:^15s}{2:^15s}{3:^15s}{4:^5s}{5:^9s}{6:^5s}".format(
+    printInfo("\t{0:^5s}{1:^15s}{2:^15s}{3:^15s}{4:^5s}{5:^9s}{6:^5s}".format(
         "xi", "Para", "Sigma", "t-statistics", 'FD', "p-value", 'Sig'))
-    for i in range(x.shape[1] - 1):
-        printInfo("\t{0:^4s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
-                  "{6:^5s}".format("x" + str(i + 1),
-                                   beta[i][0],
-                                   (sigma2 * cov[i, i])**.5,
-                                   (beta[i][0] / ((sigma2 * cov[i, i])**.5)),
-                                   x.shape[0] - x.shape[1],
-                                   (1. - t.cdf(
-                                       abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) * 2,
-                                   "Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No'))
-    i = i + 1
-    if addconst:
-        printInfo("\t{0:^4s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
-                  "{6:^5s}".format('c',
-                                   beta[i][0],
-                                   (sigma2 * cov[i, i])**.5,
-                                   (beta[i][0] / ((sigma2 * cov[i, i])**.5)),
-                                   x.shape[0] - x.shape[1],
-                                   (1. - t.cdf(
-                                       abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) * 2,
-                                   "Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No'))
-    else:
-        printInfo("\t{0:^4s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
-                  "{6:^5s}".format("x" + str(i + 1),
+    for i in range(x.shape[1]):
+        printInfo("\t{0:^5s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
+                  "{6:^5s}".format(label[i],
                                    beta[i][0],
                                    (sigma2 * cov[i, i])**.5,
                                    (beta[i][0] / ((sigma2 * cov[i, i])**.5)),
