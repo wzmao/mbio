@@ -6,7 +6,7 @@ In the future plan: Eigenvalue, Inverse, Matrix Multiplication,
 
 __author__ = 'Wenzhi Mao'
 
-__all__ = ['isSquare', 'ANOVA', 'calcRegression']
+__all__ = ['isSquare', 'ANOVA', 'performRegression']
 
 
 def isSquare(x):
@@ -146,7 +146,7 @@ class ANOVA(object):
         return None
 
 
-def calcRegression(x, y, const=True, alpha=0.05, **kwargs):
+def performRegression(x, y, const=True, alpha=0.05, **kwargs):
     """Make regression analysis of array data. And test each parameter using t-test.
 
     `x` must be a N*a array. `y` must be a N*b array.
