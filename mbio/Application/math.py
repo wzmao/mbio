@@ -6,7 +6,7 @@ In the future plan: Eigenvalue, Inverse, Matrix Multiplication,
 
 __author__ = 'Wenzhi Mao'
 
-__all__ = ['isSquare', 'ANOVA']
+__all__ = ['isSquare', 'ANOVA', 'calcRegression']
 
 
 def isSquare(x):
@@ -144,3 +144,111 @@ class ANOVA(object):
                 printInfo(
                     "Accept the null hypothesis at alpha = {}, each class are the same.".format(alpha))
         return None
+
+
+def calcRegression(x, y, const=True, alpha=0.05, **kwargs):
+    """Make regression analysis of array data. And test each parameter using t-test.
+
+    `x` must be a N*a array. `y` must be a N*b array.
+    If `x` or `y` just has one dimension, it could be a 1D array and converted automatically.
+
+    `const` is `True` default and it will detect the are there constant in `x`.
+    If no constant in `x`, it will add a new column at the end.
+
+    `alpha` is used to test each parameter."""
+
+    from numpy import ndarray, array, hstack, ones
+    from numpy.linalg.linalg import inv
+    from ..IO.output import printError, printInfo
+    from scipy.stats import t
+
+    if not isinstance(x, ndarray) or not isinstance(y, ndarray):
+        try:
+            x = array(x, dtype=float)
+            y = array(y, dtype=float)
+        except:
+            printError(
+                "x and y must be numpy array or could be converted to numpy array.")
+            return None
+    x = array(x, dtype=float)
+    y = array(y, dtype=float)
+    if x.ndim == 1:
+        x.resize((x.size, 1))
+    elif x.ndim == 2:
+        pass
+    else:
+        printError("x must be 1D or 2D data.")
+        return None
+    if y.ndim == 1:
+        y.resize((y.size, 1))
+    elif y.ndim == 2:
+        pass
+    else:
+        printError("y must be 1D or 2D data.")
+        return None
+    if x.shape[0] != y.shape[0]:
+        printError("x and y must have same first dimension.")
+        return None
+
+    addconst = 0
+    if const:
+        hasconst = False
+        for i in range(x.shape[1]):
+            if len(set(x[:, i])) == 1:
+                hasconst = True
+                break
+        if not hasconst:
+            x = hstack((x, ones((x.shape[0], 1))))
+            addconst = 1
+            printInfo(
+                "Add const automatically. If you don't want to add const, use `const = False`")
+
+    cov = inv(x.T.dot(x))
+    beta = cov.dot(x.T).dot(y)
+    r = y - x.dot(beta)
+    sigma2 = ((r.T.dot(r)) / (x.shape[0] - x.shape[1]))[0, 0]
+    if sigma2 == 0:
+        sigma2 = 5e-324
+    st = '\ty = '
+    for i in range(x.shape[1] - 1):
+        st += "{0:+10.6f}*x{1:d} ".format(beta[i, 0], i + 1)
+    if addconst:
+        st += "{0:+10.6f}".format(beta[-1, 0])
+    else:
+        st += "{0:+10.6f} * x{1:d}".format(beta[-1, 0], i + 2)
+    printInfo("The result is :")
+    printInfo(st)
+    printInfo("Test each parameter.")
+    printInfo("\t{0:^4s}{1:^15s}{2:^15s}{3:^15s}{4:^5s}{5:^9s}{6:^5s}".format(
+        "xi", "Para", "Sigma", "t-statistics", 'FD', "p-value", 'Sig'))
+    for i in range(x.shape[1] - 1):
+        printInfo("\t{0:^4s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
+                  "{6:^5s}".format("x" + str(i + 1),
+                                   beta[i][0],
+                                   (sigma2 * cov[i, i])**.5,
+                                   (beta[i][0] / ((sigma2 * cov[i, i])**.5)),
+                                   x.shape[0] - x.shape[1],
+                                   (1. - t.cdf(
+                                       abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) * 2,
+                                   "Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No'))
+    i = i + 1
+    if addconst:
+        printInfo("\t{0:^4s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
+                  "{6:^5s}".format('c',
+                                   beta[i][0],
+                                   (sigma2 * cov[i, i])**.5,
+                                   (beta[i][0] / ((sigma2 * cov[i, i])**.5)),
+                                   x.shape[0] - x.shape[1],
+                                   (1. - t.cdf(
+                                       abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) * 2,
+                                   "Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No'))
+    else:
+        printInfo("\t{0:^4s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
+                  "{6:^5s}".format("x" + str(i + 1),
+                                   beta[i][0],
+                                   (sigma2 * cov[i, i])**.5,
+                                   (beta[i][0] / ((sigma2 * cov[i, i])**.5)),
+                                   x.shape[0] - x.shape[1],
+                                   (1. - t.cdf(
+                                       abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) * 2,
+                                   "Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No'))
