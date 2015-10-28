@@ -33,5 +33,5 @@ __all__.extend(algorithm.__all__)
 # __all__.extend(job_organization.__all__)
 
 from . import math
-# from .math import *
-# __all__.extend(math.__all__)
+from .math import *
+__all__.extend(math.__all__)

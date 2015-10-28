@@ -8,8 +8,8 @@ __all__ = []
 
 
 from . import Application
-from .Application import *
-__all__.extend(Application.__all__)
+# from .Application import *
+# __all__.extend(Application.__all__)
 __all__.append('Application')
 
 
