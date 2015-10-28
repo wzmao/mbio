@@ -149,7 +149,7 @@ class ANOVA(object):
 def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     """Make regression analysis of array data. And test each parameter using t-test.
 
-    `x` must be a N*a array. `y` must be a N*b array.
+    `x` must be a N*a array. `y` must be a N*1 array.
     If `x` or `y` just has one dimension, it could be a 1D array and converted automatically.
 
     `const` is `True` default and it will detect the are there constant in `x`.
@@ -174,30 +174,33 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
             return None
     x = array(x, dtype=float)
     y = array(y, dtype=float)
-    if x.ndim == 1:
-        x.resize((x.size, 1))
-    elif x.ndim == 2:
+    if x.ndim == 2:
         pass
+    elif x.ndim == 1:
+        x.resize((x.size, 1))
     else:
         printError("x must be 1D or 2D data.")
         return None
-    if y.ndim == 1:
+    if y.ndim == 2:
+        if y.shape[1] != 1:
+            printInfo("Just take the first column of y.")
+            y = y[:, 0:1]
+    elif y.ndim == 1:
         y.resize((y.size, 1))
-    elif y.ndim == 2:
-        pass
     else:
         printError("y must be 1D or 2D data.")
         return None
     if x.shape[0] != y.shape[0]:
         printError("x and y must have same first dimension.")
         return None
-    if type(label)==type(None):
-        label=['x'+str(i+1) for i in range(x.shape[1])]
+    if type(label) == type(None):
+        label = ['x' + str(i + 1) for i in range(x.shape[1])]
     else:
-        label=[str(i) for i in label]
-    if len(label)!=x.shape[1]:
-        printError("The length of label does not match data. Dismiss the label.")
-        label=['x'+str(i+1) for i in range(x.shape[1])]
+        label = [str(i) for i in label]
+    if len(label) != x.shape[1]:
+        printError(
+            "The length of label does not match data. Dismiss the label.")
+        label = ['x' + str(i + 1) for i in range(x.shape[1])]
 
     addconst = 0
     if const:
@@ -225,7 +228,7 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     if addconst:
         st += "{0:+10.6f}".format(beta[-1, 0])
     else:
-        st += "{0:+10.6f}*{1:s}".format(beta[-1, 0], label[i+1])
+        st += "{0:+10.6f}*{1:s}".format(beta[-1, 0], label[i + 1])
     printInfo("The result is :")
     printInfo(st)
     printInfo("Test each parameter.")
@@ -241,3 +244,4 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
                                    (1. - t.cdf(
                                        abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) * 2,
                                    "Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No'))
+    return beta
