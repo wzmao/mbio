@@ -234,17 +234,28 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     printInfo("Test each parameter.")
     printInfo("\t{0:^5s}{1:^15s}{2:^15s}{3:^15s}{4:^5s}{5:^9s}{6:^5s}".format(
         "xi", "Para", "Sigma", "t-statistics", 'FD', "p-value", 'Sig'))
+    p=[]
+    ts=[]
+    sig=[]
+    sigma=[]
     for i in range(x.shape[1]):
+        sigma.append((sigma2 * cov[i, i])**.5)
+        ts.append(beta[i][0] / sigma[-1])
+        p.append((1. - t.cdf(ts[-1], x.shape[0] - x.shape[1])) * 2)
+        sig.append("Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No')
         printInfo("\t{0:^5s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
                   "{6:^5s}".format(label[i],
                                    beta[i][0],
-                                   (sigma2 * cov[i, i])**.5,
-                                   (beta[i][0] / ((sigma2 * cov[i, i])**.5)),
+                                   sigma[-1],
+                                   ts[-1],
                                    x.shape[0] - x.shape[1],
-                                   (1. - t.cdf(
-                                       abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) * 2,
-                                   "Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / ((sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No'))
-    return beta
+                                   p[-1],
+                                   sig[-1]))
+    p=array(p)
+    ts=array(ts)
+    sig=array(sig)
+    sigma=array(sigma)
+    return {'beta':beta,'p':p,'t':ts,"label":label,'sig':sig,'sigma':sigma}
 
 
 def performPolyRegression(y, degree=2, **kwargs):
@@ -320,4 +331,5 @@ def performPolyRegression(y, degree=2, **kwargs):
                 st += " {0:>7.4f}".format(poly[j, i])
         printInfo("\t{0:^5s}:{1}".format(label[i], st))
     result = performRegression(poly, y, label=label, **kwargs)
-    return poly, result
+    result['poly']=poly
+    return result
