@@ -1,6 +1,7 @@
 #include "Python.h"
 #include "numpy/arrayobject.h"
 #include <string.h>
+#include <zlib.h>
 
 typedef struct MRCHeader
 {   
@@ -52,22 +53,35 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
     char *filename, SymData[80];
     PyObject *header;
     FILE *m_fp;
+    int compress;
     MRCHeader m_header;
     int i;
+    gzFile gzfp;
 
-    static char *kwlist[] = {"filename", "header", NULL};
+    static char *kwlist[] = {"filename", "header", "compress",NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sO", kwlist,
-                                     &filename, &header))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sOi", kwlist,
+                                     &filename, &header, &compress))
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
-    m_fp=fopen(filename,"r");
+    if (compress){
+        gzfp = gzopen(filename,"rb");
 
-    if(m_fp==NULL)
-        return Py_BuildValue("Os", Py_None,"Couldn't read file.");
+        if(gzfp==NULL)
+            return Py_BuildValue("Os", Py_None,"Couldn't read file.");
 
-    if(fread(&m_header,1,1024,m_fp)<1024)
-        return Py_BuildValue("Os", Py_None,"File header is not complete.");
+        if (gzread(gzfp,&m_header,1024)<1024)
+            return Py_BuildValue("Os", Py_None,"File header is not complete.");
+    }
+    else{
+        m_fp=fopen(filename,"r");
+
+        if(m_fp==NULL)
+            return Py_BuildValue("Os", Py_None,"Couldn't read file.");
+
+        if(fread(&m_header,1,1024,m_fp)<1024)
+            return Py_BuildValue("Os", Py_None,"File header is not complete.");
+    }
     
     PyObject_SetAttrString(header, "nx", PyInt_FromLong(m_header.nx));
     PyObject_SetAttrString(header, "ny", PyInt_FromLong(m_header.ny));
@@ -109,16 +123,28 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
         PyObject_SetAttrString(header, "symdata", Py_None);
     }
     else if (m_header.nsymbt==80){
-        if(fseek(m_fp, 1024, SEEK_SET)!=0)
-            return Py_BuildValue("Os", Py_None,"Symmetry data couldn't be located.");
-        if (fread(SymData, 80, sizeof(char), m_fp)!=0)
-            return Py_BuildValue("Os", Py_None,"Couldn't parse symmetry data from file."); 
-        PyObject_SetAttrString(header, "symdata", PyString_FromStringAndSize(SymData,80));
+        if (compress){
+            if(gzseek(gzfp, 1024, SEEK_SET)!=0)
+                return Py_BuildValue("Os", Py_None,"Symmetry data couldn't be located.");
+            if (gzread(gzfp, SymData, 80*sizeof(char))!=0)
+                return Py_BuildValue("Os", Py_None,"Couldn't parse symmetry data from file."); 
+            PyObject_SetAttrString(header, "symdata", PyString_FromStringAndSize(SymData,80));
+        }
+        else{
+            if(fseek(m_fp, 1024, SEEK_SET)!=0)
+                return Py_BuildValue("Os", Py_None,"Symmetry data couldn't be located.");
+            if (fread(SymData, 80, sizeof(char), m_fp)!=0)
+                return Py_BuildValue("Os", Py_None,"Couldn't parse symmetry data from file."); 
+            PyObject_SetAttrString(header, "symdata", PyString_FromStringAndSize(SymData,80));
+        }
     }
     else{
         return Py_BuildValue("Os", Py_None,"Symmetry data size is not 0 or 80.");
     }
-    fclose(m_fp);
+    if (compress)
+        gzclose(gzfp);
+    else
+        fclose(m_fp);
     // printf("%ld\n", PyInt_AsLong(PyObject_GetAttrString(header,"maps")));
     return Py_BuildValue("O", header);
 }

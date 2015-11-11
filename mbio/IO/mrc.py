@@ -39,7 +39,9 @@ class MRCHeader():
             from os.path import exists, isfile
             if exists(filename) and isfile(filename):
                 from .Cmrc import readHeader
-                temp = readHeader(filename=filename, header=self)
+                compress = 1 if filename.lower().endswith('.gz') else 0
+                temp = readHeader(
+                    filename=filename, header=self, compress=compress)
                 if isinstance(temp, tuple):
                     from .output import printError
                     if temp[0] == None:
@@ -88,7 +90,9 @@ class MRCHeader():
             from os.path import exists, isfile
             if exists(filename) and isfile(filename):
                 from .Cmrc import readHeader
-                temp = readHeader(filename=filename, header=self)
+                compress = 1 if filename.lower().endswith('.gz') else 0
+                temp = readHeader(
+                    filename=filename, header=self, compress=compress)
                 if isinstance(temp, tuple):
                     from .output import printError
                     if temp[0] == None:
