@@ -179,24 +179,140 @@ def writePDB(filename, pdb, forcebeta=None, **kwargs):
     """Write PDB file. Write the beta to beta also."""
 
     from prody import writePDB as w
-    from numpy import array
-    from os.path import exists, isfile
-    from ..IO.output import printInfo
+    from prody import writePDBStream as ws
+    import tarfile
+    from numpy import array, dtype
+    from os.path import exists, isfile, split
+    from ..IO.output import printInfo, printError
+    import StringIO
 
-    w(filename, pdb, **kwargs)
-    if forcebeta is None:
-        if (array([float('%6.2f' % i) for i in pdb.getBetas()]) == pdb.getBetas()).all():
-            forcebeta = False
+    if pdb.getChids().dtype != dtype("S1") or pdb.numAtoms() > 99999:
+        gotar = True
+    else:
+        if filename.lower().endswith('.pdb') or filename.lower().endswith('.pdb.gz'):
+            gotar = False
         else:
-            forcebeta = True
+            gotar = True
+    if gotar:
+        if filename.lower().endswith('.tar.gz') or filename.lower().endswith('.tar.bz2'):
+            pass
+        elif filename.lower().endswith('.pdb'):
+            filename = filename + '.tar.gz'
+        elif filename.lower().endswith('.gz') and not filename.lower().endswith('.tar.gz'):
+            filename = '.'.join(
+                filename.split('.')[:-1] + ['tar'] + filename.split('.')[-1:])
+        elif filename.lower().endswith('.bz2') and not filename.lower().endswith('.tar.bz2'):
+            filename = '.'.join(
+                filename.split('.')[:-1] + ['tar'] + filename.split('.')[-1:])
+        elif filename.lower().endswith('.tar'):
+            filename = filename + '.gz'
+        else:
+            filename = filename + '.tar.gz'
 
-    if forcebeta:
-        if (exists(filename + ".beta") and isfile(filename + ".beta")) or not exists(filename + '.beta'):
-            try:
-                f = open(filename + ".beta", 'w')
-                f.write('\n'.join([str(i) for i in pdb.getBetas()]))
-                f.close()
-                printInfo(
-                    'Write the beta values to {0}'.format(filename + ".beta"))
-            except:
-                pass
+    if filename.lower().endswith('.tar.gz') or filename.lower().endswith('.tar.bz2'):
+        filetype = filename.lower().split('.')[-1]
+        rootname = split(filename)[1]
+        rootname = rootname[:-7] if filetype == 'gz' else rootname[:-8]
+        chains = list(set(pdb.getChids()))
+        chains.sort()
+        chainnums = [pdb.select('chain ' + i).numAtoms() for i in chains]
+        sumatom = 0
+        segs = [[]]
+        for i in chains:
+            segs[-1].append(i)
+            sumatom += chainnums[chains.index(i)]
+            onetoobig = False
+            if (sumatom > 99999) or len(segs[-1]) > 26:
+                if len(segs[-1]) != 1:
+                    segs.append([segs[-1][-1]])
+                    segs[-2] = segs[-2][:-1]
+                    sumatom = chainnums[chains.index(i)]
+                    if (chainnums[chains.index(i)] > 99999):
+                        onetoobig = True
+                else:
+                    onetoobig = True
+            if onetoobig or len(segs[-1]) == 26:
+                sumatom = 0
+                segs.append([])
+        while segs[-1] == []:
+            segs = segs[:-1]
+        t = tarfile.open(filename, "w:" + filetype)
+        nownum = 1
+        info = t.tarinfo()
+        mapper = {}
+
+        for i in range(len(segs)):
+            p1 = pdb.select('chain ' + ' '.join(segs[i]))
+            if p1.numAtoms() < 99999:
+                nowfilename = rootname + '-bundle-' + str(nownum) + '.pdb'
+                mapper[nowfilename] = {}
+                for j in range(len(segs[i])):
+                    mapper[nowfilename][segs[i][j]] = chr(ord('A') + j)
+                p1.setChids([mapper[nowfilename][j] for j in p1.getChids()])
+
+                data = StringIO.StringIO()
+                ws(data, p1)
+                data.seek(0)
+
+                info.name = nowfilename
+                info.size = data.len
+                info.mtime = tarfile.time.time()
+
+                t.addfile(info, data)
+                nownum += 1
+            else:
+                ss = 0
+                while p1[ss:ss + 99999]:
+                    nowfilename = rootname + '-bundle-' + str(nownum) + '.pdb'
+                    mapper[nowfilename] = {}
+                    mapper[nowfilename][segs[i][0]] = 'A'
+                    p2 = p1[ss:ss + 99999]
+                    p2.setChids([mapper[nowfilename][j]
+                                 for j in p2.getChids()])
+
+                    data = StringIO.StringIO()
+                    ws(data, p2)
+                    data.seek(0)
+
+                    info.name = nowfilename
+                    info.size = data.len
+                    info.mtime = tarfile.time.time()
+
+                    t.addfile(info, data)
+                    nownum += 1
+                    ss += 99999
+
+        data = StringIO.StringIO()
+        data.write("    New chain ID            Original chain ID\n")
+        for i in sorted(mapper.keys()):
+            data.write('\n' + i + ':\n')
+            for j in sorted(mapper[i].keys()):
+                data.write(
+                    "           {0}           {1}\n".format(j, mapper[i][j]))
+        data.seek(0)
+        info.name = rootname + "-chain-id-mapping.txt"
+        info.size = data.len
+        info.mtime = tarfile.time.time()
+        t.addfile(info, data)
+        t.close()
+        return filename
+    else:
+        w(filename, pdb, **kwargs)
+        if forcebeta is None:
+            if (array([float('%6.2f' % i) for i in pdb.getBetas()]) == pdb.getBetas()).all():
+                forcebeta = False
+            else:
+                forcebeta = True
+        if forcebeta:
+            if (exists(filename + ".beta") and isfile(filename + ".beta")) or not exists(filename + '.beta'):
+                try:
+                    f = open(filename + ".beta", 'w')
+                    f.write('\n'.join([str(i) for i in pdb.getBetas()]))
+                    f.close()
+                    printInfo(
+                        'Write the Beta values to {0}'.format(filename + ".beta"))
+                except:
+                    printError(
+                        "Writting the Beta for {0} failed.".format(filename))
+                    pass
+        return filename
