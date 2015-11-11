@@ -211,19 +211,27 @@ static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyObject *header;
     MRCHeader m_header;
     FILE *m_fp=NULL;
-    int i,j,k,bytesize=4;
+    gzFile gzfp=NULL;
+    int i,j,k,bytesize=4,compress=0;
 
-    static char *kwlist[] = {"header", "data", "filename", NULL};
+    static char *kwlist[] = {"header", "data", "filename", "compress", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOs", kwlist,
-                                     &header, &data, &filename))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOsi", kwlist,
+                                     &header, &data, &filename, &compress))
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
     data = PyArray_GETCONTIGUOUS(data);
     void *matrix = (void *) PyArray_DATA(data);
-    m_fp=fopen(filename,"w");
-    if(m_fp==NULL)
-        return Py_BuildValue("Os", Py_None,"Couldn't write file.");
+    if (compress){
+        gzfp = gzopen(filename,"wb");
+        if(gzfp==NULL)
+            return Py_BuildValue("Os", Py_None,"Couldn't write file.");
+    }
+    else{
+        m_fp=fopen(filename,"w");
+        if(m_fp==NULL)
+            return Py_BuildValue("Os", Py_None,"Couldn't write file.");
+    }
 
     m_header.nx=PyInt_AsLong(PyObject_GetAttrString(header, "nx"));
     m_header.ny=PyInt_AsLong(PyObject_GetAttrString(header, "ny"));
@@ -311,21 +319,40 @@ static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     // Write file.
-    if (fwrite(&m_header,1,1024,m_fp)!=1024){
-        fclose(m_fp);
-        return Py_BuildValue("Os", Py_None,"Couldn't write the header.");
-    }
-    if (m_header.nsymbt==80){
-        if (fwrite(SymData, 1, (size_t)80, m_fp)!=80){
-            fclose(m_fp);
-            return Py_BuildValue("Os", Py_None,"Couldn't write Symmetry Data.");
+    if (compress){
+        if (gzwrite(gzfp,&m_header,1024)!=1024){
+            gzclose(gzfp);
+            return Py_BuildValue("Os", Py_None,"Couldn't write the header.");
         }
+        if (m_header.nsymbt==80){
+            if (gzwrite(gzfp, SymData, 80)!=80){
+                gzclose(gzfp);
+                return Py_BuildValue("Os", Py_None,"Couldn't write Symmetry Data.");
+            }
+        }
+        if (gzwrite(gzfp, matrix, bytesize*m_header.nz*m_header.ny*m_header.nx)!=bytesize*m_header.nz*m_header.ny*m_header.nx){
+            gzclose(gzfp);
+            return Py_BuildValue("Os", Py_None,"Couldn't write Matrix.");
+        }
+        gzclose(gzfp);
     }
-    if (fwrite(matrix, bytesize, m_header.nz*m_header.ny*m_header.nx, m_fp)!=m_header.nz*m_header.ny*m_header.nx){
+    else{
+        if (fwrite(&m_header,1,1024,m_fp)!=1024){
+            fclose(m_fp);
+            return Py_BuildValue("Os", Py_None,"Couldn't write the header.");
+        }
+        if (m_header.nsymbt==80){
+            if (fwrite(SymData, 1, (size_t)80, m_fp)!=80){
+                fclose(m_fp);
+                return Py_BuildValue("Os", Py_None,"Couldn't write Symmetry Data.");
+            }
+        }
+        if (fwrite(matrix, bytesize, m_header.nz*m_header.ny*m_header.nx, m_fp)!=m_header.nz*m_header.ny*m_header.nx){
+            fclose(m_fp);
+            return Py_BuildValue("Os", Py_None,"Couldn't write Matrix.");
+        }
         fclose(m_fp);
-        return Py_BuildValue("Os", Py_None,"Couldn't write Matrix.");
     }
-    fclose(m_fp);
     return Py_BuildValue("i", 0);
 }
 

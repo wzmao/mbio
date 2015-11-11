@@ -400,10 +400,12 @@ class MRC():
         self.header.nxstart, self.header.nystart, self.header.nzstart = array(
             [self.header.nxstart, self.header.nystart, self.header.nzstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
         printInfo("Writing MRC to {0}".format(filename))
+        compress = 1 if filename.lower().endswith('.gz') else 0
         temp = writeData(header=self.header, data=transpose(
-            self.data, (self.header.maps - 1, self.header.mapr - 1, self.header.mapc - 1)), filename=filename)
+            self.data, (self.header.maps - 1, self.header.mapr - 1, self.header.mapc - 1)), filename=filename, compress=compress)
         if isinstance(temp, tuple):
             if temp[0] == None:
+                print temp
                 printError(temp[1])
             else:
                 printError("Couldn't parse the Error information.")
