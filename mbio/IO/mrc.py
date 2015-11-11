@@ -304,10 +304,12 @@ class MRC():
                     printInfo(
                         "Parsing the Data from file {0}.".format(filename))
                     self.data = self.data - 1
+                    compress = 1 if filename.lower().endswith('.gz') else 0
                     temp = readData(
                         filename=filename, nsymbt=self.header.nsymbt,
                         datamode=self.header.mode, data=self.data,
-                        size=self.header.nz * self.header.ny * self.header.nx)
+                        size=self.header.nz * self.header.ny * self.header.nx,
+                        compress=compress)
                     if isinstance(temp, tuple):
                         del self.data
                         self.data = None

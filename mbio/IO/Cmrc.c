@@ -52,11 +52,10 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
 
     char *filename, SymData[80];
     PyObject *header;
-    FILE *m_fp;
-    int compress;
+    FILE *m_fp=NULL;
+    gzFile gzfp=NULL;
+    int compress, i;
     MRCHeader m_header;
-    int i;
-    gzFile gzfp;
 
     static char *kwlist[] = {"filename", "header", "compress",NULL};
 
@@ -131,7 +130,7 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
             PyObject_SetAttrString(header, "symdata", PyString_FromStringAndSize(SymData,80));
         }
         else{
-            if(fseek(m_fp, 1024, SEEK_SET)!=0)
+            if(fseek(m_fp, 1024, SEEK_SET)==-1)
                 return Py_BuildValue("Os", Py_None,"Symmetry data couldn't be located.");
             if (fread(SymData, 80, sizeof(char), m_fp)!=0)
                 return Py_BuildValue("Os", Py_None,"Couldn't parse symmetry data from file."); 
@@ -154,21 +153,31 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
     char *filename=NULL;
     PyArrayObject *data;
     FILE *m_fp=NULL;
-    int nsymbt=0, datamode=-1,size=0,bytesize=4;
+    gzFile gzfp=NULL;
+    int nsymbt=0, datamode=-1,size=0,bytesize=4,compress=0;
 
-    static char *kwlist[] = {"filename", "nsymbt", "datamode", "data", "size", NULL};
+    static char *kwlist[] = {"filename", "nsymbt", "datamode", "data", "size", "compress", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "siiOi", kwlist,
-                                     &filename, &nsymbt, &datamode, &data, &size))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "siiOii", kwlist,
+                                     &filename, &nsymbt, &datamode, &data, &size, &compress))
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
     data = PyArray_GETCONTIGUOUS(data);
     void *matrix = (void *) PyArray_DATA(data);
-    m_fp=fopen(filename,"r");
-    if(m_fp==NULL)
-        return Py_BuildValue("Os", Py_None,"Couldn't read file.");
-    if(fseek(m_fp, (size_t)(1024+nsymbt), SEEK_SET)!=0)
-        return Py_BuildValue("Os", Py_None,"Matrix data couldn't be located.");
+    if (compress){
+        gzfp = gzopen(filename,"rb");
+        if(gzfp==NULL)
+            return Py_BuildValue("Os", Py_None,"Couldn't read file.");
+        if (gzseek(gzfp,(1024+nsymbt),SEEK_SET)==-1)
+            return Py_BuildValue("Os", Py_None,"File header is not complete.");
+    }
+    else{
+        m_fp=fopen(filename,"r");
+        if(m_fp==NULL)
+            return Py_BuildValue("Os", Py_None,"Couldn't read file.");
+        if(fseek(m_fp, (size_t)(1024+nsymbt), SEEK_SET)!=0)
+            return Py_BuildValue("Os", Py_None,"Matrix data couldn't be located.");
+    }
     switch(datamode)
     {
         case 0:
@@ -182,9 +191,16 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
         case 6:
             bytesize=2;break;
     }
-    if(fread(matrix, 1,size*bytesize, m_fp)!=size*bytesize)
-        return Py_BuildValue("Os", Py_None,"Parsing data Error.");
-    fclose(m_fp);
+    if (compress){
+        if(gzread(gzfp,matrix, size*bytesize)!=size*bytesize)
+            return Py_BuildValue("Os", Py_None,"Parsing data Error.");
+        gzclose(gzfp);
+    }
+    else{
+        if(fread(matrix, 1,size*bytesize, m_fp)!=size*bytesize)
+            return Py_BuildValue("Os", Py_None,"Parsing data Error.");
+        fclose(m_fp);
+    }
     return Py_BuildValue("O", data);
 }
 
