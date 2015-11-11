@@ -19,15 +19,15 @@ Now, I have
 * DICOV
 * APC
 * BND
-* PPV(for PSICOV)
+* PPV (for PSICOV)
 * Sequence shuffle
 
 We also have some functions for different file formats.
 
-* PDB(which could support the .tar.gz bundle PDB parser and writer.)
+* PDB (which could support the .tar.gz bundle PDB parser and writer.)
 * Fasta
 * Numpy Matrix
-* MRC
+* MRC (support .mrc.gz parser and writer.)
 
 ----
 ## Usage
