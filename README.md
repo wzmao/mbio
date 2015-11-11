@@ -3,7 +3,10 @@
 ----
 ## What is **`mbio`**?
    This is a biology python package I used in my working. I will translate some algorithms from other language into python. I will try to make the program fast and easy to use. I mainly working on protein sequence analysis.
+   
    Now we have v1.1.1, welcome to download and tell me your feeling.
+   
+   The package is dependent on numpy and prody.
 
 Now, I have
 
@@ -21,6 +24,7 @@ Now, I have
 
 We also have some functions for different file formats.
 
+* PDB(which could support the .tar.gz bundle PDB parser and writer.)
 * Fasta
 * Numpy Matrix
 * MRC
