@@ -193,6 +193,7 @@ def writePDB(filename, pdb, forcebeta=None, **kwargs):
             gotar = False
         else:
             gotar = True
+
     if gotar:
         if filename.lower().endswith('.tar.gz') or filename.lower().endswith('.tar.bz2'):
             pass
@@ -260,6 +261,29 @@ def writePDB(filename, pdb, forcebeta=None, **kwargs):
 
                 t.addfile(info, data)
                 nownum += 1
+
+                if forcebeta is None:
+                    if (array([float('%6.2f' % i) for i in p1.getBetas()]) == p1.getBetas()).all():
+                        forcebeta1 = False
+                    else:
+                        forcebeta1 = True
+                else:
+                    forcebeta1 = forcebeta
+                if forcebeta1:
+                    try:
+                        data = StringIO.StringIO()
+                        data.write('\n'.join([str(i) for i in p1.getBetas()]))
+                        data.seek(0)
+                        info.name = nowfilename + '.beta'
+                        info.size = data.len
+                        info.mtime = tarfile.time.time()
+                        t.addfile(info, data)
+                        printInfo(
+                            'Write the Beta values to {0}'.format(nowfilename + ".beta"))
+                    except:
+                        printError(
+                            "Writting the Beta for {0} failed.".format(nowfilename))
+                        pass
             else:
                 ss = 0
                 while p1[ss:ss + 99999]:
@@ -281,6 +305,29 @@ def writePDB(filename, pdb, forcebeta=None, **kwargs):
                     t.addfile(info, data)
                     nownum += 1
                     ss += 99999
+                    if forcebeta is None:
+                        if (array([float('%6.2f' % i) for i in p2.getBetas()]) == p2.getBetas()).all():
+                            forcebeta1 = False
+                        else:
+                            forcebeta1 = True
+                    else:
+                        forcebeta1 = forcebeta
+                    if forcebeta1:
+                        try:
+                            data = StringIO.StringIO()
+                            data.write(
+                                '\n'.join([str(i) for i in p2.getBetas()]))
+                            data.seek(0)
+                            info.name = nowfilename + '.beta'
+                            info.size = data.len
+                            info.mtime = tarfile.time.time()
+                            t.addfile(info, data)
+                            printInfo(
+                                'Write the Beta values to {0}'.format(nowfilename + ".beta"))
+                        except:
+                            printError(
+                                "Writting the Beta for {0} failed.".format(nowfilename))
+                            pass
 
         data = StringIO.StringIO()
         data.write("    New chain ID            Original chain ID\n")
