@@ -186,7 +186,7 @@ def writePDB(filename, pdb, forcebeta=None, **kwargs):
     from ..IO.output import printInfo, printError
     import StringIO
 
-    if pdb.getChids().dtype != dtype("S1") or pdb.numAtoms() > 99999:
+    if set([len(i) for i in set(pdb.getChids())]) != set([1]) or pdb.numAtoms() > 99999:
         gotar = True
     else:
         if filename.lower().endswith('.pdb') or filename.lower().endswith('.pdb.gz'):
