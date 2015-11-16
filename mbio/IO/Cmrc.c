@@ -81,7 +81,21 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
         if(fread(&m_header,1,1024,m_fp)<1024)
             return Py_BuildValue("Os", Py_None,"File header is not complete.");
     }
-    
+    if ((m_header.mapc>2)|(m_header.maps>2)|(m_header.mapr>2)){
+        unsigned char *t,*y;
+        int swap=0;
+        t=(unsigned char *)&(m_header.mapc);
+        y=(unsigned char *)&swap;
+        y[0]=t[0];y[1]=t[1];y[2]=t[2];y[3]=t[3];
+        t[0]=y[3];t[1]=y[2];t[2]=y[1];t[3]=y[0];
+        t=(unsigned char *)&(m_header.maps);
+        y[0]=t[0];y[1]=t[1];y[2]=t[2];y[3]=t[3];
+        t[0]=y[3];t[1]=y[2];t[2]=y[1];t[3]=y[0];
+        t=(unsigned char *)&(m_header.mapr);
+        y[0]=t[0];y[1]=t[1];y[2]=t[2];y[3]=t[3];
+        t[0]=y[3];t[1]=y[2];t[2]=y[1];t[3]=y[0];        
+    }
+
     PyObject_SetAttrString(header, "nx", PyInt_FromLong(m_header.nx));
     PyObject_SetAttrString(header, "ny", PyInt_FromLong(m_header.ny));
     PyObject_SetAttrString(header, "nz", PyInt_FromLong(m_header.nz));
