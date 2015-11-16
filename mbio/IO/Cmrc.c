@@ -204,12 +204,12 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyArrayObject *data;
     FILE *m_fp=NULL;
     gzFile gzfp=NULL;
-    int nsymbt=0, datamode=-1,size=0,bytesize=4,compress=0,transend1=0;
+    int nsymbt=0, datamode=-1,size=0,bytesize=4,compress=0;
 
-    static char *kwlist[] = {"filename", "nsymbt", "datamode", "data", "size", "compress", "transend", NULL};
+    static char *kwlist[] = {"filename", "nsymbt", "datamode", "data", "size", "compress", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "siiOiii", kwlist,
-                                     &filename, &nsymbt, &datamode, &data, &size, &compress, &transend1))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "siiOii", kwlist,
+                                     &filename, &nsymbt, &datamode, &data, &size, &compress))
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
     data = PyArray_GETCONTIGUOUS(data);
@@ -250,19 +250,6 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
         if(fread(matrix, bytesize, size, m_fp)!=size)
             return Py_BuildValue("Os", Py_None,"Parsing data Error.");
         fclose(m_fp);
-    }
-    if (transend1){
-        long i,j;
-        unsigned char y[bytesize];
-
-        for (i=0;i<size;i++){
-            for (j=0;j<bytesize;j++){
-                y[j]=matrix[i*bytesize+j];
-            }
-            for (j=0;j<bytesize;j++){
-                matrix[i*bytesize+j]=y[bytesize-1-j];
-            }
-        }
     }
     return Py_BuildValue("O", data);
 }

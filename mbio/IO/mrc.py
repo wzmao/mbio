@@ -309,7 +309,7 @@ class MRC():
                         filename=filename, nsymbt=self.header.nsymbt,
                         datamode=self.header.mode, data=self.data,
                         size=self.header.nz * self.header.ny * self.header.nx,
-                        compress=compress,transend=self.header.transend)
+                        compress=compress)
                     if isinstance(temp, tuple):
                         del self.data
                         self.data = None
@@ -331,6 +331,8 @@ class MRC():
                                 self.header.maps, self.header.mapr, self.header.mapc]
                             self.data = transpose(temp, argsort(temporder))
                             del temp
+                    if self.header.transend:
+                        self.data.byteswap(True)
             else:
                 printError("The file doesn't exists or is not a file.")
                 return None
@@ -424,6 +426,7 @@ class MRC():
 
         from numpy import array, int8, int16, float32, uint8, uint16, argsort
         from .output import printError
+        from platform import architecture
 
         if set([self.header.mapc, self.header.mapr, self.header.maps]) != set([1, 2, 3]):
             printError(
@@ -446,7 +449,19 @@ class MRC():
         self.header.dmin = self.data.min()
         self.header.dmax = self.data.max()
         self.header.dmean = self.data.mean()
-        self.header.rms = (((self.data - self.data.mean())**2).mean())**.5
+        if architecture()[0].find('32')!=-1:
+            temp1=0.
+            temp2=0.
+            temp3=0.
+            for i in self.data:
+                for j in i:
+                    for k in j:
+                        temp1+=k**2
+                        temp2+=k
+                        temp3+=1
+            self.header.rms = (temp1/temp3-(temp2/temp3)**2)**.5
+        else:
+            self.header.rms = (((self.data - self.data.mean())**2).mean())**.5
         if self.header.symdata:
             self.header.nsymbt = 80
             self.header.symdata = self.header.symdata[:80]
