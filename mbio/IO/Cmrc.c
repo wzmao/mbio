@@ -81,7 +81,8 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
         if(fread(&m_header,1,1024,m_fp)<1024)
             return Py_BuildValue("Os", Py_None,"File header is not complete.");
     }
-    if ((m_header.mapc>2)|(m_header.maps>2)|(m_header.mapr>2)){
+
+    if ((m_header.mapc>3)|(m_header.maps>3)|(m_header.mapr>3)){
         unsigned char *t,*y;
         int swap=0;
         t=(unsigned char *)&(m_header.mapc);
