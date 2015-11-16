@@ -309,7 +309,7 @@ class MRC():
                         filename=filename, nsymbt=self.header.nsymbt,
                         datamode=self.header.mode, data=self.data,
                         size=self.header.nz * self.header.ny * self.header.nx,
-                        compress=compress)
+                        compress=compress,transend=self.header.transend)
                     if isinstance(temp, tuple):
                         del self.data
                         self.data = None

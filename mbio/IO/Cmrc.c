@@ -47,6 +47,19 @@ typedef struct MRCHeader
                           //terminate in a *). 
                           //Data records follow.
 } MRCHeader;
+static int *transend(unsigned char *x,int l){
+    long temp=0;
+    int i;
+    unsigned char *y=NULL;
+    y=(unsigned char *)&temp;
+    for (i=0;i<l;i++){
+        y[i]=x[i];
+    }
+    for (i=0;i<l;i++){
+        x[i]=y[l-1-i];
+    }
+    return 0;
+}
 
 static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
 
@@ -73,7 +86,7 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
             return Py_BuildValue("Os", Py_None,"File header is not complete.");
     }
     else{
-        m_fp=fopen(filename,"r");
+        m_fp=fopen(filename,"rb");
 
         if(m_fp==NULL)
             return Py_BuildValue("Os", Py_None,"Couldn't read file.");
@@ -83,18 +96,40 @@ static PyObject *readHeader(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     if ((m_header.mapc>3)|(m_header.maps>3)|(m_header.mapr>3)){
-        unsigned char *t,*y;
-        int swap=0;
-        t=(unsigned char *)&(m_header.mapc);
-        y=(unsigned char *)&swap;
-        y[0]=t[0];y[1]=t[1];y[2]=t[2];y[3]=t[3];
-        t[0]=y[3];t[1]=y[2];t[2]=y[1];t[3]=y[0];
-        t=(unsigned char *)&(m_header.maps);
-        y[0]=t[0];y[1]=t[1];y[2]=t[2];y[3]=t[3];
-        t[0]=y[3];t[1]=y[2];t[2]=y[1];t[3]=y[0];
-        t=(unsigned char *)&(m_header.mapr);
-        y[0]=t[0];y[1]=t[1];y[2]=t[2];y[3]=t[3];
-        t[0]=y[3];t[1]=y[2];t[2]=y[1];t[3]=y[0];        
+        transend((unsigned char *)&(m_header.mapc),4);
+        transend((unsigned char *)&(m_header.mapr),4);
+        transend((unsigned char *)&(m_header.maps),4);
+        transend((unsigned char *)&(m_header.nx),4);
+        transend((unsigned char *)&(m_header.ny),4);
+        transend((unsigned char *)&(m_header.nz),4);
+        transend((unsigned char *)&(m_header.mode),4);
+        transend((unsigned char *)&(m_header.nxstart),4);
+        transend((unsigned char *)&(m_header.nystart),4);
+        transend((unsigned char *)&(m_header.nzstart),4);
+        transend((unsigned char *)&(m_header.mx),4);
+        transend((unsigned char *)&(m_header.my),4);
+        transend((unsigned char *)&(m_header.mz),4);
+        transend((unsigned char *)&(m_header.ispg),4);
+        transend((unsigned char *)&(m_header.nsymbt),4);
+        transend((unsigned char *)&(m_header.machst),4);
+        transend((unsigned char *)&(m_header.nlabels),4);
+        transend((unsigned char *)&(m_header.dmin),4);
+        transend((unsigned char *)&(m_header.dmax),4);
+        transend((unsigned char *)&(m_header.dmean),4);
+        transend((unsigned char *)&(m_header.rms),4);
+        transend((unsigned char *)&(m_header.cella[0]),4);
+        transend((unsigned char *)&(m_header.cella[1]),4);
+        transend((unsigned char *)&(m_header.cella[2]),4);
+        transend((unsigned char *)&(m_header.cellb[0]),4);
+        transend((unsigned char *)&(m_header.cellb[1]),4);
+        transend((unsigned char *)&(m_header.cellb[2]),4);
+        transend((unsigned char *)&(m_header.origin[0]),4);
+        transend((unsigned char *)&(m_header.origin[1]),4);
+        transend((unsigned char *)&(m_header.origin[2]),4);
+        PyObject_SetAttrString(header, "transend", PyInt_FromLong(1));
+    }
+    else{
+        PyObject_SetAttrString(header, "transend", PyInt_FromLong(0));
     }
 
     PyObject_SetAttrString(header, "nx", PyInt_FromLong(m_header.nx));
@@ -169,16 +204,16 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
     PyArrayObject *data;
     FILE *m_fp=NULL;
     gzFile gzfp=NULL;
-    int nsymbt=0, datamode=-1,size=0,bytesize=4,compress=0;
+    int nsymbt=0, datamode=-1,size=0,bytesize=4,compress=0,transend1=0;
 
-    static char *kwlist[] = {"filename", "nsymbt", "datamode", "data", "size", "compress", NULL};
+    static char *kwlist[] = {"filename", "nsymbt", "datamode", "data", "size", "compress", "transend", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "siiOii", kwlist,
-                                     &filename, &nsymbt, &datamode, &data, &size, &compress))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "siiOiii", kwlist,
+                                     &filename, &nsymbt, &datamode, &data, &size, &compress, &transend1))
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
     data = PyArray_GETCONTIGUOUS(data);
-    void *matrix = (void *) PyArray_DATA(data);
+    unsigned char *matrix = (unsigned char *) PyArray_DATA(data);
     if (compress){
         gzfp = gzopen(filename,"rb");
         if(gzfp==NULL)
@@ -187,7 +222,7 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
             return Py_BuildValue("Os", Py_None,"File header is not complete.");
     }
     else{
-        m_fp=fopen(filename,"r");
+        m_fp=fopen(filename,"rb");
         if(m_fp==NULL)
             return Py_BuildValue("Os", Py_None,"Couldn't read file.");
         if(fseek(m_fp, (size_t)(1024+nsymbt), SEEK_SET)!=0)
@@ -212,9 +247,22 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
         gzclose(gzfp);
     }
     else{
-        if(fread(matrix, 1,size*bytesize, m_fp)!=size*bytesize)
+        if(fread(matrix, bytesize, size, m_fp)!=size)
             return Py_BuildValue("Os", Py_None,"Parsing data Error.");
         fclose(m_fp);
+    }
+    if (transend1){
+        long i,j;
+        unsigned char y[bytesize];
+
+        for (i=0;i<size;i++){
+            for (j=0;j<bytesize;j++){
+                y[j]=matrix[i*bytesize+j];
+            }
+            for (j=0;j<bytesize;j++){
+                matrix[i*bytesize+j]=y[bytesize-1-j];
+            }
+        }
     }
     return Py_BuildValue("O", data);
 }
