@@ -4,7 +4,7 @@
 ## What is **`mbio`**?
    This is a biology python package I used in my working. I will translate some algorithms from other language into python. I will try to make the program fast and easy to use. I mainly working on protein sequence analysis.
    
-   Now we have v1.1.1, welcome to download and tell me your feeling.
+   Now we have v1.1.2, welcome to download and tell me your feeling.
    
    The package is dependent on numpy and prody.
 
