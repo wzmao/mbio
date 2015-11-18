@@ -3,7 +3,7 @@
 """
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['genPvalue', 'calcPcutoff', 'showPcutoff']
+__all__ = ['genPvalue', 'calcPcutoff', 'showPcutoff', 'transCylinder']
 
 
 def interpolationball(matrix, index, step, r, **kwarg):
@@ -536,3 +536,42 @@ def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwarg):
     printInfo("Sorting the sample set.")
     findset.sort(kind='quicksort')
     return findset
+
+
+def transCylinder(pdb, **kwarg):
+    """Transfer the PDB fragment to Cylinder.
+    Given the PDB, extract the CA C N and generate the center, 3 directions of the cube
+    and the length."""
+
+    from ..IO.output import printInfo
+    from numpy.linalg import svd
+    from numpy import cross, array
+
+    p1 = pdb.select("name CA C N").copy()
+    if p1 is None:
+        printError("The pdb has no CA C or N in the backbone.")
+        return None
+
+    if p1.numAtoms() < 15:
+        printError("The atom number({0}) is not enough to perform calculation.".format(
+            p1.numAtoms()))
+        printError("The result is not reliable.")
+
+    data = p1.getCoords()
+    datamean = data.mean(axis=0)
+    uu, dd, vv = svd(data - datamean)
+    cent = datamean
+    dirc1 = vv[0]
+    if abs((dirc1**2).sum()**.5 - 1) > 1e-10:
+        raise ValueError(
+            "length of dirc is not 1, is {0}".format((dirc1**2).sum()**.5))
+    if (data[-1] - data[0]).dot(dirc1) < 0:
+        dirc1 = -dirc1
+    rank = (data - cent).dot(dirc1)
+    rankrange = [rank.min(), rank.max()]
+    dirc2 = cent - cent.dot(dirc1) * dirc1
+    dirc2 = dirc2 / ((dirc2**2).sum()**.5)
+    dirc3 = cross(dirc1, dirc2, axis=0)
+    dirc3 = dirc3 / ((dirc3**2).sum()**.5)
+    dirc = array((dirc1, dirc2, dirc3))
+    return cent, dirc, rankrange
