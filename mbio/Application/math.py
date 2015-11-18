@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""This module contains some math functions.
+"""This module contains some math and statistics functions.
 In the future plan: Eigenvalue, Inverse, Matrix Multiplication,
                     SVD, PCA
 """

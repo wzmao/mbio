@@ -7,11 +7,16 @@ Math (If it grows too big in the future, make it alone)
     * :func:`.isSquare` - check if a integer is a square
     * :func:`.eigh` - return the eigenvalues and eigenvectors
     * :func:`.invsp` - inverse a symetric postive definite matrix
+    * :func:`.performRegression - perform the regression and t-test for given data
+    * :func:`.performPolyRegression - perform polynomial regression and F-test for given data
+
+    * :class:`.ANOVA` - a class to perform the ANOVA analysis
 
 Algorithm
 ========
 
     * :func:`.quickSort` - Quick Sort a list of float/int
+    * :func:`.binarySearch` - binary search in a sorted list-like object
 
 """
 

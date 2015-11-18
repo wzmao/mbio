@@ -75,7 +75,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
     """
 
     from ..IO.output import printError, printInfo
-    from ..IO.mrc import MRC as MRCclass
+    from .mrc import MRC as MRCclass
     from ..Application.algorithm import binarySearch
     from prody import AtomGroup as pdbclass
     from prody.atomic.selection import Selection as selectionclass
@@ -488,7 +488,7 @@ def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwarg):
     """
 
     from ..IO.output import printError, printInfo
-    from ..IO.mrc import MRC as MRCclass
+    from .mrc import MRC as MRCclass
     from prody import AtomGroup as pdbclass
     from numpy import ndarray, zeros_like, array, floor, ceil, rint
 
