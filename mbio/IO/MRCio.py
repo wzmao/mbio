@@ -10,7 +10,7 @@ __all__ = ["parseMRC", "parseMRCHeader", "writeMRC"]
 def parseMRC(filename=None, **kwargs):
     """Parse the MRC from a file."""
 
-    from .mrc import MRC
+    from ..EM.mrc import MRC
     from os.path import exists, isfile
 
     if type(filename) == type(None):
@@ -27,7 +27,7 @@ def parseMRC(filename=None, **kwargs):
 def parseMRCHeader(filename=None, **kwargs):
     """Parse the MRC header from a file."""
 
-    from .mrc import MRCHeader
+    from ..EM.mrc import MRCHeader
 
     from os.path import exists, isfile
 
@@ -45,7 +45,7 @@ def parseMRCHeader(filename=None, **kwargs):
 def writeMRC(filename, mrc, **kwargs):
     """Write the MRC file into a file."""
 
-    from .mrc import MRC
+    from ..EM.mrc import MRC
 
     if not isinstance(mrc, MRC):
         from .output import printError
