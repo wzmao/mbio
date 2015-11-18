@@ -43,7 +43,7 @@ class MRCHeader():
                 temp = readHeader(
                     filename=filename, header=self, compress=compress)
                 if isinstance(temp, tuple):
-                    from .output import printError
+                    from ..IO.output import printError
                     if temp[0] == None:
                         printError(temp[1])
                     else:
@@ -80,7 +80,7 @@ class MRCHeader():
                         self.xstart, self.ystart, self.zstart = array(
                             self.origin)[argsort([self.mapc, self.mapr, self.maps])]
             else:
-                from .output import printError
+                from ..IO.output import printError
                 printError("The file doesn't exists or is not a file.")
 
     def parseHeader(self, filename=None, **kwargs):
@@ -94,7 +94,7 @@ class MRCHeader():
                 temp = readHeader(
                     filename=filename, header=self, compress=compress)
                 if isinstance(temp, tuple):
-                    from .output import printError
+                    from ..IO.output import printError
                     if temp[0] == None:
                         printError(temp[1])
                     else:
@@ -131,16 +131,16 @@ class MRCHeader():
                         self.xstart, self.ystart, self.zstart = array(
                             self.origin)[argsort([self.mapc, self.mapr, self.maps])]
             else:
-                from .output import printError
+                from ..IO.output import printError
                 printError("The file doesn't exists or is not a file.")
         else:
-            from .output import printError
+            from ..IO.output import printError
             printError("The filename must be provided.")
 
     def printInformation(self, **kwargs):
         """Print the information from the header."""
 
-        from .output import printInfo as p
+        from ..IO.output import printInfo as p
 
         p("Num of columns, rows and sections: {0} {1} {2}".format(
             self.nx, self.ny, self.nz))
@@ -246,10 +246,10 @@ class MRC():
             if exists(filename) and isfile(filename):
                 self.header = MRCHeader(filename=filename)
             else:
-                from .output import printError
+                from ..IO.output import printError
                 printError("The file doesn't exists or is not a file.")
         else:
-            from .output import printError
+            from ..IO.output import printError
             printError("The filename must be provided.")
 
     def parseData(self, filename=None, **kwargs):
@@ -261,7 +261,7 @@ class MRC():
             if exists(filename) and isfile(filename):
                 from .Cmrc import readData
                 from numpy import zeros, int8, int16, float32, uint8, uint16
-                from .output import printInfo, printError
+                from ..IO.output import printInfo, printError
 
                 if getattr(self, 'header', None):
                     del self.header
@@ -346,7 +346,7 @@ class MRC():
         You could skip the update using `skipupdate` option.
         You could force it to overwrite files with `force` option."""
 
-        from .output import printInfo, printError
+        from ..IO.output import printInfo, printError
         from os.path import exists, isfile
         from numpy import transpose, array
 
@@ -425,7 +425,7 @@ class MRC():
         Correct mapc, mapr and maps automaticly."""
 
         from numpy import array, int8, int16, float32, uint8, uint16, argsort
-        from .output import printError
+        from ..IO.output import printError
         from platform import architecture
 
         if set([self.header.mapc, self.header.mapr, self.header.maps]) != set([1, 2, 3]):
@@ -487,7 +487,7 @@ class MRC():
         You could use *None* to indicate start from begin or to the end.
         """
 
-        from .output import printError, printInfo
+        from ..IO.output import printError, printInfo
         from numpy import array
         if len(index) != 6:
             printError("Must provide 6 indeces.")
@@ -568,7 +568,7 @@ class MRC():
                 isinstance(self.header.ny, int) and isinstance(self.header.nz, int)):
             return (self.header.nx, self.header.ny, self.header.nz)
         else:
-            from .output import printError
+            from ..IO.output import printError
             printError("There is no header information here.")
             return None
 
@@ -623,7 +623,7 @@ class MRC():
             6       image : unsigned 16-bit range 0 to 65535"""
 
         from numpy import array, int8, int16, float32, uint8, uint16
-        from .output import printError
+        from ..IO.output import printError
 
         if mode not in range(7):
             printError("Mode must be 0,1,2,3,4,5,6.")
