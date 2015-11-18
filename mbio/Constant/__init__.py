@@ -22,6 +22,7 @@ def getconstantfunc(name, **kwargs):
     if not name in listdir(path):
         from ..IO.output import printError
         printError("File {0} not exists.".format(name))
+        raise ValueError("File {0} not exists.".format(name))
     temp = fromfile(join(path, name))
 
     return temp
