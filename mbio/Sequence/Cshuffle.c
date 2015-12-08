@@ -1,4 +1,5 @@
 #include "Python.h"
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 #include <stdlib.h>
 #include <time.h>
@@ -313,7 +314,7 @@ static PyObject *shufflemi(PyObject *self, PyObject *args, PyObject *kwargs) {
 	msa = PyArray_GETCONTIGUOUS(msa);
 
 	/* check dimensions */
-	long number = msa->dimensions[0], length = msa->dimensions[1];
+	long number = PyArray_DIMS(msa)[0], length = PyArray_DIMS(msa)[1];
 
 	/* get pointers to data */
 	char *seq = (char *) PyArray_DATA(msa); /*size: number x length */
@@ -589,7 +590,7 @@ static PyObject *shuffleomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 	msa = PyArray_GETCONTIGUOUS(msa);
 
 	/* check dimensions */
-	long number = msa->dimensions[0], length = msa->dimensions[1];
+	long number = PyArray_DIMS(msa)[0], length = PyArray_DIMS(msa)[1];
 
 	/* get pointers to data */
 	char *seq = (char *) PyArray_DATA(msa); /*size: number x length */
@@ -848,7 +849,7 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
 	msa = PyArray_GETCONTIGUOUS(msa);
 
 	/* check dimensions */
-	long number = msa->dimensions[0], length = msa->dimensions[1];
+	long number = PyArray_DIMS(msa)[0], length = PyArray_DIMS(msa)[1];
 
 	/* get pointers to data */
 	char *seq = (char *) PyArray_DATA(msa); /*size: number x length */
@@ -1164,7 +1165,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 
 
 	/* check dimensions */
-	long number = msa->dimensions[0], length = msa->dimensions[1];
+	long number = PyArray_DIMS(msa)[0], length = PyArray_DIMS(msa)[1];
 
 	/* get pointers to data */
 	char *seq = (char *) PyArray_DATA(msa); /*size: number x length */

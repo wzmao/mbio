@@ -1,4 +1,5 @@
 #include "Python.h"
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 #include <stdio.h>
 
@@ -66,7 +67,7 @@ static PyObject *quicksort(PyObject *self, PyObject *args, PyObject *kwargs){
                                      &a))
         return NULL;
     a = PyArray_GETCONTIGUOUS(a);
-    long start=0, end = (a->dimensions[0]) -1;
+    long start=0, end = (PyArray_DIMS(a)[0]) -1;
     double *b = (double *) PyArray_DATA(a);
     qs(b,start,end);
     return Py_BuildValue("O", a);
