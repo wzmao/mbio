@@ -91,6 +91,11 @@ EXTENSIONS = [
               include_dirs=[numpy.get_include()],
               extra_compile_args=['-O3'],
               extra_link_args=['-O3']),
+    Extension('mbio.Learning.CNN_p',
+              [join('mbio', 'Learning', 'CNN_p.c'), ],
+              include_dirs=[numpy.get_include()],
+              extra_compile_args=['-fopenmp', '-O3'],
+              extra_link_args=['-lgomp', '-O3']),
 ]
 
 setup(

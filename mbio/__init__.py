@@ -36,6 +36,11 @@ from .EM import *
 __all__.extend(EM.__all__)
 __all__.append('EM')
 
+from . import Learning
+from .Learning import *
+__all__.extend(Learning.__all__)
+__all__.append('Learning')
+
 
 def _ABSpath():
     """Get absolute path for the script."""
