@@ -449,7 +449,7 @@ class MRC():
         self.header.dmin = self.data.min()
         self.header.dmax = self.data.max()
         self.header.dmean = self.data.mean()
-        self.header.rms = (((self.data - self.data.mean())**2).mean())**.5
+        self.header.rms = (((self.data - self.data.mean()) ** 2).mean()) ** .5
         # if architecture()[0].find('32')!=-1:
         #     temp1=0.
         #     temp2=0.
@@ -462,7 +462,7 @@ class MRC():
         #                 temp3+=1
         #     self.header.rms = (temp1/temp3-(temp2/temp3)**2)**.5
         # else:
-        #     self.header.rms = (((self.data - self.data.mean())**2).mean())**.5
+        # self.header.rms = (((self.data - self.data.mean())**2).mean())**.5
         if self.header.symdata:
             self.header.nsymbt = 80
             self.header.symdata = self.header.symdata[:80]
@@ -482,7 +482,7 @@ class MRC():
     def truncMatrix(self, index=[None, None, None, None, None, None], **kwargs):
         """Trunc the matrix by index. Related values will change accordingly.
         You need provide the start and end index(will be included) of x,y and z.
-        Exapmle: 
+        Exapmle:
             MRC.truncMatrix([xstart, xend, ystart, yend, zstart, zend])
         You could use *None* to indicate start from begin or to the end.
         """

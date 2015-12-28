@@ -6,6 +6,7 @@ __author__ = 'Wenzhi Mao'
 
 __all__ = ["NeuralNet"]
 
+
 class NeuralNet(object):
 
     '''This is a neu web class to setup a web and perform the training.
@@ -68,29 +69,29 @@ class NeuralNet(object):
         '''Set the web shape (nodes for each layer) for the network.'''
 
         from ..IO.output import printInfo, printError
-        from numpy import array,int32,zeros,float64,matrix,random,ndarray
+        from numpy import array, int32, zeros, float64, matrix, random, ndarray
 
-        if len(webshape)==0:
+        if len(webshape) == 0:
             printError('No web shape data provided. Ignored.')
             return None
         webshape = array(webshape, dtype=int32)
-        if isinstance(self.webshape,ndarray) and (self.webshape == webshape).all():
+        if isinstance(self.webshape, ndarray) and (self.webshape == webshape).all():
             printInfo('webshape unchanged, the trans also unchanged.', 1)
         else:
-            if self.inputdata is not None and isinstance(self.inputdata,ndarray) and self.inputdata.shape[0] != webshape[0]:
+            if self.inputdata is not None and isinstance(self.inputdata, ndarray) and self.inputdata.shape[0] != webshape[0]:
                 printError("The web shape and the inputdata doesn't fit.")
-                self.inputdata=None
+                self.inputdata = None
                 printError("The Input data has been deleted.")
-            if self.outputdata is not None and isinstance(self.outputdata,ndarray) and self.outputdata.shape[0] != webshape[-1]:
+            if self.outputdata is not None and isinstance(self.outputdata, ndarray) and self.outputdata.shape[0] != webshape[-1]:
                 printError("The web shape and the outputdata doesn't fit.")
-                self.outputdata=None
+                self.outputdata = None
                 printError("The Output data has been deleted.")
             self.webshape = webshape
-            self.trans = zeros((webshape.shape[0]-1), dtype=object)
+            self.trans = zeros((webshape.shape[0] - 1), dtype=ndarray)
             for i in range(len(webshape) - 1):
                 self.trans[i] = matrix(
-                    random.random((webshape[i] + 1, webshape[i + 1])) * 0.1 - 0.05)
-            self.label=["x{0}".format(i+1) for i in xrange(webshape[0])]
+                    random.random((webshape[i] + 1, webshape[i + 1])) * 0.1 - 0.05, dtype=float64)
+            self.label = ["x{0}".format(i + 1) for i in xrange(webshape[0])]
         return None
 
     def setLabel(self, label=[], **kwargs):
@@ -103,10 +104,11 @@ class NeuralNet(object):
             return None
         if not isinstance(label, list):
             label = list(label)
-        label=[str(i) for i in label]
+        label = [str(i) for i in label]
         if self.webshape is not None:
             if self.webshape[0] != len(label):
-                printError("The length of the label list doesn't fit the webshape[0].")
+                printError(
+                    "The length of the label list doesn't fit the webshape[0].")
             else:
                 self.label = label
         else:
@@ -116,7 +118,7 @@ class NeuralNet(object):
         '''Set the input data for the network.'''
 
         from ..IO.output import printInfo, printError
-        from numpy import ndarray,matrix,float64,zeros,int32
+        from numpy import ndarray, matrix, float64, zeros, int32
 
         if inputdata is None:
             self.printError('No input data provided. Ignored.')
@@ -131,14 +133,16 @@ class NeuralNet(object):
             if not inputdata.dtype == float64:
                 inputdata = matrix(inputdata, dtype=float64)
         else:
-            printError("Please provide a list, numpy.ndarray or a numpy.matrix.")
+            printError(
+                "Please provide a list, numpy.ndarray or a numpy.matrix.")
             return None
-        if inputdata.ndim!=2:
+        if inputdata.ndim != 2:
             printError("The input must be 2-dimension data.")
-            return None            
+            return None
         if self.webshape is not None:
             if inputdata.shape[1] != self.webshape[0]:
-                printError("The input data shape[1] doesn't fit the webshape[0].")
+                printError(
+                    "The input data shape[1] doesn't fit the webshape[0].")
                 return None
         if self.outputdata is not None:
             if self.inputdata.shape[0] != outputdata.shape[0]:
@@ -151,7 +155,7 @@ class NeuralNet(object):
         '''Set the output data for the network.'''
 
         from ..IO.output import printInfo, printError
-        from numpy import ndarray,matrix,float64,zeros,int32
+        from numpy import ndarray, matrix, float64, zeros, int32
 
         if outputdata is None:
             printError('No output data provided. Ignored.')
@@ -166,14 +170,16 @@ class NeuralNet(object):
             if not outputdata.dtype == float64:
                 outputdata = matrix(outputdata, dtype=float64)
         else:
-            printError("Please provide a list, numpy.ndarray or a numpy.matrix.")
+            printError(
+                "Please provide a list, numpy.ndarray or a numpy.matrix.")
             return None
-        if outputdata.ndim!=2:
+        if outputdata.ndim != 2:
             printError("The output must be 2-dimension data.")
-            return None   
+            return None
         if self.webshape is not None:
             if outputdata.shape[1] != self.webshape[-1]:
-                printError("The output data shape[1] doesn't fit the webshape[-1].")
+                printError(
+                    "The output data shape[1] doesn't fit the webshape[-1].")
                 return None
         if self.inputdata is not None:
             if self.inputdata.shape[0] != outputdata.shape[0]:
@@ -184,21 +190,25 @@ class NeuralNet(object):
 
     def fit(self, times, step='auto', **kwargs):
         '''Train the data.'''
+
+        from .CNN_p import fit_ANN_BP
+        from ..IO.output import printInfo, printError
+
         if self.inputdata.shape[0] != self.outputdata.shape[0]:
-            raise ValueError("The sizes of Input and Output are different.")
-        temptimes = times
-        while temptimes > self.inputdata.shape[0]:
-            temptimes -= self.inputdata.shape[0]
-            templist = range(self.inputdata.shape[0])
-            np.random.shuffle(templist)
-            for i in templist:
-                self.__simulate_point(
-                    self.inputdata[templist[i]], self.outputdata[templist[i]], step=step)
-        templist = range(self.inputdata.shape[0])
-        np.random.shuffle(templist)
-        for i in templist[:temptimes]:
-            self.__simulate_point(
-                self.inputdata[templist[i]], self.outputdata[templist[i]], step=step)
+            printError("The sizes of Input and Output are different.")
+            return None
+        if self.inputdata.shape[1] != self.webshape[0]:
+            printError("The sizes of Input doesnot fit the webshape.")
+            return None
+        if self.outputdata.shape[1] != self.webshape[-1]:
+            printError("The sizes of Output doesnot fit the webshape.")
+            return None
+        for i in range(len(self.webshape) - 1):
+            if self.trans[i].shape != (self.webshape[i] + 1, self.webshape[i + 1]):
+                printError("`trans`[{0}] shape wrong".format(i))
+                result = 0
+                return None
+        return fit_ANN_BP(shape=self.webshape, input=self.inputdata, output=self.outputdata, trans=self.trans, times=times)
 
     # def __simulate_point(self, inputd, outputd, step=0.1, **kwargs):
     #     '''Train one data point.'''
@@ -218,7 +228,7 @@ class NeuralNet(object):
     #     for i in range(layer):
     #         self.trans[i] = self.trans[
     #             i] + (np.concatenate((save[i], np.ones((1, 1))), axis=1).T.dot(wucha[i + 1])) * step
-    #     # return ((outputd1 - save[-1])*(outputd1 - save[-1])).sum()
+    # return ((outputd1 - save[-1])*(outputd1 - save[-1])).sum()
 
     # def test(self, inputtest, outputtest, f, **kwargs):
     #     if inputtest.shape[0] != outputtest.shape[0]:
@@ -238,7 +248,7 @@ class NeuralNet(object):
         Check only the data for calculation.'''
 
         from ..IO.output import printInfo, printError
-        from numpy import ndarray,int32,float64
+        from numpy import ndarray, int32, float64
 
         result = 1
         # Type Check
@@ -294,19 +304,19 @@ class NeuralNet(object):
                     printInfo("`trans[{0}]` dtype".format(i))
                     result = 0
         # webshape
-        if isinstance(self.inputdata, ndarray) and isinstance(self.webshape,ndarray):
+        if isinstance(self.inputdata, ndarray) and isinstance(self.webshape, ndarray):
             if self.inputdata.shape[1] != self.webshape[0]:
                 printInfo("`inputdata` doesn't fit webshape[0]")
                 result = 0
-        if isinstance(self.outputdata, ndarray) and isinstance(self.webshape,ndarray):
+        if isinstance(self.outputdata, ndarray) and isinstance(self.webshape, ndarray):
             if self.outputdata.shape[1] != self.webshape[-1]:
                 printInfo("`outputdata` doesn't fit webshape[-1]")
                 result = 0
-        if isinstance(self.inputdata, ndarray) and isinstance(self.outputdata,ndarray):
+        if isinstance(self.inputdata, ndarray) and isinstance(self.outputdata, ndarray):
             if self.inputdata.shape[0] != self.outputdata.shape[0]:
                 printInfo("`inputdata` doesn't fit `outputdata`")
                 result = 0
-        if isinstance(self.webshape, ndarray) and isinstance(self.trans,ndarray):
+        if isinstance(self.webshape, ndarray) and isinstance(self.trans, ndarray):
             for i in range(len(self.webshape) - 1):
                 if self.trans[i].shape != (self.webshape[i] + 1, self.webshape[i + 1]):
                     printInfo("`trans`[{0}] shape wrong".format(i))

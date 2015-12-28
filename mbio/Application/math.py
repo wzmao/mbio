@@ -62,10 +62,10 @@ def invsp(x):
 
 class ANOVA(object):
 
-    """It is a class for ANOVA analysis. Given the analysis data, 
+    """It is a class for ANOVA analysis. Given the analysis data,
     output the test result.
     1D data supported now. More dimension could be achieved in the future.
-    `data` should be n*2 numpy array or list. The first column is the value 
+    `data` should be n*2 numpy array or list. The first column is the value
     and the second column is the label."""
 
     def __init__(self, data=None, **kwargs):
@@ -108,13 +108,13 @@ class ANOVA(object):
         labelset.sort()
         printInfo("{} label(s) found".format(len(labelset)))
         muall = self.data[:, 0].mean()
-        sst = ((self.data[:, 0] - muall)**2).sum()
+        sst = ((self.data[:, 0] - muall) ** 2).sum()
         n = self.data.shape[0]
         ns = array([(self.data[:, 1] == i).sum()
                     for i in labelset], dtype=float)
         mus = array([self.data[:, 0][
                     (self.data[:, 1] == i)].mean() - muall for i in labelset], dtype=float)
-        sstreat = (mus**2).dot(ns)
+        sstreat = (mus ** 2).dot(ns)
         mstreat = sstreat * 1.0 / (len(ns) - 1)
         mse = (0.0 + sst - sstreat) * 1.0 / (n - len(ns))
         f0 = mstreat / mse
@@ -239,11 +239,11 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     sig = []
     sigma = []
     for i in range(x.shape[1]):
-        sigma.append((sigma2 * cov[i, i])**.5)
+        sigma.append((sigma2 * cov[i, i]) ** .5)
         ts.append(beta[i][0] / sigma[-1])
         p.append((1. - t.cdf(abs(ts[-1]), x.shape[0] - x.shape[1])) * 2)
         sig.append("Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / (
-            (sigma2 * cov[i, i])**.5)), x.shape[0] - x.shape[1])) < alpha else 'No')
+            (sigma2 * cov[i, i]) ** .5)), x.shape[0] - x.shape[1])) < alpha else 'No')
         printInfo("\t{0:^5s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
                   "{6:^5s}".format(label[i],
                                    beta[i][0],
@@ -306,17 +306,17 @@ def performPolyRegression(y, degree=2, **kwargs):
             label.append('x^' + str(i + 1))
         if i == 0:
             poly[:, i] = t
-            poly[:, i] = poly[:, i] / ((poly[:, i]**2).sum())**.5
+            poly[:, i] = poly[:, i] / ((poly[:, i] ** 2).sum()) ** .5
         elif i == 1:
-            poly[:, i] = t**2 - (k**2. - 1) / 12
-            poly[:, i] = poly[:, i] / ((poly[:, i]**2).sum())**.5
+            poly[:, i] = t ** 2 - (k ** 2. - 1) / 12
+            poly[:, i] = poly[:, i] / ((poly[:, i] ** 2).sum()) ** .5
         elif i == 2:
-            poly[:, i] = t**3 - t * ((3. * k**2 - 7) / 20)
-            poly[:, i] = poly[:, i] / ((poly[:, i]**2).sum())**.5
+            poly[:, i] = t ** 3 - t * ((3. * k ** 2 - 7) / 20)
+            poly[:, i] = poly[:, i] / ((poly[:, i] ** 2).sum()) ** .5
         elif i == 3:
-            poly[:, i] = t**4 - (t**2) * ((3 * k**2 - 13) /
-                                          14.) + 3. * (k**2 - 1) * (k**2 - 9) / 560
-            poly[:, i] = poly[:, i] / ((poly[:, i]**2).sum())**.5
+            poly[:, i] = t ** 4 - (t ** 2) * ((3 * k ** 2 - 13) /
+                                              14.) + 3. * (k ** 2 - 1) * (k ** 2 - 9) / 560
+            poly[:, i] = poly[:, i] / ((poly[:, i] ** 2).sum()) ** .5
     printInfo("The polynomial is listed.")
     for i in range(degree):
         if k > 6:

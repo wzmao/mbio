@@ -334,7 +334,7 @@ def applyBND(mat, **kwargs):
     d, u = eigh(mat_th)
     for i in range(n):
         if d[i] != 0:
-            d[i] = (-1. + (1 + 4 * d[i] * d[i])**.5) / 2. / d[i]
+            d[i] = (-1. + (1 + 4 * d[i] * d[i]) ** .5) / 2. / d[i]
     # Double general matrix multiply
     mat_new1 = dgemm(alpha=1.0, a=(u * d), b=u, trans_b=True)
     # mat_new1 = (u*d).dot(u.T) #old numpy dot,slower
@@ -376,7 +376,7 @@ def buildPSICOV_expert(msa,
 
     Options:
         `approx_lasso_flag`: use approximate LASSO algorithm, default as 0.
-        `pre_shrink_flag`: Shrink the sample covariance matrix towards 
+        `pre_shrink_flag`: Shrink the sample covariance matrix towards
             shrinkage target F = Diag(1,1,1,...,1), default as 1.
         `force`: force the calculation if the sequence is not sufficient,
             default as 0.
@@ -387,7 +387,7 @@ def buildPSICOV_expert(msa,
             score remains 0.
         `set_default_rho`: set the initial rho parameter, default as -1 (not
             specified)
-        `target_fraction_of_none_zero`: set the target matrix density value 
+        `target_fraction_of_none_zero`: set the target matrix density value
             (none-zero fraction), should be in range 5e-5 - 1. default as 0
             (not specified)
         `set_lasso_convergence_threshold`: set Lasso convergence threshold,
@@ -466,7 +466,7 @@ def buildPSICOV(msa,
         `approx_lasso_flag`: use approximate LASSO algorithm, default as 0.
         `force`: force the calculation if the sequence is not sufficient,
             default as 0.
-        `target_fraction_of_none_zero`: set the target matrix density value 
+        `target_fraction_of_none_zero`: set the target matrix density value
             (none-zero fraction), should be in range 5e-5 - 1. default as 0
             (not specified)
         `set_minimum_sequence_separation`: set pseudocount value, default as 5.
@@ -551,7 +551,7 @@ def applyPPV(psicov, **kwargs):
 
     r = zeros_like(psicov)
     r[psicov != 0] = 0.904 / (1. +
-                              16.61 * (e**(psicov[psicov != 0] * (-0.8105))))
+                              16.61 * (e ** (psicov[psicov != 0] * (-0.8105))))
     return r
 
 
@@ -565,7 +565,7 @@ def calcContactFrac(n, **kwargs):
     and limitations of current methods for detecting sequence coevolution[J].
     Bioinformatics, 2015: btv103."""
 
-    return 8.88332505338 * (n**-0.825688603083)
+    return 8.88332505338 * (n ** -0.825688603083)
 
 
 def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
@@ -663,14 +663,14 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
     nn = val.shape[0]
     s = cov(pos)
     invs = inv(s)
-    h = (nn**(-1.0 / 6.0)) * (((2.0**(-1.0)) * (diag(s).sum())) ** .5)
-    para1 = (-.5) * (h**-2.)
+    h = (nn ** (-1.0 / 6.0)) * (((2.0 ** (-1.0)) * (diag(s).sum())) ** .5)
+    para1 = (-.5) * (h ** -2.)
     for i in range(pplus.shape[0]):
         for j in range(pplus.shape[1]):
             if cdouble[i][j] == -1:
                 temp = array([X[i][j], Y[i][j]]).reshape((2, 1))
-                temp = e**(para1 *
-                           ((invs.dot((pos - temp)) * (pos - temp)).sum(0)))
+                temp = e ** (para1 *
+                            ((invs.dot((pos - temp)) * (pos - temp)).sum(0)))
                 cdouble[i][j] = (temp.dot(val).sum()) / temp.sum()
 
     csingle = zeros_like(psigplus)
@@ -687,11 +687,11 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
     val = array(val)
     nn = val.shape[0]
     s = pos.std()
-    h = ((4.0 / 3)**(.2)) * s * (nn**-.2)
-    para1 = 1. / (nn * h * ((2 * pi)**.5))
+    h = ((4.0 / 3) ** (.2)) * s * (nn ** -.2)
+    para1 = 1. / (nn * h * ((2 * pi) ** .5))
     for i in range(psigplus.shape[0]):
         if csingle[i] == -1:
-            temp = para1 * (e**(-.5 * (((pos - XX[i]) / h)**2)))
+            temp = para1 * (e ** (-.5 * (((pos - XX[i]) / h) ** 2)))
             csingle[i] = (temp.dot(val).sum()) / temp.sum()
 
     for i in range(n):

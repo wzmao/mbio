@@ -18,9 +18,9 @@ def interpolationball(matrix, index, step, r, **kwarg):
     for i in arange(ceil(index[0] - (r / step[0])) // 1, floor(index[0] + (r / step[0])) // 1 + 1):
         for j in arange(ceil(index[1] - (r / step[1])) // 1, floor(index[1] + (r / step[1])) // 1 + 1):
             for k in arange(ceil(index[2] - (r / step[2])) // 1, floor(index[2] + (r / step[2])) // 1 + 1):
-                if (((index[0] - i) * step[0])**2 + ((index[1] - j) * step[1])**2 + ((index[2] - k) * step[2])**2) <= r**2:
-                    w.append(1.0 / ((((index[0] - i) * step[0])**2 + (
-                        (index[1] - j) * step[1])**2 + ((index[2] - k) * step[2])**2)**2)**.5)
+                if (((index[0] - i) * step[0]) ** 2 + ((index[1] - j) * step[1]) ** 2 + ((index[2] - k) * step[2]) ** 2) <= r ** 2:
+                    w.append(1.0 / ((((index[0] - i) * step[0]) ** 2 + (
+                        (index[1] - j) * step[1]) ** 2 + ((index[2] - k) * step[2]) ** 2) ** 2) ** .5)
                     v.append(matrix[i, j, k])
     w = array(w)
     v = array(v)
@@ -37,13 +37,13 @@ def interpolationcube(m, p, way, *kwarg):
 
     if way == 'idw':
         tt = array([[[0, 0], [0, 0]], [[0, 0], [0, 0]]], dtype=float)
-        tt[0, :, :] += p[0]**2
-        tt[1, :, :] += (1 - p[0])**2
-        tt[:, 0, :] += p[1]**2
-        tt[:, 1, :] += (1 - p[1])**2
-        tt[:, :, 0] += p[2]**2
-        tt[:, :, 1] += (1 - p[2])**2
-        tt = tt**.5
+        tt[0, :, :] += p[0] ** 2
+        tt[1, :, :] += (1 - p[0]) ** 2
+        tt[:, 0, :] += p[1] ** 2
+        tt[:, 1, :] += (1 - p[1]) ** 2
+        tt[:, :, 0] += p[2] ** 2
+        tt[:, :, 1] += (1 - p[2]) ** 2
+        tt = tt ** .5
         tt = 1. / tt
         tt = tt / tt.sum()
     elif way == 'interpolation':
@@ -60,8 +60,9 @@ def interpolationcube(m, p, way, *kwarg):
         return (tt * m).sum()
 
 
-def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), sampleradius=3.0,
-              assumenorm=False, **kwarg):
+def genPvalue(
+    pdb, mrc, sample=None, method=('cube', 'interpolation'), sampleradius=3.0,
+        assumenorm=False, **kwarg):
     """This function assign p-value for pdb structure in mrc. sample is used to get the population values.
     `method` must be a tuple or list.
     There are 2 methods now: `cube` and `ball`.
@@ -156,7 +157,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
         for i in range(int(floor(-sampleradius / step[0])), int(ceil(sampleradius / step[0]) + 1)):
             for j in range(int(floor(-sampleradius / step[1])), int(ceil(sampleradius / step[1]) + 1)):
                 for k in range(int(floor(-sampleradius / step[2])), int(ceil(sampleradius / step[2]) + 1)):
-                    if (i * step[0])**2 + (j * step[1])**2 + (k * step[2])**2 <= sampleradius**2:
+                    if (i * step[0]) ** 2 + (j * step[1]) ** 2 + (k * step[2]) ** 2 <= sampleradius ** 2:
                         ballindex[0].append(i)
                         ballindex[1].append(j)
                         ballindex[2].append(k)
@@ -174,7 +175,7 @@ def genPvalue(pdb, mrc, sample=None, method=('cube', 'interpolation'), samplerad
     if assumenorm:
         mu = findset.mean()
         sigma = (
-            ((findset - findset.mean())**2).sum() / (findsetlength - 1))**.5
+            ((findset - findset.mean()) ** 2).sum() / (findsetlength - 1)) ** .5
     else:
         mu = sigma = 0.
 
@@ -240,7 +241,8 @@ def calcPcutoff(data, scale=5.0, **kwarg):
 
     if isinstance(data, (pdbclass, selectionclass)):
         data = [i for i in data.getHierView().iterResidues()]
-        # data.sort(cmp=lambda x,y:chainsort(x.getChid(),y.getChid()) if x.getChid()!=y.getChid() else cmp(x.getResnum(),y.getResnum()))
+        # data.sort(cmp=lambda x,y:chainsort(x.getChid(),y.getChid()) if
+        # x.getChid()!=y.getChid() else cmp(x.getResnum(),y.getResnum()))
         data = array([i.select('backbone').getBetas().mean() for i in data])
         data.sort()
     elif isinstance(data, ndarray):
@@ -261,7 +263,7 @@ def calcPcutoff(data, scale=5.0, **kwarg):
     beta0 = firsthalfdata.mean() - beta1 * firsthalfindex.mean()
     # Determine the RMSE
     rmse = (
-        ((firsthalfindex * beta1 + beta0 - firsthalfdata)**2).sum() / (n - 1))**.5
+        ((firsthalfindex * beta1 + beta0 - firsthalfdata) ** 2).sum() / (n - 1)) ** .5
     # Test the second half and get cutoff
     tvalue = abs(index * beta1 + beta0 - data)
     tbigset = (tvalue <= scale * rmse).nonzero()[0]
@@ -272,7 +274,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
     """This is a function to plot the p-value cutoff.
 
         `data` must be a `prody.AtomGroup` with p-values in the Beta, the
-    backbone average is calculated to perform analysis. 
+    backbone average is calculated to perform analysis.
         `color` could set to draw in specific color.
         `detail` could be used to plot more detail information.
             1 to plot the error bar. Provide color list.
@@ -314,7 +316,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
     beta0 = firsthalfdata.mean() - beta1 * firsthalfindex.mean()
     # Determine the RMSE
     rmse = (
-        ((firsthalfindex * beta1 + beta0 - firsthalfdata)**2).sum() / (n - 1))**.5
+        ((firsthalfindex * beta1 + beta0 - firsthalfdata) ** 2).sum() / (n - 1)) ** .5
     # Test the second half and get cutoff
     tvalue = abs(index * beta1 + beta0 - data1)
     tbigset = (tvalue <= scale * rmse).nonzero()[0]
@@ -341,8 +343,9 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
             x = plot.get_xlim()
             y = plot.get_ylim()
             if detail != -1:
-                plot.text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
-                          "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+                plot.text(
+                    x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
+                    "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
         elif detail > 0:
             if detail == 2:
                 dd = array([i.select('not backbone').getBetas().mean()
@@ -419,8 +422,10 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                 x = plot[1].get_xlim()
                 y = plot[1].get_ylim()
                 if detail != -1:
-                    plot[1].text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
-                                 "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+                    plot[1].text(
+                        x[1] - 0.05 * (x[1] - x[0]), y[
+                            1] - 0.05 * (y[1] - y[0]),
+                        "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
             elif detail > 0:
                 if detail == 2:
                     dd = array(
@@ -474,8 +479,9 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                 plot[1].set_ylim(plot[0].get_ylim())
                 x = plot[1].get_xlim()
                 y = plot[1].get_ylim()
-                plot[1].text(x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
-                             "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
+                plot[1].text(
+                    x[1] - 0.05 * (x[1] - x[0]), y[1] - 0.05 * (y[1] - y[0]),
+                    "cutoff=%.3f" % (cutoff), va='top', multialignment='left', ha='right')
         except:
             printError(
                 "The plot type wrong. Must be 1 or 2 `matplotlib.axes.Axes`.")
@@ -521,7 +527,7 @@ def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwarg):
         for i in range(int(floor(-sampleradius / step[0])), int(ceil(sampleradius / step[0]) + 1)):
             for j in range(int(floor(-sampleradius / step[1])), int(ceil(sampleradius / step[1]) + 1)):
                 for k in range(int(floor(-sampleradius / step[2])), int(ceil(sampleradius / step[2]) + 1)):
-                    if (i * step[0])**2 + (j * step[1])**2 + (k * step[2])**2 <= sampleradius**2:
+                    if (i * step[0]) ** 2 + (j * step[1]) ** 2 + (k * step[2]) ** 2 <= sampleradius ** 2:
                         ballindex[0].append(i)
                         ballindex[1].append(j)
                         ballindex[2].append(k)
@@ -562,16 +568,16 @@ def transCylinder(pdb, **kwarg):
     uu, dd, vv = svd(data - datamean)
     cent = datamean
     dirc1 = vv[0]
-    if abs((dirc1**2).sum()**.5 - 1) > 1e-10:
+    if abs((dirc1 ** 2).sum() ** .5 - 1) > 1e-10:
         raise ValueError(
-            "length of dirc is not 1, is {0}".format((dirc1**2).sum()**.5))
+            "length of dirc is not 1, is {0}".format((dirc1 ** 2).sum() ** .5))
     if (data[-1] - data[0]).dot(dirc1) < 0:
         dirc1 = -dirc1
     rank = (data - cent).dot(dirc1)
     rankrange = [rank.min(), rank.max()]
     dirc2 = cent - cent.dot(dirc1) * dirc1
-    dirc2 = dirc2 / ((dirc2**2).sum()**.5)
+    dirc2 = dirc2 / ((dirc2 ** 2).sum() ** .5)
     dirc3 = cross(dirc1, dirc2, axis=0)
-    dirc3 = dirc3 / ((dirc3**2).sum()**.5)
+    dirc3 = dirc3 / ((dirc3 ** 2).sum() ** .5)
     dirc = array((dirc1, dirc2, dirc3))
     return cent, dirc, rankrange
