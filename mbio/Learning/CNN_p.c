@@ -11,6 +11,10 @@
 #include <omp.h>
 #endif
 
+static int *matrixtimes(double *a,double *b,double *c,int n,int m,int p){
+    int i,j,k;
+
+}
 
 static PyObject *fit_ANN_BP(PyObject *self, PyObject *args, PyObject *kwargs) {
 
@@ -36,8 +40,10 @@ static PyObject *fit_ANN_BP(PyObject *self, PyObject *args, PyObject *kwargs) {
     if (!trans)
         return PyErr_NoMemory();
     transp=(PyArrayObject **)malloc(transl*(sizeof(PyArrayObject *)));
-    if (!transp)
-        return PyErr_NoMemory();    
+    if (!transp){
+        free(trans);
+        return PyErr_NoMemory();
+    }
 
     if ((PyArray_NDIM(inputdata)!=2)||((PyArray_NDIM(outputdata)!=2)))
         return Py_BuildValue("Os", Py_None,"Input or Output data are not 2-D data.");
@@ -54,8 +60,42 @@ static PyObject *fit_ANN_BP(PyObject *self, PyObject *args, PyObject *kwargs) {
         trans[i] = (double *)PyArray_DATA(transp[i]);
     }
 
+    double **temp=NULL;
+
+    temp=(double **)malloc(transl*sizeof(double *));
+    if (!temp){
+        free(trans);
+        free(transp);
+        return Py_None;
+    }
+    for (i=0;i<transl;i++){
+        temp[i] = (double *)malloc((shape[i+1])*sizeof(double));
+        if (!temp[i]){
+            for (j=0;j<i;j++)
+                free(temp[j]);
+            free(temp);
+            free(trans);
+            free(transp);
+            return Py_None;
+        }
+    }
+
+    for (k=0;k<times;k++){
+        for (i=0;i<transl;i++){
+            if (i==0)
+                matrixtimes(&input[(k%(PyArray_DIM(inputdata,0)))*PyArray_DIM(inputdata,1)],trans[0],temp[0],1,shape[0],shape[1]);
+            
+        }
+    }
+    // while (times>=PyArray_DIM(inputdata,0)){
+
+    //     times-=PyArray_DIM(inputdata,0);
+    // }
     free(trans);
     free(transp);
+    for (i=0;i<transl;i++)
+        free(temp[i]);
+    free(temp);
     return Py_BuildValue("O", Py_None);
 }
 
