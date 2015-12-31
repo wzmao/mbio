@@ -208,7 +208,12 @@ class NeuralNet(object):
                 printError("`trans`[{0}] shape wrong".format(i))
                 result = 0
                 return None
-        return fit_ANN_BP(shape=self.webshape, input=self.inputdata, output=self.outputdata, trans=self.trans, times=times)
+        result=fit_ANN_BP(shape=self.webshape, input=self.inputdata, output=self.outputdata, trans=self.trans, times=times)
+        if isinstance(result,list):
+            if result[0] is None:
+                printError(result[1])
+                return None
+        return result
 
     # def __simulate_point(self, inputd, outputd, step=0.1, **kwargs):
     #     '''Train one data point.'''
@@ -230,18 +235,22 @@ class NeuralNet(object):
     #             i] + (np.concatenate((save[i], np.ones((1, 1))), axis=1).T.dot(wucha[i + 1])) * step
     # return ((outputd1 - save[-1])*(outputd1 - save[-1])).sum()
 
-    # def test(self, inputtest, outputtest, f, **kwargs):
-    #     if inputtest.shape[0] != outputtest.shape[0]:
-    #         raise ValueError("Size not same.")
-    #     mark = []
-    #     for i in range(inputtest.shape[0]):
-    #         layer = len(self.webshape) - 1
-    #         temp = inputtest[i]
-    #         for j in range(layer):
-    #             temp = np.concatenate((temp, np.ones((1, 1))), axis=1)
-    #             temp = temp.dot(self.trans[j])
-    #         mark += [f(temp) == f(outputtest[i])]
-    #     return mark
+    def predict(self, inputtest, **kwargs):
+
+        from ..IO.output import printInfo, printError
+        from numpy import ndarray,array
+
+        if not isinstance(inputtest, ndarray):
+            inputtest=array(inputtest)
+        
+        # for i in range(inputtest.shape[0]):
+        #     layer = len(self.webshape) - 1
+        #     temp = inputtest[i]
+        #     for j in range(layer):
+        #         temp = np.concatenate((temp, np.ones((1, 1))), axis=1)
+        #         temp = temp.dot(self.trans[j])
+        #     mark += [f(temp) == f(outputtest[i])]
+        # return mark
 
     def _check(self, **kwargs):
         '''Check all data compatible to each other.

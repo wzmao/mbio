@@ -12,14 +12,24 @@
 #endif
 
 static int *matrixtimes(double *a,double *b,double *c,int n,int m,int p){
-    int i,j,k;
+    int i,j,k,tempid;
 
+    for (i=0;i<n;i++){
+        for (j=0;j<p;j++){
+            tempid=i*p+j;
+            c[tempid]=b[m*p+j];
+            for (k=0;k<m;k++){
+                c[tempid]+=a[i*m+k]*b[k*p+j];
+            }
+        }
+    }
+    return 0;
 }
 
 static PyObject *fit_ANN_BP(PyObject *self, PyObject *args, PyObject *kwargs) {
 
     PyArrayObject *shapedata,*inputdata,*outputdata,*transdata,**transp;
-    int i,j,k,times=0,transl=0;
+    int i,j,k,p,q,times=0,transl=0;
 
     static char *kwlist[] = {"shape", "input", "output", "trans", "times", NULL};
 
@@ -60,41 +70,80 @@ static PyObject *fit_ANN_BP(PyObject *self, PyObject *args, PyObject *kwargs) {
         trans[i] = (double *)PyArray_DATA(transp[i]);
     }
 
-    double **temp=NULL;
+    int corenumber=omp_get_max_threads(),mythreadid=-1;
+    printf("* Find %d threads avaiable.\n", corenumber);
 
-    temp=(double **)malloc(transl*sizeof(double *));
+    double ***temp=NULL;
+
+    temp=(double ***)malloc(corenumber*sizeof(double **));
     if (!temp){
         free(trans);
         free(transp);
-        return Py_None;
+        return PyErr_NoMemory();
     }
-    for (i=0;i<transl;i++){
-        temp[i] = (double *)malloc((shape[i+1])*sizeof(double));
+    for (i=0;i<corenumber;i++){
+        temp[i]=(double **)malloc(transl*sizeof(double *));
         if (!temp[i]){
-            for (j=0;j<i;j++)
+            for (j=0;j<i;j++){
+                for (k=0;k<transl;k++)
+                    free(temp[j][k]);
                 free(temp[j]);
+            }
             free(temp);
             free(trans);
             free(transp);
-            return Py_None;
+            return PyErr_NoMemory();
+        }
+        for (j=0;j<transl;j++){
+            temp[i][j] = (double *)malloc((shape[j+1])*sizeof(double));
+            if (!temp[i][j]){
+                for (k=0;k<j;k++)
+                    free(temp[i][j]);
+                free(temp[i]);
+                for (p=0;p<i;p++){
+                    for (q=0;q<transl;q++)
+                        free(temp[p][q]);
+                    free(temp[p]);
+                }
+                free(temp);
+                free(trans);
+                free(transp);
+                return PyErr_NoMemory();
+            }
         }
     }
 
+    
+    // #pragma omp parallel for firstprivate(times,i,transl,input,inputdata,trans,shape,temp,j,mythreadid) schedule(dynamic,1)
     for (k=0;k<times;k++){
+        mythreadid=omp_get_thread_num();
+        double **nowarray=temp[mythreadid];
         for (i=0;i<transl;i++){
             if (i==0)
-                matrixtimes(&input[(k%(PyArray_DIM(inputdata,0)))*PyArray_DIM(inputdata,1)],trans[0],temp[0],1,shape[0],shape[1]);
-            
+                matrixtimes(&input[(k%(PyArray_DIM(inputdata,0)))*PyArray_DIM(inputdata,1)],trans[0],nowarray[0],1,shape[0],shape[1]);
+            else{
+                matrixtimes(nowarray[i-1],trans[i],nowarray[i],1,shape[i],shape[i+1]);
+            }
+            for (j=0;j<shape[i+1];j++){
+                nowarray[i][j]=1./(1.+exp(nowarray[i][j]));
+            }
         }
+        // #pragma omp barrier
+        // printf("%d\n", mythreadid);
+        // if (mythreadid==1){
+        // }
     }
-    // while (times>=PyArray_DIM(inputdata,0)){
+    for (i=0;i<shape[transl];i++){
+        output[i]=temp[0][transl-1][i];
+    }
 
-    //     times-=PyArray_DIM(inputdata,0);
-    // }
     free(trans);
     free(transp);
-    for (i=0;i<transl;i++)
+    for (i=0;i<corenumber;i++){
+        for (j=0;j<transl;j++)
+            free(temp[i][j]);
         free(temp[i]);
+    }
     free(temp);
     return Py_BuildValue("O", Py_None);
 }
