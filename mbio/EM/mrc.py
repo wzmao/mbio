@@ -514,28 +514,28 @@ class MRC():
             zend = self.data.shape[2] + 1
         else:
             zend += 1
-        if not 0 <= xstart < self.data.shape[0]:
+        if not 0 <= xstart <= self.data.shape[0]:
             printError("xstart is not in the range of x.")
             return None
-        if not 0 <= xend < self.data.shape[0]:
+        if not 0 <= xend <= self.data.shape[0]:
             printError("xend is not in the range of x.")
             return None
         if not xstart < xend:
             printError("xstart must less than xend.")
             return None
-        if not 0 <= ystart < self.data.shape[1]:
+        if not 0 <= ystart <= self.data.shape[1]:
             printError("ystart is not in the range of y.")
             return None
-        if not 0 <= yend < self.data.shape[1]:
+        if not 0 <= yend <= self.data.shape[1]:
             printError("yend is not in the range of y.")
             return None
         if not ystart < yend:
             printError("ystart must less than yend.")
             return None
-        if not 0 <= zstart < self.data.shape[2]:
+        if not 0 <= zstart <= self.data.shape[2]:
             printError("zstart is not in the range of z.")
             return None
-        if not 0 <= zend < self.data.shape[2]:
+        if not 0 <= zend <= self.data.shape[2]:
             printError("zend is not in the range of z.")
             return None
         if not zstart < zend:
