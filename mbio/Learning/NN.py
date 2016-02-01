@@ -208,8 +208,9 @@ class NeuralNet(object):
                 printError("`trans`[{0}] shape wrong".format(i))
                 result = 0
                 return None
-        result=fit_ANN_BP(shape=self.webshape, input=self.inputdata, output=self.outputdata, trans=self.trans, times=times)
-        if isinstance(result,list):
+        result = fit_ANN_BP(shape=self.webshape, input=self.inputdata,
+                            output=self.outputdata, trans=self.trans, times=times)
+        if isinstance(result, list):
             if result[0] is None:
                 printError(result[1])
                 return None
@@ -238,11 +239,11 @@ class NeuralNet(object):
     def predict(self, inputtest, **kwargs):
 
         from ..IO.output import printInfo, printError
-        from numpy import ndarray,array
+        from numpy import ndarray, array
 
         if not isinstance(inputtest, ndarray):
-            inputtest=array(inputtest)
-        
+            inputtest = array(inputtest)
+
         # for i in range(inputtest.shape[0]):
         #     layer = len(self.webshape) - 1
         #     temp = inputtest[i]
