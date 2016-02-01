@@ -443,7 +443,7 @@ PyMODINIT_FUNC PyInit_Cmrc(void) {
 PyMODINIT_FUNC initCmrc(void) {
 
     Py_InitModule3("Cmrc", Cmrc_methods,
-        "MSA mrc tools.");
+        "MRC file tools.");
 
     import_array();
 }
