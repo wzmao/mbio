@@ -30,3 +30,7 @@ __all__.extend(analysis.__all__)
 from . import mrc
 from .mrc import *
 __all__.extend(mrc.__all__)
+
+from . import mrcModel
+from .mrcModel import *
+__all__.extend(mrcModel.__all__)
