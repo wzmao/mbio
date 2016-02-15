@@ -15,7 +15,7 @@ def GetAtomID(names):
              "O": 7, "F": 8, "Ne": 9, "Na": 10, "MG": 11, "AL": 12,
              "SI": 13, "P": 14, "S": 15, "CL": 16, "AR": 17, "K": 18,
              "CA": 19, "FE": 25, }
-    atomid = map(lambda x: trans.get(x, 0), names)
+    atomid = map(lambda x: trans.get(x[:2].strip(), 0), names)
     atomid = array(atomid, dtype=int32)
     return atomid
 
@@ -43,7 +43,7 @@ def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwarg):
     if not isinstance(pdb, AtomGroup):
         from prody import parsePDB
         try:
-            pdb = parsePDB(pdb)
+            pdb = parsePDB(pdb,needfullname=True)
         except:
             printError("The pdb could not be recongnized. Stopped.")
             return None
@@ -71,6 +71,7 @@ def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwarg):
     bf = bf[ind]
     cor = cor[ind]
     atomid = atomid[ind]
+
     mrc = MRC()
     mrc.nx = mrc.ny = mrc.nz = mrc.mx = mrc.my = mrc.mz = grid_size
     mrc.nxstart = mrc.nystart = mrc.nzstart = 0
