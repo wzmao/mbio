@@ -78,7 +78,7 @@ def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwarg):
     mrc.cella = [grid_size * pixel_size] * 3
     mrc.cellb = [90.] * 3
     mrc.mode = 2
-    mrc.mapc, mrc.mapr, mrc.maps = 3,2,1
+    mrc.mapc, mrc.mapr, mrc.maps = 1,2,3
     mrc.dmin = mrc.dmax = mrc.dmean = 0
     mrc.ispg = 0
     mrc.nsymbt = 0

@@ -206,7 +206,7 @@ static CMPLXf GetStructureFactor(int *atomid,float *occ,float *bf,float *cor,int
 			AtomDiffFactor=(a1[curAtomID]*exp(-(b1[curAtomID])*r2/4.0)+a2[curAtomID]*exp(-(b2[curAtomID])*r2/4.0)+a3[curAtomID]*exp(-(b3[curAtomID])*r2/4.0)+a4[curAtomID]*exp(-(b4[curAtomID])*r2/4.0)+c[curAtomID]);
 		}
 		amp=exp(-r2*bf[i]/2.0)*occ[i]*AtomDiffFactor;
-		phase=-2.0*PI*(h*cor[i*3]+k*cor[i*3+1]+l*cor[i*3+2]);
+		phase=-2.0*PI*(h*cor[i*3+2]+k*cor[i*3+1]+l*cor[i*3]);
 		Fhkl.x+=cos(phase)*amp;
 		Fhkl.y+=sin(phase)*amp;
 	}
