@@ -9,6 +9,7 @@ from distutils.extension import Extension
 from distutils.command.install import install
 
 # os.environ['CC']='gcc'
+# os.environ['LDSHARED']='g++'
 # os.environ['CXX']='g++'
 if sys.version_info[:2] < (2, 6):
     sys.stderr.write('Python 2.5 and older is not supported\n')
