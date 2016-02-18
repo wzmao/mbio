@@ -13,3 +13,5 @@ build
 mbio/.Cache
 mbio/.Result
 mbio/.Info
+MANIFEST
+dist
