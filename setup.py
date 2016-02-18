@@ -114,5 +114,6 @@ setup(
     package_data=PACKAGE_DATA,
     ext_modules=EXTENSIONS,
     requires=['NumPy (>=1.9)', 'Scipy (>=0.15)'],
-    provides=['mbio ({0:s})'.format(__version__)]
+    provides=['mbio ({0:s})'.format(__version__)],
+    url='https://github.com/wzmao/mbio'
 )
