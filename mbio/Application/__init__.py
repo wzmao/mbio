@@ -44,3 +44,7 @@ __all__.extend(math.__all__)
 from . import setting
 from .setting import *
 __all__.extend(setting.__all__)
+
+from . import plotting
+from .plotting import *
+# __all__.extend(plotting.__all__)

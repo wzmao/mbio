@@ -583,7 +583,7 @@ def transCylinder(pdb, **kwarg):
     dirc = array((dirc1, dirc2, dirc3))
     return cent, dirc, rankrange
 
-def showMRCConnection(mrc, cutoff=3**.5, **kwarg):
+def showMRCConnection(mrc, cutoff=2, **kwarg):
     """Plot 3D plot of connected parts in different color for MRC."""
 
     from matplotlib import pyplot as plt
@@ -591,6 +591,7 @@ def showMRCConnection(mrc, cutoff=3**.5, **kwarg):
     import mpl_toolkits.mplot3d.axes3d as p3
     from mpl_toolkits.mplot3d import Axes3D
     from ..Application.setting import getMatplotlibDisplay
+    from ..Application.plotting import setAxesEqual
     from numpy import array
 
     try:
@@ -608,6 +609,7 @@ def showMRCConnection(mrc, cutoff=3**.5, **kwarg):
     ax.w_yaxis.line.set_lw(0)
     ax.w_zaxis.line.set_lw(0)
     classes={}
+    step=mrc.getGridSteps()
     cutoff=(cutoff+1e-5)**2
     for i,j,k in zip(*mrc.data.nonzero()):
         if mrc.data[i,j,k]==0:
@@ -619,22 +621,29 @@ def showMRCConnection(mrc, cutoff=3**.5, **kwarg):
     for ty,i in zip(classes.keys(),xrange(len(classes))):
         color=plt.cm.gist_ncar(i*1./len(classes)*.9)
         pos=array(classes[ty])
-        ax.scatter(pos[:,0],pos[:,1],pos[:,2],lw=0,c=color,zorder=10)
+        ax.scatter(pos[:,0]*step[0]+mrc.origin[0],
+                   pos[:,1]*step[1]+mrc.origin[1],
+                   pos[:,2]*step[2]+mrc.origin[2],lw=0,c=color,zorder=10)
         for j in xrange(len(pos)):
             for k in xrange(j):
-                if ((pos[j]-pos[k])**2).sum()<=cutoff:
-                    ax.plot(pos[[j,k],0],pos[[j,k],1],pos[[j,k],2],lw=2,c=color,zorder=10)
+                if (((pos[j]-pos[k])*step)**2).sum()<=cutoff:
+                    ax.plot(pos[[j,k],0]*step[0]+mrc.origin[0],
+                            pos[[j,k],1]*step[1]+mrc.origin[1],
+                            pos[[j,k],2]*step[2]+mrc.origin[2],lw=3,c=color,zorder=10)
         del pos
+    ax.set_xlabel('X',fontsize=15)
+    ax.set_ylabel('Y',fontsize=15)
+    ax.set_zlabel('Z',fontsize=15)
+    setAxesEqual(ax)
     del classes
     del ax
-    plt.ion()
     plt.show()
     return None
 
 
-# def mrcSegment(mrc, percentage=0.01,cutoff=3**.5,**kwarg):
-#     """Segment the MRC with the top `percentage` points.
-#     Only two points closer than the cutoff will be taken as connected."""
+def mrcSegment(mrc, percentage=0.01,cutoff=3**.5,**kwarg):
+    """Segment the MRC with the top `percentage` points.
+    Only two points closer than the cutoff will be taken as connected."""
 
     
-#     return None
+    return None
