@@ -3,7 +3,8 @@
 """
 
 __author__ = 'Wenzhi Mao'
-__all__ = ['genPvalue', 'calcPcutoff', 'showPcutoff', 'transCylinder']
+__all__ = ['genPvalue', 'calcPcutoff', 'showPcutoff', 'transCylinder',
+           'showMRCConnection']
 
 
 def interpolationball(matrix, index, step, r, **kwarg):
@@ -581,3 +582,59 @@ def transCylinder(pdb, **kwarg):
     dirc3 = dirc3 / ((dirc3 ** 2).sum() ** .5)
     dirc = array((dirc1, dirc2, dirc3))
     return cent, dirc, rankrange
+
+def showMRCConnection(mrc, cutoff=3**.5, **kwarg):
+    """Plot 3D plot of connected parts in different color for MRC."""
+
+    from matplotlib import pyplot as plt
+    from matplotlib import use as matplotlibuse
+    import mpl_toolkits.mplot3d.axes3d as p3
+    from mpl_toolkits.mplot3d import Axes3D
+    from ..Application.setting import getMatplotlibDisplay
+    from numpy import array
+
+    try:
+        if not getMatplotlibDisplay():
+            matplotlibuse('Agg')
+    except:
+        pass
+
+    fig = plt.figure(figsize=(6,6), facecolor='white')
+    ax = p3.Axes3D(fig,aspect=1)
+    ax.w_xaxis.set_pane_color((0,0,0))
+    ax.w_yaxis.set_pane_color((0,0,0))
+    ax.w_zaxis.set_pane_color((0,0,0))
+    ax.w_xaxis.line.set_lw(0)
+    ax.w_yaxis.line.set_lw(0)
+    ax.w_zaxis.line.set_lw(0)
+    classes={}
+    cutoff=(cutoff+1e-5)**2
+    for i,j,k in zip(*mrc.data.nonzero()):
+        if mrc.data[i,j,k]==0:
+            continue
+        if mrc.data[i,j,k] not in classes.keys():
+            classes[mrc.data[i,j,k]]=[[i,j,k]]
+        else:
+            classes[mrc.data[i,j,k]].append([i,j,k])
+    for ty,i in zip(classes.keys(),xrange(len(classes))):
+        color=plt.cm.gist_ncar(i*1./len(classes)*.9)
+        pos=array(classes[ty])
+        ax.scatter(pos[:,0],pos[:,1],pos[:,2],lw=0,c=color,zorder=10)
+        for j in xrange(len(pos)):
+            for k in xrange(j):
+                if ((pos[j]-pos[k])**2).sum()<=cutoff:
+                    ax.plot(pos[[j,k],0],pos[[j,k],1],pos[[j,k],2],lw=2,c=color,zorder=10)
+        del pos
+    del classes
+    del ax
+    plt.ion()
+    plt.show()
+    return None
+
+
+# def mrcSegment(mrc, percentage=0.01,cutoff=3**.5,**kwarg):
+#     """Segment the MRC with the top `percentage` points.
+#     Only two points closer than the cutoff will be taken as connected."""
+
+    
+#     return None
