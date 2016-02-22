@@ -4,7 +4,7 @@
 
 __author__ = 'Wenzhi Mao'
 __all__ = ['genPvalue', 'calcPcutoff', 'showPcutoff', 'transCylinder',
-           'showMRCConnection']
+           'showMRCConnection', 'mrcSegment']
 
 
 def interpolationball(matrix, index, step, r, **kwarg):
@@ -38,23 +38,23 @@ def interpolationcube(m, p, way, *kwarg):
 
     if way == 'idw':
         tt = array([[[0, 0], [0, 0]], [[0, 0], [0, 0]]], dtype=float)
-        tt[0, :, :] += p[0] ** 2
-        tt[1, :, :] += (1 - p[0]) ** 2
-        tt[:, 0, :] += p[1] ** 2
-        tt[:, 1, :] += (1 - p[1]) ** 2
-        tt[:, :, 0] += p[2] ** 2
-        tt[:, :, 1] += (1 - p[2]) ** 2
+        tt[0,:,:] += p[0] ** 2
+        tt[1,:,:] += (1 - p[0]) ** 2
+        tt[:, 0,:] += p[1] ** 2
+        tt[:, 1,:] += (1 - p[1]) ** 2
+        tt[:,:, 0] += p[2] ** 2
+        tt[:,:, 1] += (1 - p[2]) ** 2
         tt = tt ** .5
         tt = 1. / tt
         tt = tt / tt.sum()
     elif way == 'interpolation':
         tt = array([[[1, 1], [1, 1]], [[1, 1], [1, 1]]], dtype=float)
-        tt[0, :, :] *= 1 - p[0]
-        tt[1, :, :] *= p[0]
-        tt[:, 0, :] *= 1 - p[1]
-        tt[:, 1, :] *= p[1]
-        tt[:, :, 0] *= 1 - p[2]
-        tt[:, :, 1] *= p[2]
+        tt[0,:,:] *= 1 - p[0]
+        tt[1,:,:] *= p[0]
+        tt[:, 0,:] *= 1 - p[1]
+        tt[:, 1,:] *= p[1]
+        tt[:,:, 0] *= 1 - p[2]
+        tt[:,:, 1] *= p[2]
     if m.shape != (2, 2, 2):
         return -999999999999
     else:
@@ -600,40 +600,40 @@ def showMRCConnection(mrc, cutoff=2, **kwarg):
     except:
         pass
 
-    fig = plt.figure(figsize=(6,6), facecolor='white')
-    ax = p3.Axes3D(fig,aspect=1)
-    ax.w_xaxis.set_pane_color((0,0,0))
-    ax.w_yaxis.set_pane_color((0,0,0))
-    ax.w_zaxis.set_pane_color((0,0,0))
+    fig = plt.figure(figsize=(6, 6), facecolor='white')
+    ax = p3.Axes3D(fig, aspect=1)
+    ax.w_xaxis.set_pane_color((0, 0, 0))
+    ax.w_yaxis.set_pane_color((0, 0, 0))
+    ax.w_zaxis.set_pane_color((0, 0, 0))
     ax.w_xaxis.line.set_lw(0)
     ax.w_yaxis.line.set_lw(0)
     ax.w_zaxis.line.set_lw(0)
-    classes={}
-    step=mrc.getGridSteps()
-    cutoff=(cutoff+1e-5)**2
-    for i,j,k in zip(*mrc.data.nonzero()):
-        if mrc.data[i,j,k]==0:
+    classes = {}
+    step = mrc.getGridSteps()
+    cutoff = (cutoff+1e-5)**2
+    for i, j, k in zip(*mrc.data.nonzero()):
+        if mrc.data[i, j, k] == 0:
             continue
-        if mrc.data[i,j,k] not in classes.keys():
-            classes[mrc.data[i,j,k]]=[[i,j,k]]
+        if mrc.data[i, j, k] not in classes.keys():
+            classes[mrc.data[i, j, k]] = [[i, j, k]]
         else:
-            classes[mrc.data[i,j,k]].append([i,j,k])
-    for ty,i in zip(classes.keys(),xrange(len(classes))):
-        color=plt.cm.gist_ncar(i*1./len(classes)*.9)
-        pos=array(classes[ty])
-        ax.scatter(pos[:,0]*step[0]+mrc.origin[0],
-                   pos[:,1]*step[1]+mrc.origin[1],
-                   pos[:,2]*step[2]+mrc.origin[2],lw=0,c=color,zorder=10)
+            classes[mrc.data[i, j, k]].append([i, j, k])
+    for ty, i in zip(classes.keys(), xrange(len(classes))):
+        color = plt.cm.gist_ncar(i*1./len(classes)*.9)
+        pos = array(classes[ty])
+        ax.scatter(pos[:, 0]*step[0]+mrc.origin[0],
+                   pos[:, 1]*step[1]+mrc.origin[1],
+                   pos[:, 2]*step[2]+mrc.origin[2], lw=0, c=color, zorder=10)
         for j in xrange(len(pos)):
             for k in xrange(j):
-                if (((pos[j]-pos[k])*step)**2).sum()<=cutoff:
-                    ax.plot(pos[[j,k],0]*step[0]+mrc.origin[0],
-                            pos[[j,k],1]*step[1]+mrc.origin[1],
-                            pos[[j,k],2]*step[2]+mrc.origin[2],lw=3,c=color,zorder=10)
+                if (((pos[j]-pos[k])*step)**2).sum() <= cutoff:
+                    ax.plot(pos[[j, k], 0]*step[0]+mrc.origin[0],
+                            pos[[j, k], 1]*step[1]+mrc.origin[1],
+                            pos[[j, k], 2]*step[2]+mrc.origin[2], lw=3, c=color, zorder=10)
         del pos
-    ax.set_xlabel('X',fontsize=15)
-    ax.set_ylabel('Y',fontsize=15)
-    ax.set_zlabel('Z',fontsize=15)
+    ax.set_xlabel('X', fontsize=15)
+    ax.set_ylabel('Y', fontsize=15)
+    ax.set_zlabel('Z', fontsize=15)
     setAxesEqual(ax)
     del classes
     del ax
@@ -645,5 +645,18 @@ def mrcSegment(mrc, percentage=0.01,cutoff=3**.5,**kwarg):
     """Segment the MRC with the top `percentage` points.
     Only two points closer than the cutoff will be taken as connected."""
 
-    
-    return None
+    from numpy import floor, indices, argsort, zeros
+
+    maxnum = int(percentage*mrc.data.size)
+    args = argsort(mrc.data.ravel())[:mrc.data.size-maxnum-1:-1]
+    data = zeros((maxnum, 4), dtype=float)
+    data[:, 0] = args//(mrc.data.shape[1]*mrc.data.shape[2])
+    data[:, 1] = args%(mrc.data.shape[1]*mrc.data.shape[2])//mrc.data.shape[2]
+    data[:, 2] = args%(mrc.data.shape[2])
+    data[:, 3] = mrc.data.ravel()[args]
+
+    origin = mrc.origin
+    grid = mrc.getGridCoords()
+    shape = [int((floor((grid[i][-1]-origin[i])/cutoff)))+1 for i in range(3)]
+    weight = mrc.getGridSteps()/cutoff
+    # return mrc.data, int(percentage*mrc.data.size), cutoff, step/cutoff, shape

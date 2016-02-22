@@ -43,7 +43,7 @@ def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwarg):
     if not isinstance(pdb, AtomGroup):
         from prody import parsePDB
         try:
-            pdb = parsePDB(pdb,needfullname=True)
+            pdb = parsePDB(pdb, needfullname=True)
         except:
             printError("The pdb could not be recongnized. Stopped.")
             return None
@@ -78,7 +78,7 @@ def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwarg):
     mrc.cella = [grid_size * pixel_size] * 3
     mrc.cellb = [90.] * 3
     mrc.mode = 2
-    mrc.mapc, mrc.mapr, mrc.maps = 1,2,3
+    mrc.mapc, mrc.mapr, mrc.maps = 1, 2, 3
     mrc.dmin = mrc.dmax = mrc.dmean = 0
     mrc.ispg = 0
     mrc.nsymbt = 0
@@ -89,7 +89,7 @@ def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwarg):
     mrc.nlabels = 0
     mrc.label = [""] * 10
     mrc.symdata = None
-    mrc.extra=''
+    mrc.extra = ''
     mrc.xstart, mrc.ystart, mrc.zstart = array(
         mrc.origin)[argsort([mrc.mapc, mrc.mapr, mrc.maps])]
     mrc.data = zeros((grid_size, grid_size, grid_size), dtype=float32)
