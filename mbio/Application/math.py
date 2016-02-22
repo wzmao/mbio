@@ -194,18 +194,18 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
         printError("x and y must have same first dimension.")
         return None
     if type(label) == type(None):
-        label = ['x' + str(i + 1) for i in range(x.shape[1])]
+        label = ['x' + str(i + 1) for i in xrange(x.shape[1])]
     else:
         label = [str(i) for i in label]
     if len(label) != x.shape[1]:
         printError(
             "The length of label does not match data. Dismiss the label.")
-        label = ['x' + str(i + 1) for i in range(x.shape[1])]
+        label = ['x' + str(i + 1) for i in xrange(x.shape[1])]
 
     addconst = 0
     if const:
         hasconst = False
-        for i in range(x.shape[1]):
+        for i in xrange(x.shape[1]):
             if len(set(x[:, i])) == 1:
                 hasconst = True
                 break
@@ -223,7 +223,7 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     if sigma2 == 0:
         sigma2 = 5e-324
     st = '\ty = '
-    for i in range(x.shape[1] - 1):
+    for i in xrange(x.shape[1] - 1):
         st += "{0:+10.6f}*{1:s} ".format(beta[i, 0], label[i])
     if addconst:
         st += "{0:+10.6f}".format(beta[-1, 0])
@@ -238,7 +238,7 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     ts = []
     sig = []
     sigma = []
-    for i in range(x.shape[1]):
+    for i in xrange(x.shape[1]):
         sigma.append((sigma2 * cov[i, i]) ** .5)
         ts.append(beta[i][0] / sigma[-1])
         p.append((1. - t.cdf(abs(ts[-1]), x.shape[0] - x.shape[1])) * 2)
@@ -299,7 +299,7 @@ def performPolyRegression(y, degree=2, **kwargs):
     t = t - t.mean()
     label = []
     kwargs.pop('label', None)
-    for i in range(degree):
+    for i in xrange(degree):
         if i == 0:
             label.append('x')
         else:
@@ -318,17 +318,17 @@ def performPolyRegression(y, degree=2, **kwargs):
                                               14.) + 3. * (k ** 2 - 1) * (k ** 2 - 9) / 560
             poly[:, i] = poly[:, i] / ((poly[:, i] ** 2).sum()) ** .5
     printInfo("The polynomial is listed.")
-    for i in range(degree):
+    for i in xrange(degree):
         if k > 6:
             st = ""
-            for j in range(3):
+            for j in xrange(3):
                 st += " {0:>7.4f}".format(poly[j, i])
             st += ' ...'
-            for j in range(-3, 0):
+            for j in xrange(-3, 0):
                 st += " {0:>7.4f}".format(poly[j, i])
         else:
             st = ""
-            for j in range(int(k)):
+            for j in xrange(int(k)):
                 st += " {0:>7.4f}".format(poly[j, i])
         printInfo("\t{0:^5s}:{1}".format(label[i], st))
     result = performRegression(poly, y, label=label, **kwargs)

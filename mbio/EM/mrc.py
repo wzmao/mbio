@@ -52,7 +52,7 @@ class MRCHeader():
                 else:
                     from numpy import array, argsort
                     self = temp
-                    for i in range(10):
+                    for i in xrange(10):
                         self.label[i] = self.label[i][:80]
                         if self.label[i].find('\0') != -1:
                             self.label[i] = self.label[i][
@@ -103,7 +103,7 @@ class MRCHeader():
                 else:
                     from numpy import array, argsort
                     self = temp
-                    for i in range(10):
+                    for i in xrange(10):
                         self.label[i] = self.label[i][:80]
                         if self.label[i].find('\0') != -1:
                             self.label[i] = self.label[i][
@@ -372,7 +372,7 @@ class MRC():
             printError("No data to write.")
             return None
         find = False
-        for i in range(10):
+        for i in xrange(10):
             if self.label[i].startswith("Written by mbio"):
                 find = True
                 from time import ctime
@@ -625,7 +625,7 @@ class MRC():
         from numpy import array, int8, int16, float32, uint8, uint16
         from ..IO.output import printError
 
-        if mode not in range(7):
+        if mode not in xrange(7):
             printError("Mode must be 0,1,2,3,4,5,6.")
         elif mode in [3, 4]:
             printError("Sorry, the complex format is not supported now.")

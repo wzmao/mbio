@@ -332,7 +332,7 @@ def applyBND(mat, **kwargs):
     mat_th = (mat + mat.T) / 2.
     # Double symetric eigvector relatively robust representation (RRR)
     d, u = eigh(mat_th)
-    for i in range(n):
+    for i in xrange(n):
         if d[i] != 0:
             d[i] = (-1. + (1 + 4 * d[i] * d[i]) ** .5) / 2. / d[i]
     # Double general matrix multiply
@@ -650,8 +650,8 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
 
     pos = []
     val = []
-    for i in range(pplus.shape[0]):
-        for j in range(pplus.shape[1]):
+    for i in xrange(pplus.shape[0]):
+        for j in xrange(pplus.shape[1]):
             if pplus[i][j] <= 1e-3 or pminus[i][j] <= 1e-3:
                 cdouble[i][j] = -1
             else:
@@ -665,8 +665,8 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
     invs = inv(s)
     h = (nn ** (-1.0 / 6.0)) * (((2.0 ** (-1.0)) * (diag(s).sum())) ** .5)
     para1 = (-.5) * (h ** -2.)
-    for i in range(pplus.shape[0]):
-        for j in range(pplus.shape[1]):
+    for i in xrange(pplus.shape[0]):
+        for j in xrange(pplus.shape[1]):
             if cdouble[i][j] == -1:
                 temp = array([X[i][j], Y[i][j]]).reshape((2, 1))
                 temp = e ** (para1 *
@@ -676,7 +676,7 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
     csingle = zeros_like(psigplus)
     pos = []
     val = []
-    for i in range(psigplus.shape[0]):
+    for i in xrange(psigplus.shape[0]):
         if psigplus[i] <= 1e-8 or psigminus[i] <= 1e-8:
             csingle[i] = -1
         else:
@@ -689,13 +689,13 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
     s = pos.std()
     h = ((4.0 / 3) ** (.2)) * s * (nn ** -.2)
     para1 = 1. / (nn * h * ((2 * pi) ** .5))
-    for i in range(psigplus.shape[0]):
+    for i in xrange(psigplus.shape[0]):
         if csingle[i] == -1:
             temp = para1 * (e ** (-.5 * (((pos - XX[i]) / h) ** 2)))
             csingle[i] = (temp.dot(val).sum()) / temp.sum()
 
-    for i in range(n):
-        for j in range(i + 1, n):
+    for i in xrange(n):
+        for j in xrange(i + 1, n):
             if psicov[i][j] == 0:
                 ldi = log(di[i][j]) / log(10)
                 temp = int(trunc((ldi + 5) / .05))
@@ -722,7 +722,7 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
 
 #     if refine:
 #         mark = msa[0]!='-'
-#         for i in range(len(mark)):
+#         for i in xrange(len(mark)):
 #             if mark[i] and msa[0,i].isupper():
 #                 mark[i]=True
 #             else:
@@ -730,10 +730,10 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
 #         msa=msa[:,mark]
 #     if unique:
 #         mark=ones(msa.shape[0],dtype=bool)
-#         for i in range(msa.shape[0]):
+#         for i in xrange(msa.shape[0]):
 #             if not mark[i]:
 #                 continue
-#             for j in range(i+1,msa.shape[0]):
+#             for j in xrange(i+1,msa.shape[0]):
 #                 if (msa[i]==msa[j]).all():
 #                     mark[j]=False
 #         msa=msa[mark]

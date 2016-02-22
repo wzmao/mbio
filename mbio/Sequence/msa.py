@@ -56,5 +56,5 @@ class MSA(object):
 
     def __iter__(self):
 
-        for i in range(self.numseq):
+        for i in xrange(self.numseq):
             yield self.seq[i]

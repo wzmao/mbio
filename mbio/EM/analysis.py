@@ -155,16 +155,16 @@ def genPvalue(
         tempindex = array(
             rint(array(((sample - grid[:, 0]) / step), dtype=float)), dtype=int)
         ballindex = ([], [], [])
-        for i in range(int(floor(-sampleradius / step[0])), int(ceil(sampleradius / step[0]) + 1)):
-            for j in range(int(floor(-sampleradius / step[1])), int(ceil(sampleradius / step[1]) + 1)):
-                for k in range(int(floor(-sampleradius / step[2])), int(ceil(sampleradius / step[2]) + 1)):
+        for i in xrange(int(floor(-sampleradius / step[0])), int(ceil(sampleradius / step[0]) + 1)):
+            for j in xrange(int(floor(-sampleradius / step[1])), int(ceil(sampleradius / step[1]) + 1)):
+                for k in xrange(int(floor(-sampleradius / step[2])), int(ceil(sampleradius / step[2]) + 1)):
                     if (i * step[0]) ** 2 + (j * step[1]) ** 2 + (k * step[2]) ** 2 <= sampleradius ** 2:
                         ballindex[0].append(i)
                         ballindex[1].append(j)
                         ballindex[2].append(k)
         ballindex = [array(i, dtype=int) for i in ballindex]
         k = array([[len(grid[0])], [len(grid[1])], [len(grid[2])]])
-        for i in range(len(sample)):
+        for i in xrange(len(sample)):
             t = array([ballindex[0] + tempindex[i][0], ballindex[1] +
                        tempindex[i][1], ballindex[2] + tempindex[i][2]])
             t = t[:, (t >= 0).all(0) & (t < k).all()]
@@ -185,7 +185,7 @@ def genPvalue(
     coor = pdb.getCoords()
     if method == 'ball':
         index = (coor - gridstart) / step
-        for i in range(len(coor)):
+        for i in xrange(len(coor)):
             beta[i] = interpolationball(mrc.data, index[i], step, r=way)
             if assumenorm:
                 beta[i] = norm.cdf(-(beta[i] - mu) / sigma)
@@ -194,7 +194,7 @@ def genPvalue(
                     binarySearch(findset, beta[i]) * 1.0 / findsetlength
     elif method == 'cube':
         index = (coor - gridstart) // step
-        for i in range(len(coor)):
+        for i in xrange(len(coor)):
             beta[i] = interpolationcube(mrc.data[index[i][0]:index[i][
                 0] + 2, index[i][1]:index[i][1] + 2, index[i][2]:index[i][2] + 2], coor[i] % array(step) / array(step), way)
             if assumenorm:
@@ -334,7 +334,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
             plot.plot(
                 list(plot.get_xlim()), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
             dd = array([i.select('backbone').getBetas().mean() for i in data])
-            for i in range(len(dd) - 2):
+            for i in xrange(len(dd) - 2):
                 if (dd[i:i + 3] > cutoff).all():
                     plot.plot(
                         labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
@@ -374,7 +374,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
             plot.plot(
                 list(plot.get_xlim()), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
             dd = array([i.select('backbone').getBetas().mean() for i in data])
-            for i in range(len(dd) - 2):
+            for i in xrange(len(dd) - 2):
                 if (dd[i:i + 3] > cutoff).all():
                     plot.plot(
                         labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
@@ -410,7 +410,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                     list(plot[0].get_xlim()), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
                 dd = array([i.select('backbone').getBetas().mean()
                             for i in data])
-                for i in range(len(dd) - 2):
+                for i in xrange(len(dd) - 2):
                     if (dd[i:i + 3] > cutoff).all():
                         plot[0].plot(
                             labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
@@ -457,7 +457,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
                     list(plot[0].get_xlim()), [cutoff, cutoff], '--', c='grey', alpha=0.8, zorder=5)
                 dd = array([i.select('backbone').getBetas().mean()
                             for i in data])
-                for i in range(len(dd) - 2):
+                for i in xrange(len(dd) - 2):
                     if (dd[i:i + 3] > cutoff).all():
                         plot[0].plot(
                             labelindex[i:i + 3], dd[i:i + 3], '.-', c='red', zorder=11)
@@ -525,16 +525,16 @@ def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwarg):
         tempindex = array(
             rint(array(((sample - grid[:, 0]) / step), dtype=float)), dtype=int)
         ballindex = ([], [], [])
-        for i in range(int(floor(-sampleradius / step[0])), int(ceil(sampleradius / step[0]) + 1)):
-            for j in range(int(floor(-sampleradius / step[1])), int(ceil(sampleradius / step[1]) + 1)):
-                for k in range(int(floor(-sampleradius / step[2])), int(ceil(sampleradius / step[2]) + 1)):
+        for i in xrange(int(floor(-sampleradius / step[0])), int(ceil(sampleradius / step[0]) + 1)):
+            for j in xrange(int(floor(-sampleradius / step[1])), int(ceil(sampleradius / step[1]) + 1)):
+                for k in xrange(int(floor(-sampleradius / step[2])), int(ceil(sampleradius / step[2]) + 1)):
                     if (i * step[0]) ** 2 + (j * step[1]) ** 2 + (k * step[2]) ** 2 <= sampleradius ** 2:
                         ballindex[0].append(i)
                         ballindex[1].append(j)
                         ballindex[2].append(k)
         ballindex = [array(i, dtype=int) for i in ballindex]
         k = array([[len(grid[0])], [len(grid[1])], [len(grid[2])]])
-        for i in range(len(sample)):
+        for i in xrange(len(sample)):
             t = array([ballindex[0] + tempindex[i][0], ballindex[1] +
                        tempindex[i][1], ballindex[2] + tempindex[i][2]])
             t = t[:, (t >= 0).all(0) & (t < k).all()]
@@ -645,18 +645,30 @@ def mrcSegment(mrc, percentage=0.01,cutoff=3**.5,**kwarg):
     """Segment the MRC with the top `percentage` points.
     Only two points closer than the cutoff will be taken as connected."""
 
-    from numpy import floor, indices, argsort, zeros
+    from numpy import floor, indices, argsort, zeros, zeros_like
 
     maxnum = int(percentage*mrc.data.size)
     args = argsort(mrc.data.ravel())[:mrc.data.size-maxnum-1:-1]
-    data = zeros((maxnum, 4), dtype=float)
-    data[:, 0] = args//(mrc.data.shape[1]*mrc.data.shape[2])
-    data[:, 1] = args%(mrc.data.shape[1]*mrc.data.shape[2])//mrc.data.shape[2]
-    data[:, 2] = args%(mrc.data.shape[2])
-    data[:, 3] = mrc.data.ravel()[args]
+    pos = zeros((maxnum, 3), dtype=int)
+    pos[:, 0] = args // (mrc.data.shape[1]*mrc.data.shape[2])
+    pos[:, 1] = args % (mrc.data.shape[1]*mrc.data.shape[2]) // mrc.data.shape[2]
+    pos[:, 2] = args % (mrc.data.shape[2])
+    data = mrc.data.ravel()[args]
+
+    save=zeros_like(mrc.data,dtype=int)
+    save[[pos[:,0],pos[:,1],pos[:,2]]]=-1
 
     origin = mrc.origin
-    grid = mrc.getGridCoords()
-    shape = [int((floor((grid[i][-1]-origin[i])/cutoff)))+1 for i in range(3)]
-    weight = mrc.getGridSteps()/cutoff
+    step = mrc.getGridSteps()/cutoff
+
+    classnum=0
+    classleft=[]
+    classvec=zeros(len(data),dtype=int)
+    classcount={}
+
+    for posnum in xrange(len(data)):
+        temp=pos[posnum]
+        for i in xrange()
+        del temp
+
     # return mrc.data, int(percentage*mrc.data.size), cutoff, step/cutoff, shape

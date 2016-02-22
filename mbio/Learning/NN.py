@@ -88,7 +88,7 @@ class NeuralNet(object):
                 printError("The Output data has been deleted.")
             self.webshape = webshape
             self.trans = zeros((webshape.shape[0] - 1), dtype=ndarray)
-            for i in range(len(webshape) - 1):
+            for i in xrange(len(webshape) - 1):
                 self.trans[i] = matrix(
                     random.random((webshape[i] + 1, webshape[i + 1])) * 0.1 - 0.05, dtype=float64)
             self.label = ["x{0}".format(i + 1) for i in xrange(webshape[0])]
@@ -203,7 +203,7 @@ class NeuralNet(object):
         if self.outputdata.shape[1] != self.webshape[-1]:
             printError("The sizes of Output doesnot fit the webshape.")
             return None
-        for i in range(len(self.webshape) - 1):
+        for i in xrange(len(self.webshape) - 1):
             if self.trans[i].shape != (self.webshape[i] + 1, self.webshape[i + 1]):
                 printError("`trans`[{0}] shape wrong".format(i))
                 result = 0
@@ -222,16 +222,16 @@ class NeuralNet(object):
     #     layer = len(self.webshape) - 1
     #     temp = inputd
     #     save = [np.array(inputd)]
-    #     for i in range(layer):
+    #     for i in xrange(layer):
     #         temp = np.concatenate((temp, np.ones((1, 1))), axis=1)
     #         temp = temp.dot(self.trans[i])
     #         temp = 1. / (1. + np.exp(-temp))
     #         save = save + [np.array(temp)]
     #     wucha = [save[-1] * (1 - save[-1]) * (outputd1 - save[-1])]
-    #     for i in reversed(range(layer)):
+    #     for i in reversed(xrange(layer)):
     #         wucha = [
     #             save[i] * (1 - save[i]) * np.array(wucha[0].dot(self.trans[i][:-1].T))] + wucha
-    #     for i in range(layer):
+    #     for i in xrange(layer):
     #         self.trans[i] = self.trans[
     #             i] + (np.concatenate((save[i], np.ones((1, 1))), axis=1).T.dot(wucha[i + 1])) * step
     # return ((outputd1 - save[-1])*(outputd1 - save[-1])).sum()
@@ -244,10 +244,10 @@ class NeuralNet(object):
         if not isinstance(inputtest, ndarray):
             inputtest = array(inputtest)
 
-        # for i in range(inputtest.shape[0]):
+        # for i in xrange(inputtest.shape[0]):
         #     layer = len(self.webshape) - 1
         #     temp = inputtest[i]
-        #     for j in range(layer):
+        #     for j in xrange(layer):
         #         temp = np.concatenate((temp, np.ones((1, 1))), axis=1)
         #         temp = temp.dot(self.trans[j])
         #     mark += [f(temp) == f(outputtest[i])]
@@ -309,7 +309,7 @@ class NeuralNet(object):
             if self.trans.ndim != 1:
                 printInfo("`trans` shape")
                 result = 0
-            for i in range(len(self.trans)):
+            for i in xrange(len(self.trans)):
                 if not isinstance(self.trans[i], ndarray):
                     printInfo("`trans[{0}]` dtype".format(i))
                     result = 0
@@ -327,7 +327,7 @@ class NeuralNet(object):
                 printInfo("`inputdata` doesn't fit `outputdata`")
                 result = 0
         if isinstance(self.webshape, ndarray) and isinstance(self.trans, ndarray):
-            for i in range(len(self.webshape) - 1):
+            for i in xrange(len(self.webshape) - 1):
                 if self.trans[i].shape != (self.webshape[i] + 1, self.webshape[i + 1]):
                     printInfo("`trans`[{0}] shape wrong".format(i))
                     result = 0
@@ -343,7 +343,7 @@ class NeuralNet(object):
 #     n = a.shape[0]
 #     if keep == None:
 #         keep = keepsize(n)
-#     keeplist = range(n)
+#     keeplist = xrange(n)
 #     removelist = []
 #     while len(keeplist) > keep:
 #         removelist.append(
@@ -360,6 +360,6 @@ class NeuralNet(object):
 #     else:
 #         setitem = classier
 #     result = np.matrix(np.zeros((a.shape[0], len(setitem))))
-#     for i in range(len(setitem)):
+#     for i in xrange(len(setitem)):
 #         result[:, i] = (a == setitem[i])
 #     return result

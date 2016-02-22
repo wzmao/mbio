@@ -37,10 +37,10 @@ def parsePDB(filename, **kwargs):
             filename, 'r:{0}'.format(filename.lower().split('.')[-1]))
         files = [i for i in t.getmembers() if i.isfile()]
         names = [i.name for i in files]
-        mapindex = [i for i in range(len(names)) if not names[i].lower().endswith(
+        mapindex = [i for i in xrange(len(names)) if not names[i].lower().endswith(
             ".pdb") and not names[i].lower().endswith('.pdb.beta')]
         pdbs = [
-            i for i in range(len(names)) if names[i].lower().endswith('.pdb')]
+            i for i in xrange(len(names)) if names[i].lower().endswith('.pdb')]
         if len(mapindex) > 1:
             printError(
                 "There are more than 1 mapper file, please check the tar.")
@@ -110,11 +110,11 @@ def parsePDB(filename, **kwargs):
                 printError(
                     "Each PDB must provide the same number of coordinate sets.")
                 return None
-            for i in range(len(pdbtemp)):
+            for i in xrange(len(pdbtemp)):
                 pdbtemp[i].setChids([mapper[mapperkeylist[i]][j] if j in mapper[
                                     mapperkeylist[i]].keys() else j for j in pdbtemp[i].getChids()])
             pdb = pdbtemp[0]
-            for i in range(1, len(pdbtemp)):
+            for i in xrange(1, len(pdbtemp)):
                 pdb = pdb + pdbtemp[i]
             if filename.lower().endswith('.tar.gz'):
                 filename = filename[:-7]
@@ -192,12 +192,12 @@ def writePDB(filename, pdb, forcebeta=None, **kwargs):
         info = t.tarinfo()
         mapper = {}
 
-        for i in range(len(segs)):
+        for i in xrange(len(segs)):
             p1 = pdb.select('chain ' + ' '.join(segs[i]))
             if p1.numAtoms() < 99999:
                 nowfilename = rootname + '-bundle-' + str(nownum) + '.pdb'
                 mapper[nowfilename] = {}
-                for j in range(len(segs[i])):
+                for j in xrange(len(segs[i])):
                     mapper[nowfilename][segs[i][j]] = chr(ord('A') + j)
                 p1.setChids([mapper[nowfilename][j] for j in p1.getChids()])
 
