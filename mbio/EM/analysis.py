@@ -610,7 +610,7 @@ def showMRCConnection(mrc, cutoff=2, **kwarg):
     ax.w_zaxis.line.set_lw(0)
     classes = {}
     step = mrc.getGridSteps()
-    cutoff = (cutoff+1e-5)**2
+    cutoff = cutoff**2
     for i, j, k in zip(*mrc.data.nonzero()):
         if mrc.data[i, j, k] == 0:
             continue
@@ -624,12 +624,13 @@ def showMRCConnection(mrc, cutoff=2, **kwarg):
         ax.scatter(pos[:, 0]*step[0]+mrc.origin[0],
                    pos[:, 1]*step[1]+mrc.origin[1],
                    pos[:, 2]*step[2]+mrc.origin[2], lw=0, c=color, zorder=10)
-        for j in xrange(len(pos)):
-            for k in xrange(j):
-                if (((pos[j]-pos[k])*step)**2).sum() <= cutoff:
-                    ax.plot(pos[[j, k], 0]*step[0]+mrc.origin[0],
-                            pos[[j, k], 1]*step[1]+mrc.origin[1],
-                            pos[[j, k], 2]*step[2]+mrc.origin[2], lw=3, c=color, zorder=10)
+        if cutoff>0:
+            for j in xrange(len(pos)):
+                for k in xrange(j):
+                    if (((pos[j]-pos[k])*step)**2).sum() <= cutoff:
+                        ax.plot(pos[[j, k], 0]*step[0]+mrc.origin[0],
+                                pos[[j, k], 1]*step[1]+mrc.origin[1],
+                                pos[[j, k], 2]*step[2]+mrc.origin[2], lw=3, c=color, zorder=10)
         del pos
     ax.set_xlabel('X', fontsize=15)
     ax.set_ylabel('Y', fontsize=15)
@@ -640,12 +641,23 @@ def showMRCConnection(mrc, cutoff=2, **kwarg):
     plt.show()
     return None
 
+def testfit(pos,step):
 
-def mrcSegment(mrc, percentage=0.01,cutoff=3**.5,**kwarg):
+    # from numpy import array
+    
+    # pos=array(pos)*step
+
+    if pos.shape[0]>30:
+        return 2
+    else:
+        return 1
+
+def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwarg):
     """Segment the MRC with the top `percentage` points.
     Only two points closer than the cutoff will be taken as connected."""
 
-    from numpy import floor, indices, argsort, zeros, zeros_like
+    from numpy import floor, ceil, argsort, zeros, zeros_like, array, unique
+    from .mrc import MRC
 
     maxnum = int(percentage*mrc.data.size)
     args = argsort(mrc.data.ravel())[:mrc.data.size-maxnum-1:-1]
@@ -657,18 +669,125 @@ def mrcSegment(mrc, percentage=0.01,cutoff=3**.5,**kwarg):
 
     save=zeros_like(mrc.data,dtype=int)
     save[[pos[:,0],pos[:,1],pos[:,2]]]=-1
+    save1=zeros_like(mrc.data,dtype=float)
 
     origin = mrc.origin
-    step = mrc.getGridSteps()/cutoff
+    grid=mrc.getGridSteps()
+    step = cutoff/grid
+    ranges=[xrange(int(floor(-step[i])),int(ceil(step[i])+int(step[i].is_integer()))) for i in xrange(3)]
+    cutoff2=cutoff**2
 
     classnum=0
-    classleft=[]
-    classvec=zeros(len(data),dtype=int)
+    save1count=0
+    classmp={}
+    classmpreverse={}
     classcount={}
+    classpos={}
 
-    for posnum in xrange(len(data)):
+    for posnum in xrange(maxnum):
         temp=pos[posnum]
-        for i in xrange()
-        del temp
+        closeset=[]
+        closetype=[]
+        closenumber=0
+        for i in ranges[0]:
+            for j in ranges[1]:
+                for k in ranges[2]:
+                    if save[temp[0]+i,temp[1]+j,temp[2]+k]>0 and (i*grid[0])**2+(j*grid[1])**2+(k*grid[2])**2<=cutoff2:
+                        closeset.append([temp+array([i,j,k])])
+                        closetype.append(classmp[save[temp[0]+i,temp[1]+j,temp[2]+k]])
+                        closenumber+=1
+        if closenumber==0:
+            classnum+=1
+            save[temp[0],temp[1],temp[2]]=classnum
+            classcount[classnum]=[1,0]
+            classmp[classnum]=classnum
+            classmpreverse[classnum]=[classnum]
+            classpos[classnum]=[pos[posnum]]
+        elif len(unique(closetype))==1:
+            typeclass=closetype[0]
+            save[temp[0],temp[1],temp[2]]=typeclass
+            orilen=classcount[typeclass][0]
+            classcount[typeclass][0]+=1
+            classpos[typeclass].append(pos[posnum])
+            if classcount[typeclass][1]==0:
+                if classcount[typeclass][0]>=10:
+                    classcount[typeclass][1]=testfit(classpos[typeclass],grid)
+                    if classcount[typeclass][1]==2:
+                        save1count+=1
+                        tempposlist = classpos[typeclass]
+                        for i in xrange(orilen):
+                            save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                        del tempposlist
+            elif classcount[typeclass][1]==1:
+                classcount[typeclass][1]=testfit(classpos[typeclass],grid)
+                if classcount[typeclass][1]==2:
+                    save1count+=1
+                    tempposlist = classpos[typeclass]
+                    for i in xrange(orilen):
+                        save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                    del tempposlist
+            else:
+                pass
+            del typeclass
+        else:
+            closetypesort=unique(closetype)
+            typeclass=closetypesort[0]
+            save[temp[0],temp[1],temp[2]]=typeclass
+            orilen=classcount[typeclass][0]
+            classcount[typeclass][0]+=1
+            classpos[typeclass].append(pos[posnum])
+            hasnocylinder=False
+            for i in closetypesort[1:]:
+                if classcount[i][1]==2:
+                    hasnocylinder=True
+                classcount[typeclass][0]+=classcount[i][0]
+                classpos[typeclass]+=classpos[i]
+                classmp[i]=typeclass
+                for j in classmpreverse[i]:
+                    classmp[j] = typeclass
+                classmpreverse[typeclass]+=classmpreverse[i]
+                classmpreverse.pop(i)
+            if classcount[typeclass][1]==0:
+                if classcount[typeclass][0]>=10:
+                    classcount[typeclass][1]=testfit(classpos[typeclass],grid) if not hasnocylinder else 2
+                    if classcount[typeclass][1]==2:
+                        for i in closetypesort[1:]:
+                            if classcount[i][1]==1:
+                                save1count+=1
+                                tempposlist = classpos[i]
+                                for i in xrange(len(classpos[i])):
+                                    save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                                del tempposlist
+            elif classcount[typeclass][1]==1:
+                classcount[typeclass][1]=testfit(classpos[typeclass],grid) if not hasnocylinder else 2
+                if classcount[typeclass][1]==2:
+                    for i in closetypesort[1:]:
+                        if classcount[i][1]==1:
+                            save1count+=1
+                            tempposlist = classpos[i]
+                            for i in xrange(len(classpos[i])):
+                                save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                            del tempposlist
+                    save1count+=1
+                    tempposlist = classpos[typeclass]
+                    for i in xrange(orilen):
+                        save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                    del tempposlist
+            else:
+                pass
+            for i in closetypesort[1:]:
+                classcount.pop(i)
+                classpos.pop(i)
+            del typeclass,closetypesort
+        del temp,closeset,closetype,closenumber
 
-    # return mrc.data, int(percentage*mrc.data.size), cutoff, step/cutoff, shape
+    del classnum,save1count,classmp,classmpreverse,classcount,classpos
+
+    mrc1=MRC()
+    for i in mrc.header.__dict__:
+        setattr(mrc1.header,i,getattr(mrc.header,i))
+
+    mrc1.data=save1
+    mrc1.update()
+
+    return mrc1
