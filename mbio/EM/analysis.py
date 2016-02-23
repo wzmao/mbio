@@ -638,8 +638,13 @@ def showMRCConnection(mrc, cutoff=2, **kwarg):
     setAxesEqual(ax)
     del classes
     del ax
-    plt.show()
-    return None
+    plt.ion()
+    try:
+        if getMatplotlibDisplay():
+            plt.show()
+    except:
+        pass
+    return fig
 
 def testfit(pos,step):
 
