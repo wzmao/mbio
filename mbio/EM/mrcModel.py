@@ -20,7 +20,7 @@ def GetAtomID(names):
     return atomid
 
 
-def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwarg):
+def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwargs):
     """Transform PDB to MRC.
     You could pass a prody `AtomGroup` class as pdb or a path or a pdb code.
 

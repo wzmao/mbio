@@ -4,10 +4,10 @@
 
 __author__ = 'Wenzhi Mao'
 __all__ = ['genPvalue', 'calcPcutoff', 'showPcutoff', 'transCylinder',
-           'showMRCConnection', 'mrcSegment']
+           'showMRCConnection', 'showMRCConnectionEach', 'mrcSegment']
 
 
-def interpolationball(matrix, index, step, r, **kwarg):
+def interpolationball(matrix, index, step, r, **kwargs):
     """Interpolation the value by the radius(ball).
     The Inverse distance weighting is used to weight each value."""
 
@@ -29,7 +29,7 @@ def interpolationball(matrix, index, step, r, **kwarg):
     return (w * v).sum()
 
 
-def interpolationcube(m, p, way, *kwarg):
+def interpolationcube(m, p, way, *kwargs):
     """Interpolation the value by the smallest box.
     The Inverse distance weighting or Trilinear interpolation is
     used to weight each value."""
@@ -63,7 +63,7 @@ def interpolationcube(m, p, way, *kwarg):
 
 def genPvalue(
     pdb, mrc, sample=None, method=('cube', 'interpolation'), sampleradius=3.0,
-        assumenorm=False, **kwarg):
+        assumenorm=False, **kwargs):
     """This function assign p-value for pdb structure in mrc. sample is used to get the population values.
     `method` must be a tuple or list.
     There are 2 methods now: `cube` and `ball`.
@@ -220,7 +220,7 @@ def chainsort(x, y):
         return cmp(1, 2)
 
 
-def calcPcutoff(data, scale=5.0, **kwarg):
+def calcPcutoff(data, scale=5.0, **kwargs):
     """This is a function to calculate the cutoff for high p-values.
 
         `data` could be a `prody.AtomGroup` with p-values in the Beta, the
@@ -271,7 +271,7 @@ def calcPcutoff(data, scale=5.0, **kwarg):
     return data[max(tbigset)]
 
 
-def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
+def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwargs):
     """This is a function to plot the p-value cutoff.
 
         `data` must be a `prody.AtomGroup` with p-values in the Beta, the
@@ -489,7 +489,7 @@ def showPcutoff(data, plot, scale=5.0, color=None, detail=False, **kwarg):
             return None
 
 
-def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwarg):
+def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwargs):
     """Given the `mrc` and a sample structure, return the sample set around the sample
     structure with radius `sampleradius`.
     """
@@ -545,7 +545,7 @@ def genPvalueSample(mrc, sample=None, sampleradius=3.0, **kwarg):
     return findset
 
 
-def transCylinder(pdb, **kwarg):
+def transCylinder(pdb, **kwargs):
     """Transfer the PDB fragment to Cylinder.
     Given the PDB, extract the CA C N and generate the center, 3 directions of the cube
     and the length."""
@@ -583,7 +583,7 @@ def transCylinder(pdb, **kwarg):
     dirc = array((dirc1, dirc2, dirc3))
     return cent, dirc, rankrange
 
-def showMRCConnection(mrc, cutoff=2, **kwarg):
+def showMRCConnection(mrc, cutoff=2, **kwargs):
     """Plot 3D plot of connected parts in different color for MRC."""
 
     from matplotlib import pyplot as plt
@@ -646,22 +646,101 @@ def showMRCConnection(mrc, cutoff=2, **kwarg):
         pass
     return fig
 
+def showMRCConnectionEach(mrc, cutoff=2, path=None, **kwargs):
+    """Plot 3D plot of connected parts in different color for MRC."""
+
+    from matplotlib import pyplot as plt
+    from matplotlib import use as matplotlibuse
+    import mpl_toolkits.mplot3d.axes3d as p3
+    from mpl_toolkits.mplot3d import Axes3D
+    from ..Application.setting import getMatplotlibDisplay
+    from ..Application.plotting import setAxesEqual
+    from numpy import array
+    import os
+
+    try:
+        if not getMatplotlibDisplay():
+            matplotlibuse('Agg')
+    except:
+        pass
+
+    if path is None:
+        path=os.getcwd()
+    fig = plt.figure(figsize=(6, 6), facecolor='white')
+    ax = p3.Axes3D(fig, aspect=1)
+    ax.w_xaxis.set_pane_color((0, 0, 0))
+    ax.w_yaxis.set_pane_color((0, 0, 0))
+    ax.w_zaxis.set_pane_color((0, 0, 0))
+    ax.w_xaxis.line.set_lw(0)
+    ax.w_yaxis.line.set_lw(0)
+    ax.w_zaxis.line.set_lw(0)
+    classes = {}
+    step = mrc.getGridSteps()
+    grid = mrc.getGridCoords()
+    cutoff = cutoff**2
+    for i, j, k in zip(*mrc.data.nonzero()):
+        if mrc.data[i, j, k] == 0:
+            continue
+        if mrc.data[i, j, k] not in classes.keys():
+            classes[mrc.data[i, j, k]] = [[i, j, k]]
+        else:
+            classes[mrc.data[i, j, k]].append([i, j, k])
+    sca=ax.scatter([60,240],[60,240],[60,240],lw=0,zorder=10)
+    plt.ion()
+    ax.set_xlabel('X', fontsize=15)
+    ax.set_ylabel('Y', fontsize=15)
+    ax.set_zlabel('Z', fontsize=15)
+    setAxesEqual(ax)
+    for ty, i in zip(classes.keys(), xrange(len(classes))):
+        color = plt.cm.gist_ncar(i*1./len(classes)*.9)
+        pos = array(classes[ty])
+        sca._offsets3d=pos[:, 0]*step[0]+mrc.origin[0],pos[:, 1]*step[1]+mrc.origin[1],pos[:, 2]*step[2]+mrc.origin[2]
+        sca._facecolor3d=color
+        del pos
+        plt.savefig(os.path.join(path,str(i)+'.png'))
+    del classes
+    del ax
+    return fig
+
 def testfit(pos,step):
 
-    # from numpy import array
+    from numpy import array, diag
+    from numpy.linalg import svd
     
-    # pos=array(pos)*step
-
-    if pos.shape[0]>30:
-        return 2
-    else:
+    data=array(pos)*step
+    datamean = data.mean(axis=0)
+    uu, dd, vv = svd(data - datamean,full_matrices=False)
+    d=dd**2
+    dd[0]=0
+    if (((uu.dot(diag(dd)).dot(vv))**2).sum(1)**.5<3).all():
         return 1
+    else:
+        return 2
 
-def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwarg):
+    # Old 3
+    # if (((uu.dot(diag(dd)).dot(vv))**2).sum(1)**.5<6).sum()*1./data.shape[0]>.9:
+    #     return 1
+    # else:
+    #     return 2
+
+    # Old 2
+    # if d[0]/d.sum() <.8:
+    #     return 2
+    # else:
+    #     return 1
+
+    # Old 1
+    # if len(pos)>30:
+    #     return 2
+    # else:
+    #     return 1
+
+def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
     """Segment the MRC with the top `percentage` points.
     Only two points closer than the cutoff will be taken as connected."""
 
     from numpy import floor, ceil, argsort, zeros, zeros_like, array, unique
+    from ..IO.output import printUpdateInfo, finishUpdate
     from .mrc import MRC
 
     maxnum = int(percentage*mrc.data.size)
@@ -690,6 +769,8 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwarg):
     classpos={}
 
     for posnum in xrange(maxnum):
+        if posnum%1000==0:
+            printUpdateInfo("Building {:10d}/{:10d}".format(posnum,maxnum))
         temp=pos[posnum]
         closeset=[]
         closetype=[]
@@ -786,8 +867,16 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwarg):
             del typeclass,closetypesort
         del temp,closeset,closetype,closenumber
 
+    for i in classcount:
+        if classcount[i][1]==1:
+            save1count+=1
+            tempposlist = classpos[i]
+            for i in xrange(len(tempposlist)):
+                save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+
     del classnum,save1count,classmp,classmpreverse,classcount,classpos
 
+    finishUpdate()
     mrc1=MRC()
     for i in mrc.header.__dict__:
         setattr(mrc1.header,i,getattr(mrc.header,i))
