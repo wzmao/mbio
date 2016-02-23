@@ -53,6 +53,7 @@ def printInfo(x, **kwargs):
         else:
             print '\x1b[0;29m* {0}\x1b[0;29m'.format(str(x))
 
+
 def printUpdateInfo(x, **kwargs):
 
     if _verbo:
@@ -62,11 +63,13 @@ def printUpdateInfo(x, **kwargs):
             from os import popen
             import sys
             try:
-                l=int(os.popen('stty size').read().split()[-1])
+                l = int(os.popen('stty size').read().split()[-1])
             except:
-                l=0
-            sys.stdout.write("\r"+" "*l+'\r\x1b[0;29m* {0}\x1b[0;29m'.format(str(x)))
+                l = 0
+            sys.stdout.write(
+                "\r" + " " * l + '\r\x1b[0;29m* {0}\x1b[0;29m'.format(str(x)))
             sys.stdout.flush()
+
 
 def finishUpdate(**kwargs):
 

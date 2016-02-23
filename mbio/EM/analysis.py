@@ -624,7 +624,7 @@ def showMRCConnection(mrc, cutoff=2, **kwargs):
         ax.scatter(pos[:, 0]*step[0]+mrc.origin[0],
                    pos[:, 1]*step[1]+mrc.origin[1],
                    pos[:, 2]*step[2]+mrc.origin[2], lw=0, c=color, zorder=10)
-        if cutoff>0:
+        if cutoff > 0:
             for j in xrange(len(pos)):
                 for k in xrange(j):
                     if (((pos[j]-pos[k])*step)**2).sum() <= cutoff:
@@ -665,7 +665,7 @@ def showMRCConnectionEach(mrc, cutoff=2, path=None, **kwargs):
         pass
 
     if path is None:
-        path=os.getcwd()
+        path = os.getcwd()
     fig = plt.figure(figsize=(6, 6), facecolor='white')
     ax = p3.Axes3D(fig, aspect=1)
     ax.w_xaxis.set_pane_color((0, 0, 0))
@@ -685,7 +685,7 @@ def showMRCConnectionEach(mrc, cutoff=2, path=None, **kwargs):
             classes[mrc.data[i, j, k]] = [[i, j, k]]
         else:
             classes[mrc.data[i, j, k]].append([i, j, k])
-    sca=ax.scatter([60,240],[60,240],[60,240],lw=0,zorder=10)
+    sca = ax.scatter([60, 240], [60, 240], [60, 240], lw=0, zorder=10)
     plt.ion()
     ax.set_xlabel('X', fontsize=15)
     ax.set_ylabel('Y', fontsize=15)
@@ -694,25 +694,25 @@ def showMRCConnectionEach(mrc, cutoff=2, path=None, **kwargs):
     for ty, i in zip(classes.keys(), xrange(len(classes))):
         color = plt.cm.gist_ncar(i*1./len(classes)*.9)
         pos = array(classes[ty])
-        sca._offsets3d=pos[:, 0]*step[0]+mrc.origin[0],pos[:, 1]*step[1]+mrc.origin[1],pos[:, 2]*step[2]+mrc.origin[2]
-        sca._facecolor3d=color
+        sca._offsets3d = pos[:, 0]*step[0]+mrc.origin[0], pos[:, 1]*step[1]+mrc.origin[1], pos[:, 2]*step[2]+mrc.origin[2]
+        sca._facecolor3d = color
         del pos
-        plt.savefig(os.path.join(path,str(i)+'.png'))
+        plt.savefig(os.path.join(path, str(i)+'.png'))
     del classes
     del ax
     return fig
 
-def testfit(pos,step):
+def testfit(pos, step):
 
     from numpy import array, diag
     from numpy.linalg import svd
     
-    data=array(pos)*step
+    data = array(pos)*step
     datamean = data.mean(axis=0)
-    uu, dd, vv = svd(data - datamean,full_matrices=False)
-    d=dd**2
-    dd[0]=0
-    if (((uu.dot(diag(dd)).dot(vv))**2).sum(1)**.5<3).all():
+    uu, dd, vv = svd(data - datamean, full_matrices=False)
+    d = dd**2
+    dd[0] = 0
+    if (((uu.dot(diag(dd)).dot(vv))**2).sum(1)**.5 < 3).all():
         return 1
     else:
         return 2
@@ -751,137 +751,137 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
     pos[:, 2] = args % (mrc.data.shape[2])
     data = mrc.data.ravel()[args]
 
-    save=zeros_like(mrc.data,dtype=int)
-    save[[pos[:,0],pos[:,1],pos[:,2]]]=-1
-    save1=zeros_like(mrc.data,dtype=float)
+    save = zeros_like(mrc.data, dtype=int)
+    save[[pos[:, 0], pos[:, 1], pos[:, 2]]] = -1
+    save1 = zeros_like(mrc.data, dtype=float)
 
     origin = mrc.origin
-    grid=mrc.getGridSteps()
+    grid = mrc.getGridSteps()
     step = cutoff/grid
-    ranges=[xrange(int(floor(-step[i])),int(ceil(step[i])+int(step[i].is_integer()))) for i in xrange(3)]
-    cutoff2=cutoff**2
+    ranges = [xrange(int(floor(-step[i])), int(ceil(step[i])+int(step[i].is_integer()))) for i in xrange(3)]
+    cutoff2 = cutoff**2
 
-    classnum=0
-    save1count=0
-    classmp={}
-    classmpreverse={}
-    classcount={}
-    classpos={}
+    classnum = 0
+    save1count = 0
+    classmp = {}
+    classmpreverse = {}
+    classcount = {}
+    classpos = {}
 
     for posnum in xrange(maxnum):
-        if posnum%1000==0:
-            printUpdateInfo("Building {:10d}/{:10d}".format(posnum,maxnum))
-        temp=pos[posnum]
-        closeset=[]
-        closetype=[]
-        closenumber=0
+        if posnum%1000 == 0:
+            printUpdateInfo("Building {:10d}/{:10d}".format(posnum, maxnum))
+        temp = pos[posnum]
+        closeset = []
+        closetype = []
+        closenumber = 0
         for i in ranges[0]:
             for j in ranges[1]:
                 for k in ranges[2]:
-                    if save[temp[0]+i,temp[1]+j,temp[2]+k]>0 and (i*grid[0])**2+(j*grid[1])**2+(k*grid[2])**2<=cutoff2:
-                        closeset.append([temp+array([i,j,k])])
-                        closetype.append(classmp[save[temp[0]+i,temp[1]+j,temp[2]+k]])
-                        closenumber+=1
-        if closenumber==0:
-            classnum+=1
-            save[temp[0],temp[1],temp[2]]=classnum
-            classcount[classnum]=[1,0]
-            classmp[classnum]=classnum
-            classmpreverse[classnum]=[classnum]
-            classpos[classnum]=[pos[posnum]]
-        elif len(unique(closetype))==1:
-            typeclass=closetype[0]
-            save[temp[0],temp[1],temp[2]]=typeclass
-            orilen=classcount[typeclass][0]
-            classcount[typeclass][0]+=1
+                    if save[temp[0]+i, temp[1]+j, temp[2]+k] > 0 and (i*grid[0])**2+(j*grid[1])**2+(k*grid[2])**2 <= cutoff2:
+                        closeset.append([temp+array([i, j, k])])
+                        closetype.append(classmp[save[temp[0]+i, temp[1]+j, temp[2]+k]])
+                        closenumber += 1
+        if closenumber == 0:
+            classnum += 1
+            save[temp[0], temp[1], temp[2]] = classnum
+            classcount[classnum] = [1, 0]
+            classmp[classnum] = classnum
+            classmpreverse[classnum] = [classnum]
+            classpos[classnum] = [pos[posnum]]
+        elif len(unique(closetype)) == 1:
+            typeclass = closetype[0]
+            save[temp[0], temp[1], temp[2]] = typeclass
+            orilen = classcount[typeclass][0]
+            classcount[typeclass][0] += 1
             classpos[typeclass].append(pos[posnum])
-            if classcount[typeclass][1]==0:
-                if classcount[typeclass][0]>=10:
-                    classcount[typeclass][1]=testfit(classpos[typeclass],grid)
-                    if classcount[typeclass][1]==2:
-                        save1count+=1
+            if classcount[typeclass][1] == 0:
+                if classcount[typeclass][0] >= 10:
+                    classcount[typeclass][1] = testfit(classpos[typeclass], grid)
+                    if classcount[typeclass][1] == 2:
+                        save1count += 1
                         tempposlist = classpos[typeclass]
                         for i in xrange(orilen):
-                            save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                            save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
                         del tempposlist
-            elif classcount[typeclass][1]==1:
-                classcount[typeclass][1]=testfit(classpos[typeclass],grid)
-                if classcount[typeclass][1]==2:
-                    save1count+=1
+            elif classcount[typeclass][1] == 1:
+                classcount[typeclass][1] = testfit(classpos[typeclass], grid)
+                if classcount[typeclass][1] == 2:
+                    save1count += 1
                     tempposlist = classpos[typeclass]
                     for i in xrange(orilen):
-                        save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                        save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
                     del tempposlist
             else:
                 pass
             del typeclass
         else:
-            closetypesort=unique(closetype)
-            typeclass=closetypesort[0]
-            save[temp[0],temp[1],temp[2]]=typeclass
-            orilen=classcount[typeclass][0]
-            classcount[typeclass][0]+=1
+            closetypesort = unique(closetype)
+            typeclass = closetypesort[0]
+            save[temp[0], temp[1], temp[2]] = typeclass
+            orilen = classcount[typeclass][0]
+            classcount[typeclass][0] += 1
             classpos[typeclass].append(pos[posnum])
-            hasnocylinder=False
+            hasnocylinder = False
             for i in closetypesort[1:]:
-                if classcount[i][1]==2:
-                    hasnocylinder=True
-                classcount[typeclass][0]+=classcount[i][0]
-                classpos[typeclass]+=classpos[i]
-                classmp[i]=typeclass
+                if classcount[i][1] == 2:
+                    hasnocylinder = True
+                classcount[typeclass][0] += classcount[i][0]
+                classpos[typeclass] += classpos[i]
+                classmp[i] = typeclass
                 for j in classmpreverse[i]:
                     classmp[j] = typeclass
-                classmpreverse[typeclass]+=classmpreverse[i]
+                classmpreverse[typeclass] += classmpreverse[i]
                 classmpreverse.pop(i)
-            if classcount[typeclass][1]==0:
-                if classcount[typeclass][0]>=10:
-                    classcount[typeclass][1]=testfit(classpos[typeclass],grid) if not hasnocylinder else 2
-                    if classcount[typeclass][1]==2:
+            if classcount[typeclass][1] == 0:
+                if classcount[typeclass][0] >= 10:
+                    classcount[typeclass][1] = testfit(classpos[typeclass], grid) if not hasnocylinder else 2
+                    if classcount[typeclass][1] == 2:
                         for i in closetypesort[1:]:
-                            if classcount[i][1]==1:
-                                save1count+=1
+                            if classcount[i][1] == 1:
+                                save1count += 1
                                 tempposlist = classpos[i]
                                 for i in xrange(len(classpos[i])):
-                                    save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                                    save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
                                 del tempposlist
-            elif classcount[typeclass][1]==1:
-                classcount[typeclass][1]=testfit(classpos[typeclass],grid) if not hasnocylinder else 2
-                if classcount[typeclass][1]==2:
+            elif classcount[typeclass][1] == 1:
+                classcount[typeclass][1] = testfit(classpos[typeclass], grid) if not hasnocylinder else 2
+                if classcount[typeclass][1] == 2:
                     for i in closetypesort[1:]:
-                        if classcount[i][1]==1:
-                            save1count+=1
+                        if classcount[i][1] == 1:
+                            save1count += 1
                             tempposlist = classpos[i]
                             for i in xrange(len(classpos[i])):
-                                save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                                save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
                             del tempposlist
-                    save1count+=1
+                    save1count += 1
                     tempposlist = classpos[typeclass]
                     for i in xrange(orilen):
-                        save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                        save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
                     del tempposlist
             else:
                 pass
             for i in closetypesort[1:]:
                 classcount.pop(i)
                 classpos.pop(i)
-            del typeclass,closetypesort
-        del temp,closeset,closetype,closenumber
+            del typeclass, closetypesort
+        del temp, closeset, closetype, closenumber
 
     for i in classcount:
-        if classcount[i][1]==1:
-            save1count+=1
+        if classcount[i][1] == 1:
+            save1count += 1
             tempposlist = classpos[i]
             for i in xrange(len(tempposlist)):
-                save1[tempposlist[i][0],tempposlist[i][1],tempposlist[i][2]]=save1count
+                save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
 
-    del classnum,save1count,classmp,classmpreverse,classcount,classpos
+    del classnum, save1count, classmp, classmpreverse, classcount, classpos
 
     finishUpdate()
-    mrc1=MRC()
+    mrc1 = MRC()
     for i in mrc.header.__dict__:
-        setattr(mrc1.header,i,getattr(mrc.header,i))
+        setattr(mrc1.header, i, getattr(mrc.header, i))
 
-    mrc1.data=save1
+    mrc1.data = save1
     mrc1.update()
 
     return mrc1
