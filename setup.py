@@ -57,7 +57,7 @@ PACKAGES = ['mbio',
             'mbio.IO',
             'mbio.Sequence', ]
 
-PACKAGE_DATA = {"mbio.Constant":["pplus",'pminus','psigplus','psigminus']}
+PACKAGE_DATA = {"mbio.Constant": ["pplus", 'pminus', 'psigplus', 'psigminus']}
 
 PACKAGE_DIR = {}
 for pkg in PACKAGES:
@@ -112,6 +112,8 @@ setup(
     author='Wenzhi Mao',
     author_email='maowenzhi@yandex.com',
     description='A Python Package for Biology from Wenzhi Mao',
+    long_description='''A Python Package for Biology from Wenzhi Mao
+    Include Sequence analysis tools and MRC tools.''',
     packages=PACKAGES,
     package_dir=PACKAGE_DIR,
     package_data=PACKAGE_DATA,
@@ -120,4 +122,5 @@ setup(
     provides=['mbio ({0:s})'.format(__version__)],
     url='https://github.com/wzmao/mbio',
     license='MIT',
+    platforms=['Linux', 'Windows'],
 )
