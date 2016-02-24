@@ -20,7 +20,7 @@ def GetAtomID(names):
     return atomid
 
 
-def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwargs):
+def pdb2mrc(pdb, grid_size, pixel_size, resolution, fsccutoff=.5, *args, **kwargs):
     """Transform PDB to MRC.
     You could pass a prody `AtomGroup` class as pdb or a path or a pdb code.
 
@@ -101,7 +101,7 @@ def pdb2mrc(pdb, grid_size, pixel_size, resolution, *args, **kwargs):
 
     result = Cpdb2mrc(
         atomid=atomid, occ=occ, bf=bf, cor=cor, map=mrc.data, nsam=grid_size,
-        psize=pixel_size, res=resolution)
+        psize=pixel_size, res=resolution, fsccutoff=fsccutoff)
     if isinstance(result, (tuple, list)):
         if result[0] is None:
             printError(result[1])

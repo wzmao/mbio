@@ -222,15 +222,25 @@ static void ifft3d(float* buf, int nsam, float* out)
 	fftwf_destroy_plan(plan_fft);
 }
 
+static float normal_random(float sigma)
+{
+	float u = ((float) rand() / (RAND_MAX)) * 2 - 1;
+	float v = ((float) rand() / (RAND_MAX)) * 2 - 1;
+	float r = u * u + v * v;
+	if (r == 0 || r > 1) return normal_random(sigma);
+	float c = sqrt(-2 * log(r) / r);
+	return u * c;
+}
+
 static PyObject *Cpdb2mrc(PyObject *self, PyObject *args, PyObject *kwargs)
 {
 	PyArrayObject *atomiddata, *occdata,*bfdata, *cordata, *map;
 	int nsam;
-	float psize,res;
-    static char *kwlist[] = {"atomid", "occ", "bf", "cor", "map", "nsam", "psize", "res", NULL};
+	float psize,res,fsccutoff;
+    static char *kwlist[] = {"atomid", "occ", "bf", "cor", "map", "nsam", "psize", "res", "fsccutoff", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOOiff", kwlist,
-                                     &atomiddata, &occdata, &bfdata, &cordata, &map, &nsam, &psize, &res))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "OOOOOifff", kwlist,
+                                     &atomiddata, &occdata, &bfdata, &cordata, &map, &nsam, &psize, &res, &fsccutoff))
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
 	atomiddata=PyArray_GETCONTIGUOUS(atomiddata);
@@ -265,8 +275,9 @@ static PyObject *Cpdb2mrc(PyObject *self, PyObject *args, PyObject *kwargs)
 	CMPLXf *pfftc=(CMPLXf *)pfft;
 
 	int step=(int)(nsam/10.0+0.5),count=0,p=0;
+	float closef2=0.,closefcount=0.;
 
-	#pragma omp parallel for schedule(dynamic) firstprivate(isodd,hnsaml,hnsam,ii,nsam,id0,j,jj,id1,k,kk,id,rmax,Fpsize,atomid,occ,bf,cor,atomnumber) shared(count,p)
+	#pragma omp parallel for schedule(dynamic) firstprivate(isodd,hnsaml,hnsam,ii,nsam,id0,j,jj,id1,k,kk,id,rmax,Fpsize,atomid,occ,bf,cor,atomnumber) shared(count,p) reduction(+:closef2) reduction(+:closefcount)
 	for(i=-hnsam;i<hnsam+isodd;i++)
 	{
 		ii=(i+nsam)%nsam;
@@ -274,7 +285,7 @@ static PyObject *Cpdb2mrc(PyObject *self, PyObject *args, PyObject *kwargs)
 		if (count%step==0){
 			#pragma omp critical
 			if(p==0){
-				printf(" Progress: %%%.0f\n",count*100.0/nsam);
+				printf("\r* Progress: %3d%%",(int)(count*100.0/nsam));
 				p=1;
 			}
 		}
@@ -291,7 +302,13 @@ static PyObject *Cpdb2mrc(PyObject *self, PyObject *args, PyObject *kwargs)
 					pfftc[id].x=0.0;
 					pfftc[id].y=0.0;
 				}
-				else pfftc[id]=GetStructureFactor(atomid,occ,bf,cor,atomnumber, k*Fpsize, j*Fpsize, i*Fpsize);
+				else{
+					pfftc[id]=GetStructureFactor(atomid,occ,bf,cor,atomnumber, k*Fpsize, j*Fpsize, i*Fpsize); 
+					if (sqrt(i*i+j*j+k*k)>rmax-.5){
+						closef2+=pfftc[id].x*pfftc[id].x+pfftc[id].y*pfftc[id].y;
+						closefcount++;
+					}
+				}
 			}
 		}
 		#pragma omp critical
@@ -300,8 +317,27 @@ static PyObject *Cpdb2mrc(PyObject *self, PyObject *args, PyObject *kwargs)
 			p=0;
 		}
 	}
-	printf(" Progress: %%100\n");
-	
+	printf("\r* Progress: 100%%\n");
+	float sig=sqrt((1-fsccutoff)*closef2/closefcount/fsccutoff/4);
+
+	for(i=-hnsam;i<hnsam+isodd;i++)
+	{
+		ii=(i+nsam)%nsam;
+		id0=ii*nsam;
+		for(j=-hnsam;j<hnsam+isodd;j++)
+		{
+			jj=(j+nsam)%nsam;
+			id1=(jj+id0)*hnsaml;
+			for(k=0;k<hnsaml;k++)
+			{
+				kk=k;
+				id=kk+id1;
+				pfftc[id].x+=normal_random(sig);
+				pfftc[id].y+=normal_random(sig);
+			}
+		}
+	}
+
 	ifft3d(pfft,nsam,data);
 
 	float scale=nsam*nsam*nsam; 
