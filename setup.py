@@ -57,7 +57,7 @@ PACKAGES = ['mbio',
             'mbio.IO',
             'mbio.Sequence', ]
 
-PACKAGE_DATA = {}
+PACKAGE_DATA = {"mbio.Constant":["pplus",'pminus','psigplus','psigminus']}
 
 PACKAGE_DIR = {}
 for pkg in PACKAGES:
@@ -99,11 +99,11 @@ EXTENSIONS = [
               include_dirs=[numpy.get_include()],
               extra_compile_args=['-fopenmp', '-O3'],
               extra_link_args=['-lfftw3f', '-lgomp', '-O3']),
-    Extension('mbio.Learning.CNN_p',
-              [join('mbio', 'Learning', 'CNN_p.c'), ],
-              include_dirs=[numpy.get_include()],
-              extra_compile_args=['-fopenmp', '-O3'],
-              extra_link_args=['-lgomp', '-O3']),
+    # Extension('mbio.Learning.CNN_p',
+    #           [join('mbio', 'Learning', 'CNN_p.c'), ],
+    #           include_dirs=[numpy.get_include()],
+    #           extra_compile_args=['-fopenmp', '-O3'],
+    #           extra_link_args=['-lgomp', '-O3']),
 ]
 
 setup(
@@ -118,5 +118,6 @@ setup(
     ext_modules=EXTENSIONS,
     requires=['NumPy (>=1.9)', 'Scipy (>=0.15)'],
     provides=['mbio ({0:s})'.format(__version__)],
-    url='https://github.com/wzmao/mbio'
+    url='https://github.com/wzmao/mbio',
+    license='MIT',
 )
