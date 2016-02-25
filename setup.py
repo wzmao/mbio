@@ -122,5 +122,5 @@ setup(
     provides=['mbio ({0:s})'.format(__version__)],
     url='https://github.com/wzmao/mbio',
     license='MIT',
-    platforms=['Linux', 'Windows'],
+    platforms=['Linux'],
 )
