@@ -638,12 +638,12 @@ def showMRCConnection(mrc, cutoff=2, **kwargs):
     setAxesEqual(ax)
     del classes
     del ax
-    plt.ion()
-    try:
-        if getMatplotlibDisplay():
-            plt.show()
-    except:
-        pass
+    # plt.ion()
+    # try:
+    #     if getMatplotlibDisplay():
+    #         plt.show()
+    # except:
+    #     pass
     return fig
 
 def showMRCConnectionEach(mrc, cutoff=2, path=None, **kwargs):
@@ -712,10 +712,12 @@ def testfit(pos, step):
     uu, dd, vv = svd(data - datamean, full_matrices=False)
     d = dd**2
     dd[0] = 0
-    if (((uu.dot(diag(dd)).dot(vv))**2).sum(1)**.5 < 3).all():
+    if (((uu.dot(diag(dd)).dot(vv))**2).sum(1)**.5 > 4).any():
+        return 2
+    elif d[0]/d.sum() > .6:
         return 1
     else:
-        return 2
+        return 0
 
     # Old 3
     # if (((uu.dot(diag(dd)).dot(vv))**2).sum(1)**.5<6).sum()*1./data.shape[0]>.9:
@@ -735,12 +737,12 @@ def testfit(pos, step):
     # else:
     #     return 1
 
-def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
+def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
     """Segment the MRC with the top `percentage` points.
     Only two points closer than the cutoff will be taken as connected."""
 
     from numpy import floor, ceil, argsort, zeros, zeros_like, array, unique
-    from ..IO.output import printUpdateInfo, finishUpdate
+    from ..IO.output import printUpdateInfo, finishUpdate, printInfo
     from .mrc import MRC
 
     maxnum = int(percentage*mrc.data.size)
@@ -767,6 +769,7 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
     classmpreverse = {}
     classcount = {}
     classpos = {}
+    statuscount = [0, 0, 0]
 
     for posnum in xrange(maxnum):
         if posnum%1000 == 0:
@@ -786,6 +789,7 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
             classnum += 1
             save[temp[0], temp[1], temp[2]] = classnum
             classcount[classnum] = [1, 0]
+            statuscount[0] += 1
             classmp[classnum] = classnum
             classmpreverse[classnum] = [classnum]
             classpos[classnum] = [pos[posnum]]
@@ -797,15 +801,13 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
             classpos[typeclass].append(pos[posnum])
             if classcount[typeclass][1] == 0:
                 if classcount[typeclass][0] >= 10:
+                    statuscount[0] -= 1
                     classcount[typeclass][1] = testfit(classpos[typeclass], grid)
-                    if classcount[typeclass][1] == 2:
-                        save1count += 1
-                        tempposlist = classpos[typeclass]
-                        for i in xrange(orilen):
-                            save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
-                        del tempposlist
+                    statuscount[classcount[typeclass][1]] += 1
             elif classcount[typeclass][1] == 1:
+                statuscount[1] -= 1
                 classcount[typeclass][1] = testfit(classpos[typeclass], grid)
+                statuscount[classcount[typeclass][1]] += 1
                 if classcount[typeclass][1] == 2:
                     save1count += 1
                     tempposlist = classpos[typeclass]
@@ -835,7 +837,9 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
                 classmpreverse.pop(i)
             if classcount[typeclass][1] == 0:
                 if classcount[typeclass][0] >= 10:
+                    statuscount[0] -= 1
                     classcount[typeclass][1] = testfit(classpos[typeclass], grid) if not hasnocylinder else 2
+                    statuscount[classcount[typeclass][1]] += 1
                     if classcount[typeclass][1] == 2:
                         for i in closetypesort[1:]:
                             if classcount[i][1] == 1:
@@ -845,7 +849,9 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
                                     save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
                                 del tempposlist
             elif classcount[typeclass][1] == 1:
+                statuscount[1] -= 1
                 classcount[typeclass][1] = testfit(classpos[typeclass], grid) if not hasnocylinder else 2
+                statuscount[classcount[typeclass][1]] += 1
                 if classcount[typeclass][1] == 2:
                     for i in closetypesort[1:]:
                         if classcount[i][1] == 1:
@@ -862,10 +868,20 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, **kwargs):
             else:
                 pass
             for i in closetypesort[1:]:
+                statuscount[classcount[i][1]] -= 1
                 classcount.pop(i)
                 classpos.pop(i)
             del typeclass, closetypesort
         del temp, closeset, closetype, closenumber
+        if autostop:
+            if statuscount[0] == 0 and statuscount[1] == 0:
+                finishUpdate()
+                printInfo('Autostop')
+                break
+            if statuscount[2] != 0 and statuscount[1] == 0:
+                finishUpdate()
+                printInfo('Autostop')
+                break
 
     for i in classcount:
         if classcount[i][1] == 1:

@@ -2,11 +2,17 @@
 """This module contains some screen output functions.
 """
 
+from atexit import register as _register
+
+
 __author__ = 'Wenzhi Mao'
 
-__all__ = ["setVerbo", 'printError', 'printInfo']
+__all__ = ["setVerbo", 'printError', 'printInfo', 'printUpdateInfo',
+           'finishUpdate']
 
 _verbo = True
+
+_updating = False
 
 
 def setVerbo(mark, **kwargs):
@@ -37,25 +43,34 @@ def checkIsSublime(**kwargs):
 def printError(x, **kwargs):
     """Print red error information."""
 
+    global _verbo, _updating
     if _verbo:
         if checkIsSublime():
             print '* {0}'.format(str(x))
         else:
+            if _updating:
+                finishUpdate()
+                _updating = False
             print '\x1b[1;31m* {0}\x1b[0;29m'.format(str(x))
 
 
 def printInfo(x, **kwargs):
     """Print normal information."""
 
+    global _verbo, _updating
     if _verbo:
         if checkIsSublime():
             print '* {0}'.format(str(x))
         else:
+            if _updating:
+                finishUpdate()
+                _updating = False
             print '\x1b[0;29m* {0}\x1b[0;29m'.format(str(x))
 
 
 def printUpdateInfo(x, **kwargs):
 
+    global _verbo, _updating
     if _verbo:
         if checkIsSublime():
             print '* {0}'.format(str(x))
@@ -69,10 +84,24 @@ def printUpdateInfo(x, **kwargs):
             sys.stdout.write(
                 "\r" + " " * l + '\r\x1b[0;29m* {0}\x1b[0;29m'.format(str(x)))
             sys.stdout.flush()
+            _updating = True
 
 
 def finishUpdate(**kwargs):
 
+    global _verbo, _updating
     if _verbo:
         if not checkIsSublime():
             print ''
+            _updating = False
+
+
+def _output_exit():
+    global _updating
+    if _verbo:
+        if not checkIsSublime():
+            if _updating:
+                finishUpdate()
+                _updating = False
+
+_register(_output_exit)
