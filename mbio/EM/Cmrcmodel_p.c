@@ -286,6 +286,7 @@ static PyObject *Cpdb2mrc(PyObject *self, PyObject *args, PyObject *kwargs)
 			#pragma omp critical
 			if(p==0){
 				printf("\r* Progress: %3d%%",(int)(count*100.0/nsam));
+				fflush(stdout);
 				p=1;
 			}
 		}
