@@ -252,6 +252,7 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
             return Py_BuildValue("Os", Py_None,"Parsing data Error.");
         fclose(m_fp);
     }
+    Py_XDECREF(data);
     return Py_BuildValue("O", data);
 }
 
