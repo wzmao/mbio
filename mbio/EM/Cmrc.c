@@ -405,6 +405,7 @@ static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
         }
         fclose(m_fp);
     }
+    Py_XDECREF(data);
     return Py_BuildValue("i", 0);
 }
 
