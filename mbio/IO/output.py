@@ -78,7 +78,7 @@ def printUpdateInfo(x, **kwargs):
             from os import popen
             import sys
             try:
-                l = int(os.popen('stty size').read().split()[-1])
+                l = int(popen('stty size').read().split()[-1])
             except:
                 l = 0
             sys.stdout.write(
