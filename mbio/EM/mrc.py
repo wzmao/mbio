@@ -261,12 +261,12 @@ class MRC():
             if exists(filename) and isfile(filename):
                 from .Cmrc import readData
                 from numpy import zeros, int8, int16, float32, uint8, uint16
-                from ..IO.output import printInfo, printError
+                from ..IO.output import printInfo, printError, printUpdateInfo
 
                 if getattr(self, 'header', None):
                     del self.header
 
-                printInfo("Parsing the Header from file {0}.".format(filename))
+                printUpdateInfo("Parsing the Header from file {0}.".format(filename))
                 self.header = MRCHeader(filename=filename)
 
                 if getattr(self, 'data', None):
@@ -301,7 +301,7 @@ class MRC():
                         del self.data
                         self.data = None
                         return None
-                    printInfo(
+                    printUpdateInfo(
                         "Parsing the Data from file {0}.".format(filename))
                     self.data = self.data - 1
                     compress = 1 if filename.lower().endswith('.gz') else 0
@@ -638,3 +638,8 @@ class MRC():
         """Print the information from the header."""
 
         self.header.printInformation()
+
+    def __del__(self):
+
+        del self.data
+        del self
