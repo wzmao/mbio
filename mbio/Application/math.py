@@ -193,7 +193,7 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     if x.shape[0] != y.shape[0]:
         printError("x and y must have same first dimension.")
         return None
-    if type(label) == type(None):
+    if label is None:
         label = ['x' + str(i + 1) for i in xrange(x.shape[1])]
     else:
         label = [str(i) for i in label]
@@ -228,7 +228,7 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
     if addconst:
         st += "{0:+10.6f}".format(beta[-1, 0])
     else:
-        st += "{0:+10.6f}*{1:s}".format(beta[-1, 0], label[i + 1])
+        st += "{0:+10.6f}*{1:s}".format(beta[-1, 0], label[x.shape[1] - 1])
     printInfo("The result is :")
     printInfo(st)
     printInfo("Test each parameter.")
