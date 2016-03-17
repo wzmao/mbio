@@ -1561,7 +1561,7 @@ static PyObject *msadirectinfo2(PyObject *self, PyObject *args, PyObject *kwargs
 
     PyArrayObject *cinfo, *pinfo, *diinfo;
     long number = 0, l = 0, q = 0;
-    char *kwlist[] = {"n", "l", "c", "p", "di", "q", NULL};
+    static char *kwlist[] = {"n", "l", "c", "p", "di", "q", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "llOOOl", kwlist,
                                      &number, &l, &cinfo, &pinfo, &diinfo, &q))
         return NULL;

@@ -323,13 +323,13 @@ static PyObject *shufflemi(PyObject *self, PyObject *args, PyObject *kwargs) {
 
 	long i, j;
 	/* allocate memory */
-	double *mut = malloc(length*length*sizeof(double));
+	double *mut = (double *)malloc(length*length*sizeof(double));
 	if (!mut)
 		return PyErr_NoMemory();
-	unsigned char *temp = malloc(number * sizeof(unsigned char));
+	unsigned char *temp = (unsigned char *)malloc(number * sizeof(unsigned char));
 	if (!temp)
 		return PyErr_NoMemory();
-	unsigned char *iseq = malloc(number * sizeof(unsigned char));
+	unsigned char *iseq = (unsigned char *)malloc(number * sizeof(unsigned char));
 	if (!iseq){
 		free(mut);
 		free(temp);
@@ -337,7 +337,7 @@ static PyObject *shufflemi(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	/* hold transpose of the sorted character array */
-	unsigned char **trans = malloc(length * sizeof(unsigned char *));
+	unsigned char **trans = (unsigned char **)malloc(length * sizeof(unsigned char *));
 	if (!trans) {
 		free(mut);
 		free(temp);
@@ -348,7 +348,7 @@ static PyObject *shufflemi(PyObject *self, PyObject *args, PyObject *kwargs) {
 	/* allocate rows that will store columns of MSA */
 	trans[0] = iseq;
 	for (i = 1; i < length; i++) {
-		trans[i] = malloc(number * sizeof(unsigned char));
+		trans[i] = (unsigned char *)malloc(number * sizeof(unsigned char));
 		if (!trans[i]) {
 			for (j = 1; j < i; j++)
 				free(trans[j]);
@@ -362,7 +362,7 @@ static PyObject *shufflemi(PyObject *self, PyObject *args, PyObject *kwargs) {
 	unsigned char *jseq = iseq; /* so that we don't get uninitialized warning*/
 
 	/* length*27, a row for each column in the MSA */
-	double **probs = malloc(length * sizeof(double *)), *prow;
+	double **probs = (double **)malloc(length * sizeof(double *)), *prow;
 	if (!probs) {
 		for (j = 1; j < length; j++)
 			free(trans[j]);
@@ -374,7 +374,7 @@ static PyObject *shufflemi(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	/* 27x27, alphabet characters and a gap*/
-	double **joint = malloc(NUMCHARS * sizeof(double *)), *jrow;
+	double **joint = (double **)malloc(NUMCHARS * sizeof(double *)), *jrow;
 	if (!joint) {
 		for (j = 1; j < length; j++)
 			free(trans[j]);
@@ -387,7 +387,7 @@ static PyObject *shufflemi(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	for (i = 0; i < length; i++) {
-		prow = malloc(NUMCHARS * sizeof(double));
+		prow = (double *)malloc(NUMCHARS * sizeof(double));
 		if (!prow) {
 			for (j = 0; j < i; j++)
 				free(probs[j]);
@@ -407,7 +407,7 @@ static PyObject *shufflemi(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	for (i = 0; i < NUMCHARS; i++)  {
-		joint[i] = malloc(NUMCHARS * sizeof(double));
+		joint[i] = (double *)malloc(NUMCHARS * sizeof(double));
 		if (!joint[i]) {
 			for (j = 0; j < i; j++)
 				free(joint[j]);
@@ -599,13 +599,13 @@ static PyObject *shuffleomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 
 	long i, j;
 	/* allocate memory */
-	double *omes = malloc(length*length*sizeof(double));
+	double *omes = (double *)malloc(length*length*sizeof(double));
 	if (!omes)
 		return PyErr_NoMemory();
-	unsigned char *temp = malloc(number * sizeof(unsigned char));
+	unsigned char *temp = (unsigned char *)malloc(number * sizeof(unsigned char));
 	if (!temp)
 		return PyErr_NoMemory();
-	unsigned char *iseq = malloc(number * sizeof(unsigned char));
+	unsigned char *iseq = (unsigned char *)malloc(number * sizeof(unsigned char));
 	if (!iseq){
 		free(omes);
 		free(temp);
@@ -613,7 +613,7 @@ static PyObject *shuffleomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	/* hold transpose of the sorted character array */
-	unsigned char **trans = malloc(length * sizeof(unsigned char *));
+	unsigned char **trans = (unsigned char **)malloc(length * sizeof(unsigned char *));
 	if (!trans) {
 		free(omes);
 		free(temp);
@@ -624,7 +624,7 @@ static PyObject *shuffleomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 	/* allocate rows that will store columns of MSA */
 	trans[0] = iseq;
 	for (i = 1; i < length; i++) {
-		trans[i] = malloc(number * sizeof(unsigned char));
+		trans[i] = (unsigned char *)malloc(number * sizeof(unsigned char));
 		if (!trans[i]) {
 			for (j = 1; j < i; j++)
 				free(trans[j]);
@@ -638,7 +638,7 @@ static PyObject *shuffleomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 	unsigned char *jseq = iseq; /* so that we don't get uninitialized warning*/
 
 	/* length*27, a row for each column in the MSA */
-	double **probs = malloc(length * sizeof(double *)), *prow;
+	double **probs = (double **)malloc(length * sizeof(double *)), *prow;
 	if (!probs) {
 		for (j = 1; j < length; j++)
 			free(trans[j]);
@@ -650,7 +650,7 @@ static PyObject *shuffleomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	/* 27x27, alphabet characters and a gap*/
-	double **joint = malloc(NUMCHARS * sizeof(double *)), *jrow;
+	double **joint = (double **)malloc(NUMCHARS * sizeof(double *)), *jrow;
 	if (!joint) {
 		for (j = 1; j < length; j++)
 			free(trans[j]);
@@ -663,7 +663,7 @@ static PyObject *shuffleomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	for (i = 0; i < length; i++) {
-		prow = malloc(NUMCHARS * sizeof(double));
+		prow = (double *)malloc(NUMCHARS * sizeof(double));
 		if (!prow) {
 			for (j = 0; j < i; j++)
 				free(probs[j]);
@@ -683,7 +683,7 @@ static PyObject *shuffleomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	for (i = 0; i < NUMCHARS; i++)  {
-		joint[i] = malloc(NUMCHARS * sizeof(double));
+		joint[i] = (double *)malloc(NUMCHARS * sizeof(double));
 		if (!joint[i]) {
 			for (j = 0; j < i; j++)
 				free(joint[j]);
@@ -858,17 +858,17 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
 
 	long i, j;
 	/* allocate memory */
-	double *mi = malloc(length*length*sizeof(double));
+	double *mi = (double *)malloc(length*length*sizeof(double));
 	if (!mi)
 		return PyErr_NoMemory();
-	double *mip = malloc(length*length*sizeof(double));
+	double *mip = (double *)malloc(length*length*sizeof(double));
 	if (!mip){
 		free(mi);
 	}
-	unsigned char *temp = malloc(number * sizeof(unsigned char));
+	unsigned char *temp = (unsigned char *)malloc(number * sizeof(unsigned char));
 	if (!temp)
 		return PyErr_NoMemory();
-	unsigned char *iseq = malloc(number * sizeof(unsigned char));
+	unsigned char *iseq = (unsigned char *)malloc(number * sizeof(unsigned char));
 	if (!iseq){
 		free(mi);
 		free(mip);
@@ -877,7 +877,7 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	/* hold transpose of the sorted character array */
-	unsigned char **trans = malloc(length * sizeof(unsigned char *));
+	unsigned char **trans = (unsigned char **)malloc(length * sizeof(unsigned char *));
 	if (!trans) {
 		free(mi);
 		free(mip);
@@ -889,7 +889,7 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
 	/* allocate rows that will store columns of MSA */
 	trans[0] = iseq;
 	for (i = 1; i < length; i++) {
-		trans[i] = malloc(number * sizeof(unsigned char));
+		trans[i] = (unsigned char *)malloc(number * sizeof(unsigned char));
 		if (!trans[i]) {
 			for (j = 1; j < i; j++)
 				free(trans[j]);
@@ -904,7 +904,7 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
 	unsigned char *jseq = iseq; /* so that we don't get uninitialized warning*/
 
 	/* length*27, a row for each column in the MSA */
-	double **probs = malloc(length * sizeof(double *)), *prow;
+	double **probs = (double **)malloc(length * sizeof(double *)), *prow;
 	if (!probs) {
 		for (j = 1; j < length; j++)
 			free(trans[j]);
@@ -917,7 +917,7 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	/* 27x27, alphabet characters and a gap*/
-	double **joint = malloc(NUMCHARS * sizeof(double *)), *jrow;
+	double **joint = (double **)malloc(NUMCHARS * sizeof(double *)), *jrow;
 	if (!joint) {
 		for (j = 1; j < length; j++)
 			free(trans[j]);
@@ -931,7 +931,7 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	for (i = 0; i < length; i++) {
-		prow = malloc(NUMCHARS * sizeof(double));
+		prow = (double *)malloc(NUMCHARS * sizeof(double));
 		if (!prow) {
 			for (j = 0; j < i; j++)
 				free(probs[j]);
@@ -952,7 +952,7 @@ static PyObject *shufflemip(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	for (i = 0; i < NUMCHARS; i++)  {
-		joint[i] = malloc(NUMCHARS * sizeof(double));
+		joint[i] = (double *)malloc(NUMCHARS * sizeof(double));
 		if (!joint[i]) {
 			for (j = 0; j < i; j++)
 				free(joint[j]);
@@ -1173,17 +1173,17 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 
 	long i, j;
 	/* allocate memory */
-	unsigned char *temp = malloc(number * sizeof(unsigned char));
+	unsigned char *temp = (unsigned char *)malloc(number * sizeof(unsigned char));
 	if (!temp)
 		return PyErr_NoMemory();
-	unsigned char *iseq = malloc(number * sizeof(unsigned char));
+	unsigned char *iseq = (unsigned char *)malloc(number * sizeof(unsigned char));
 	if (!iseq){
 		free(temp);
 		return PyErr_NoMemory();
 	}
 
 	/* hold transpose of the sorted character array */
-	unsigned char **trans = malloc(length * sizeof(unsigned char *));
+	unsigned char **trans = (unsigned char **)malloc(length * sizeof(unsigned char *));
 	if (!trans) {
 		free(iseq);
 		free(temp);
@@ -1193,7 +1193,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	/* allocate rows that will store columns of MSA */
 	trans[0] = iseq;
 	for (i = 1; i < length; i++) {
-		trans[i] = malloc(number * sizeof(unsigned char));
+		trans[i] = (unsigned char *)malloc(number * sizeof(unsigned char));
 		if (!trans[i]) {
 			for (j = 1; j < i; j++)
 				free(trans[j]);
@@ -1206,7 +1206,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	unsigned char *jseq = iseq; /* so that we don't get uninitialized warning*/
 
 	/* length*27, a row for each column in the MSA */
-	double **probs = malloc(length * sizeof(double *)), *prow;
+	double **probs = (double **)malloc(length * sizeof(double *)), *prow;
 	if (!probs) {
 		for (j = 1; j < length; j++)
 			free(trans[j]);
@@ -1217,7 +1217,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	/* 27x27, alphabet characters and a gap*/
-	double **joint = malloc(NUMCHARS * sizeof(double *)), *jrow;
+	double **joint = (double **)malloc(NUMCHARS * sizeof(double *)), *jrow;
 	if (!joint) {
 		for (j = 1; j < length; j++)
 			free(trans[j]);
@@ -1229,7 +1229,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	for (i = 0; i < length; i++) {
-		prow = malloc(NUMCHARS * sizeof(double));
+		prow = (double *)malloc(NUMCHARS * sizeof(double));
 		if (!prow) {
 			for (j = 0; j < i; j++)
 				free(probs[j]);
@@ -1248,7 +1248,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 
 	for (i = 0; i < NUMCHARS; i++)  {
-		joint[i] = malloc(NUMCHARS * sizeof(double));
+		joint[i] = (double *)malloc(NUMCHARS * sizeof(double));
 		if (!joint[i]) {
 			for (j = 0; j < i; j++)
 				free(joint[j]);
@@ -1266,7 +1266,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 	double *mi=NULL;
 	if (hasmi||hasmip){
-		mi = malloc(length*length*sizeof(double));
+		mi = (double *)malloc(length*length*sizeof(double));
 		if (!mi){
 			for (j = 0; j < NUMCHARS; j++)
 				free(joint[j]);
@@ -1284,7 +1284,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 	double *mip=NULL;
 	if (hasmip){
-		mip = malloc(length*length*sizeof(double));
+		mip = (double *)malloc(length*length*sizeof(double));
 		if (!mip){
 			free(mi);
 			for (j = 0; j < NUMCHARS; j++)
@@ -1303,7 +1303,7 @@ static PyObject *shuffleall(PyObject *self, PyObject *args, PyObject *kwargs) {
 	}
 	double *omes=NULL;
 	if (hasomes){
-		omes = malloc(length*length*sizeof(double));
+		omes = (double *)malloc(length*length*sizeof(double));
 		if (!omes){
 			if (hasmi||hasmip)
 				free(mi);

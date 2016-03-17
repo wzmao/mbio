@@ -13,7 +13,7 @@ static PyObject *readFasta(PyObject *self, PyObject *args) {
     	return PyErr_NoMemory();
     FILE *fin = fopen(filename, "r");
     long p,end=0;
-    char *line=malloc(1000*sizeof(char)),*line1;
+    char *line=(char *)malloc(1000*sizeof(char)),*line1;
     p=fscanf(fin, "%s",&line[0]);
     while (1){
     	int l=strlen(line);

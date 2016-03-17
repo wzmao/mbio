@@ -259,7 +259,7 @@ int test_cholesky(double **a, const int n)
   static double *diag;
 
   if (diag == NULL)
-    diag = allocvec(n, sizeof(double));
+    diag = (double *)allocvec(n, sizeof(double));
   if (diag==NULL)
     return 2;
 
@@ -345,25 +345,25 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
       omp_set_num_threads(maxthread);
     #endif
   
-  aln = allocvec(nseqs, sizeof(char *));
+  aln = (char **)allocvec(nseqs, sizeof(char *));
   if (aln==NULL){
     return Py_BuildValue("Oi", Py_None, 1);
   }
 
-  weight = allocvec(nseqs, sizeof(double));
+  weight = (double *)allocvec(nseqs, sizeof(double));
   if (weight==NULL){
     free(aln);
     return Py_BuildValue("Oi", Py_None, 1);
   }
 
-  wtcount = allocvec(nseqs, sizeof(int));
+  wtcount = (int *)allocvec(nseqs, sizeof(int));
   if (wtcount==NULL){
     free(aln);
     free(weight);
     return Py_BuildValue("Oi", Py_None, 1);
   }
 
-  if (!(aln[0] = malloc(seqlen))){
+  if (!(aln[0] = (char *)malloc(seqlen))){
     free(aln);
     free(weight);
     free(wtcount);
@@ -375,7 +375,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
 
   for (i=1; i<nseqs; i++)
   {
-    if (!(aln[i] = malloc(seqlen))){
+    if (!(aln[i] = (char *)malloc(seqlen))){
       for (j=0;j<i;j++)
         free(aln[j]);
       free(aln);
@@ -417,7 +417,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     for (i=0; i<nseqs; i++)
       for (j=i+1; j<nseqs; j++)
       {
-        int nthresh = seqlen * idthresh;
+        int nthresh = (int)(seqlen * idthresh);
 
         for (k=0; nthresh > 0 && k<seqlen; k++)
           nthresh -= (aln[i][k] != aln[j][k]);
@@ -444,7 +444,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
       return Py_BuildValue("Oid", Py_None, 2, wtsum);
   }
 
-  pa = allocmat(seqlen, 21, sizeof(double));
+  pa = (double **)allocmat(seqlen, 21, sizeof(double));
   if (pa==NULL){
       for (j=0;j<nseqs;j++)
         free(aln[j]);
@@ -475,7 +475,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
 
   ndim = seqlen * 21;
 
-  cmat = allocmat(ndim, ndim, sizeof(double));
+  cmat = (double **)allocmat(ndim, ndim, sizeof(double));
   if (cmat==NULL){
       for (j=0;j<nseqs;j++)
         free(aln[j]);
@@ -488,7 +488,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
       return Py_BuildValue("Oi", Py_None, 1);
   }
 
-  tempmat = allocmat(ndim, ndim, sizeof(double));
+  tempmat = (double **)allocmat(ndim, ndim, sizeof(double));
   if (tempmat==NULL){
       for (j=0;j<nseqs;j++)
         free(aln[j]);
@@ -593,7 +593,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     return Py_BuildValue("Oi", Py_None, 1);
   }
 
-  rho = allocmat(ndim, ndim, sizeof(double));
+  rho = (double **)allocmat(ndim, ndim, sizeof(double));
   if (rho==NULL){
     for (j=0;j<nseqs;j++)
       free(aln[j]);
@@ -611,7 +611,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free((void *)tempmat - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
-  ww = allocmat(ndim, ndim, sizeof(double));
+  ww = (double **)allocmat(ndim, ndim, sizeof(double));
   if (ww==NULL){
     for (j=0;j<nseqs;j++)
       free(aln[j]);
@@ -632,7 +632,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free((void *)rho - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
-  wwi = allocmat(ndim, ndim, sizeof(double));
+  wwi = (double **)allocmat(ndim, ndim, sizeof(double));
   if (wwi==NULL){
     for (j=0;j<nseqs;j++)
       free(aln[j]);
@@ -759,7 +759,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
   }
 
   /* Calculate background corrected scores using average product correction */
-  pcmat = allocmat(seqlen, seqlen, sizeof(double));
+  pcmat = (double **)allocmat(seqlen, seqlen, sizeof(double));
   if (pcmat==NULL){
     for (j=0;j<nseqs;j++)
       free(aln[j]);
@@ -786,7 +786,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     free((void *)wwi - sizeof(int));
     return Py_BuildValue("Oi", Py_None, 1);
   }
-  pcsum = allocvec(seqlen, sizeof(double));
+  pcsum = (double *)allocvec(seqlen, sizeof(double));
   if (pcsum==NULL){
     for (j=0;j<nseqs;j++)
       free(aln[j]);
