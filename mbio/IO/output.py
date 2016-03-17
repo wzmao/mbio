@@ -14,6 +14,8 @@ _verbo = True
 
 _updating = False
 
+from .. import _system
+
 
 def setVerbo(mark, **kwargs):
     """Set the output on/off."""
@@ -29,7 +31,7 @@ def checkIsSublime(**kwargs):
     try:
         from os import getppid, popen
     except:
-        return False
+        return (_system == "Windows")
     try:
         pid = str(getppid())
         f = open('/proc/' + str(pid) + '/cmdline', 'r')

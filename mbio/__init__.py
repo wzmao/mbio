@@ -6,6 +6,10 @@ __release__ = [int(x) for x in __version__.split('.')]
 del x
 __all__ = []
 
+from platform import system
+
+_system = system()
+del system
 
 from . import Application
 from .Application import *
