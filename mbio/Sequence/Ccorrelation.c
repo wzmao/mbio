@@ -507,12 +507,12 @@ static PyObject *msamutinfo(PyObject *self, PyObject *args, PyObject *kwargs) {
 
     long i, j;
     /* allocate memory */
-    unsigned char *iseq = malloc(number * sizeof(unsigned char));
+    unsigned char *iseq = (unsigned char *) malloc(number * sizeof(unsigned char));
     if (!iseq)
         return PyErr_NoMemory();
 
     /* hold transpose of the sorted character array */
-    unsigned char **trans = malloc(length * sizeof(unsigned char *));
+    unsigned char **trans = (unsigned char **)malloc(length * sizeof(unsigned char *));
     if (!trans) {
         turbo = 0;
     }
@@ -521,7 +521,7 @@ static PyObject *msamutinfo(PyObject *self, PyObject *args, PyObject *kwargs) {
         /* allocate rows that will store columns of MSA */
         trans[0] = iseq;
         for (i = 1; i < length; i++) {
-            trans[i] = malloc(number * sizeof(unsigned char));
+            trans[i] = (unsigned char *)malloc(number * sizeof(unsigned char));
             if (!trans[i]) {
                 for (j = 1; j < i; j++)
                     free(trans[j]);
@@ -533,7 +533,7 @@ static PyObject *msamutinfo(PyObject *self, PyObject *args, PyObject *kwargs) {
     unsigned char *jseq = iseq; /* so that we don't get uninitialized warning*/
 
     /* length*27, a row for each column in the MSA */
-    double **probs = malloc(length * sizeof(double *)), *prow;
+    double **probs = (double **)malloc(length * sizeof(double *)), *prow;
     if (!probs) {
         if (turbo)
             for (j = 1; j < length; j++)
@@ -544,7 +544,7 @@ static PyObject *msamutinfo(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     /* 27x27, alphabet characters and a gap*/
-    double **joint = malloc(NUMCHARS * sizeof(double *)), *jrow;
+    double **joint = (double **)malloc(NUMCHARS * sizeof(double *)), *jrow;
     if (!joint) {
         if (turbo)
             for (j = 1; j < length; j++)
@@ -556,7 +556,7 @@ static PyObject *msamutinfo(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     for (i = 0; i < length; i++) {
-        prow = malloc(NUMCHARS * sizeof(double));
+        prow = (double *)malloc(NUMCHARS * sizeof(double));
         if (!prow) {
             for (j = 0; j < i; j++)
                 free(probs[j]);
@@ -575,7 +575,7 @@ static PyObject *msamutinfo(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     for (i = 0; i < NUMCHARS; i++)  {
-        joint[i] = malloc(NUMCHARS * sizeof(double));
+        joint[i] = (double *)malloc(NUMCHARS * sizeof(double));
         if (!joint[i]) {
             for (j = 0; j < i; j++)
                 free(joint[j]);
@@ -859,12 +859,12 @@ static PyObject *msaomes(PyObject *self, PyObject *args, PyObject *kwargs) {
 
     long i, j;
     /* allocate memory */
-    unsigned char *iseq = malloc(number * sizeof(unsigned char));
+    unsigned char *iseq = (unsigned char *)malloc(number * sizeof(unsigned char));
     if (!iseq)
         return PyErr_NoMemory();
 
     /* hold transpose of the sorted character array */
-    unsigned char **trans = malloc(length * sizeof(unsigned char *));
+    unsigned char **trans = (unsigned char **)malloc(length * sizeof(unsigned char *));
     if (!trans) {
         turbo = 0;
     }
@@ -873,7 +873,7 @@ static PyObject *msaomes(PyObject *self, PyObject *args, PyObject *kwargs) {
         /* allocate rows that will store columns of MSA */
         trans[0] = iseq;
         for (i = 1; i < length; i++) {
-            trans[i] = malloc(number * sizeof(unsigned char));
+            trans[i] = (unsigned char *)malloc(number * sizeof(unsigned char));
             if (!trans[i]) {
                 for (j = 1; j < i; j++)
                     free(trans[j]);
@@ -885,7 +885,7 @@ static PyObject *msaomes(PyObject *self, PyObject *args, PyObject *kwargs) {
     unsigned char *jseq = iseq; /* so that we don't get uninitialized warning*/
 
     /* length*27, a row for each column in the MSA */
-    double **probs = malloc(length * sizeof(double *)), *prow;
+    double **probs = (double **)malloc(length * sizeof(double *)), *prow;
     if (!probs) {
         if (turbo)
             for (j = 1; j < length; j++)
@@ -896,7 +896,7 @@ static PyObject *msaomes(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     /* 27x27, alphabet characters and a gap*/
-    double **joint = malloc(NUMCHARS * sizeof(double *)), *jrow;
+    double **joint = (double **)malloc(NUMCHARS * sizeof(double *)), *jrow;
     if (!joint) {
         if (turbo)
             for (j = 1; j < length; j++)
@@ -908,7 +908,7 @@ static PyObject *msaomes(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     for (i = 0; i < length; i++) {
-        prow = malloc(NUMCHARS * sizeof(double));
+        prow = (double *)malloc(NUMCHARS * sizeof(double));
         if (!prow) {
             for (j = 0; j < i; j++)
                 free(probs[j]);
@@ -927,7 +927,7 @@ static PyObject *msaomes(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     for (i = 0; i < NUMCHARS; i++)  {
-        joint[i] = malloc(NUMCHARS * sizeof(double));
+        joint[i] = (double *)malloc(NUMCHARS * sizeof(double));
         if (!joint[i]) {
             for (j = 0; j < i; j++)
                 free(joint[j]);
@@ -1138,13 +1138,13 @@ static PyObject *msasca(PyObject *self, PyObject *args, PyObject *kwargs) {
                         14, 16, 17, 18, 19, 20, 22, 23, 25};
 
     /* weighted probability matrix length*27 */
-    double **wprob = malloc(length * sizeof(double *));
+    double **wprob = (double **)malloc(length * sizeof(double *));
     if (!wprob)
         return PyErr_NoMemory();
 
     /* each row of weighted probability */
     for (i = 0; i < length; i++) {
-        wprob[i] = malloc(NUMCHARS * sizeof(double));
+        wprob[i] = (double *)malloc(NUMCHARS * sizeof(double));
         if (!wprob[i]) {
             for (j = 0; j < i; j++)
                 free(wprob[j]);
@@ -1159,14 +1159,14 @@ static PyObject *msasca(PyObject *self, PyObject *args, PyObject *kwargs) {
     double *prob;
 
     /* weighted x~ matrix array */
-    double **wx = malloc(length * sizeof(double *));
+    double **wx = (double **)malloc(length * sizeof(double *));
     if (!turbo)
         free(wx);
     if (!wx)
         turbo = 0;
     if (turbo) {
         for (i = 0; i < length; i++) {
-            wx[i] = malloc(number * sizeof(double));
+            wx[i] = (double *)malloc(number * sizeof(double));
             if (!wx[i]) {
                 for (j = 0; j < i; j++)
                     free(wx[j]);
@@ -1327,7 +1327,7 @@ static PyObject *msameff(PyObject *self, PyObject *args, PyObject *kwargs) {
     char *seq = (char *) PyArray_DATA(msa); /*size: number x length */
 
     /*Set ind and get l first.*/
-    int *ind = malloc(length * sizeof(int));
+    int *ind = (int *)malloc(length * sizeof(int));
     if (!ind) {
         return PyErr_NoMemory();
     }
@@ -1350,7 +1350,7 @@ static PyObject *msameff(PyObject *self, PyObject *args, PyObject *kwargs) {
     }
 
     /*Use l to set align and w size.*/
-    int *align = malloc(number * l * sizeof(int));
+    int *align = (int *)malloc(number * l * sizeof(int));
     if (!align) {
         free(ind);
         return PyErr_NoMemory();
@@ -1358,7 +1358,7 @@ static PyObject *msameff(PyObject *self, PyObject *args, PyObject *kwargs) {
     for (i = 0; i < number * l; i++){
         align[i] = 0;
     }
-    double *w = malloc(number * sizeof(double));
+    double *w = (double *)malloc(number * sizeof(double));
     if (!w) {
         free(ind);
         free(align);
@@ -1441,7 +1441,7 @@ static PyObject *msadipretest(PyObject *self, PyObject *args, PyObject *kwargs) 
     long number = PyArray_DIMS(msa)[0], length = PyArray_DIMS(msa)[1];
     char *seq = (char *) PyArray_DATA(msa);
     long i, j, k = 0, l = 0;
-    int *ind = malloc(length * sizeof(int));
+    int *ind = (int *)malloc(length * sizeof(int));
     if (!ind) 
         return PyErr_NoMemory();
     if (!refine){
@@ -1509,7 +1509,7 @@ static PyObject *msadirectinfo1(PyObject *self, PyObject *args, PyObject *kwargs
             prob(j, align(i,j)) += pro_weight * w[i];
 
     /*Calculate C matrix.*/
-    double *joint = malloc(q*q*sizeof(double));
+    double *joint = (double *)malloc(q*q*sizeof(double));
     if (!joint){
         free(w);
         free(align);
@@ -1561,7 +1561,7 @@ static PyObject *msadirectinfo2(PyObject *self, PyObject *args, PyObject *kwargs
 
     PyArrayObject *cinfo, *pinfo, *diinfo;
     long number = 0, l = 0, q = 0;
-    static char *kwlist[] = {"n", "l", "c", "p", "di", "q", NULL};
+    char *kwlist[] = {"n", "l", "c", "p", "di", "q", NULL};
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "llOOOl", kwlist,
                                      &number, &l, &cinfo, &pinfo, &diinfo, &q))
         return NULL;
@@ -1573,7 +1573,7 @@ static PyObject *msadirectinfo2(PyObject *self, PyObject *args, PyObject *kwargs
     double *di = (double *) PyArray_DATA(diinfo);
 
     long i, j, k1, k2;
-    double *w = malloc(q * q * sizeof(double));
+    double *w = (double *)malloc(q * q * sizeof(double));
     if (!w)
         return NULL;
     for (i = 0; i < q*q; i++){
@@ -1587,8 +1587,8 @@ static PyObject *msadirectinfo2(PyObject *self, PyObject *args, PyObject *kwargs
 
     double epsilon = 1e-4, tiny = 1.0e-100;
     double diff = 1.0, sum1 = 0.0, sum2 = 0.0, sumpdir = 0.0, sumdi = 0.0;
-    double *mu1 = malloc(q*sizeof(double)), *mu2 = malloc(q*sizeof(double));
-    double *scra1 = malloc(q*sizeof(double)), *scra2 = malloc(q*sizeof(double));
+    double *mu1 = (double *)malloc(q*sizeof(double)), *mu2 = (double *)malloc(q*sizeof(double));
+    double *scra1 = (double *)malloc(q*sizeof(double)), *scra2 = (double *)malloc(q*sizeof(double));
     for (i = 0; i < l; i++){
         di(i,i) = 0.0;
         for (j = i+1; j < l; j++){
@@ -1743,7 +1743,7 @@ static PyObject *msaplmdca(PyObject *self, PyObject *args, PyObject *kwargs) {
     mut[0]=mut[0];
 
     int i,j,k,p,q=0;
-    int *intseq=malloc(number * length * sizeof(int));
+    int *intseq=(int *)malloc(number * length * sizeof(int));
     if (!intseq)
         return PyErr_NoMemory();
 
@@ -1754,7 +1754,7 @@ static PyObject *msaplmdca(PyObject *self, PyObject *args, PyObject *kwargs) {
         }
 
     double *weight,B_eff=0.0;
-    weight=malloc(number * sizeof(double));
+    weight=(double *)malloc(number * sizeof(double));
     if (!weight){
         free(intseq);
         return PyErr_NoMemory();
