@@ -8,7 +8,7 @@
 #include <ctype.h>
 #include <math.h>
 #ifdef _OPENMP
-#include <omp.h>
+   #include <omp.h>
 #endif
 
 /* This program mainly comes from http://bioinfadmin.cs.ucl.ac.uk/downloads/PSICOV/psicov21.c
@@ -162,7 +162,9 @@ int glassofast(const int n, double **S, double **L, const double thr, const int 
   {
     dw = 0.0;
 
+    #ifdef _OPENMP
     #pragma omp parallel for default(shared) private(i,j,ii,wxj,a,b,c,dlx,delta,sum)
+    #endif
     for (j=0; j<n; j++)
     {
       for (ii=0; ii<n; ii++)
@@ -213,7 +215,9 @@ int glassofast(const int n, double **S, double **L, const double thr, const int 
       for (sum=ii=0; ii<n; ii++)
         sum += fabs(wxj[ii] - W[j][ii]);
 
+      #ifdef _OPENMP
       #pragma omp critical
+      #endif
         if (sum > dw)
           dw = sum;
 
@@ -305,7 +309,7 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
 
   int *wtcount;
   double *weight, **pa, **pcmat, *pcsum;
-  char **aln;
+  char **aln=NULL;
 
   int a, b, i, j, k, ndim, maxit=10000, initflg=0, npair, nnzero, ncon;
   double wtsum, smean, lambda, lastfnzero, trialrho, rfact, score, fnzero, pcmean,
@@ -393,7 +397,9 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
   {
     double meanfracid = 0.0;
   
+    #ifdef _OPENMP
     #pragma omp parallel for default(shared) private(j,k) reduction(+:meanfracid)
+    #endif
       for (i=0; i<nseqs; i++)
         for (j=i+1; j<nseqs; j++)
         {
@@ -413,7 +419,9 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
     idthresh = MIN(0.6, 0.38 * 0.32 / meanfracid);
   }
 
+  #ifdef _OPENMP
   #pragma omp parallel for default(shared) private(j,k)
+  #endif
     for (i=0; i<nseqs; i++)
       for (j=i+1; j<nseqs; j++)
       {
@@ -424,7 +432,9 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
         
         if (nthresh > 0)
         {
+          #ifdef _OPENMP
           #pragma omp critical
+          #endif
           {
             wtcount[i]++;
             wtcount[j]++;
@@ -505,7 +515,9 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
   }
 
   /* Form the covariance matrix */
+  #ifdef _OPENMP
   #pragma omp parallel for default(shared) private(j,k,a,b)
+  #endif
     for (i=0; i<seqlen; i++)
       for (j=i; j<seqlen; j++)
       {
@@ -564,7 +576,9 @@ static PyObject *msapsicov(PyObject *self, PyObject *args, PyObject *kwargs)
       if (!testc)
         break;
       
+      #ifdef _OPENMP
       #pragma omp parallel for default(shared) private(j,a,b)
+      #endif
         for (i=0; i<seqlen; i++)
         for (j=0; j<seqlen; j++)
           for (a=0; a<21; a++)

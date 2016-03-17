@@ -63,8 +63,11 @@ PACKAGE_DIR = {}
 for pkg in PACKAGES:
     PACKAGE_DIR[pkg] = join(*pkg.split('.'))
 
-optimize = ['-O3'] if platform.system() == 'Linux' else []
-zlib = ['zdll.lib'] if platform.system() == 'Windows' else []
+optimize = ['-O3']
+zlib = ['-lzdll'] if platform.system() == 'Windows' else []
+fftw = ['-lfftw3f-3'] if platform.system() == 'Windows' else ['-lfftw3f']
+omp_compile =['-fopenmp'] if platform.system() == 'Linux' else []
+omp = ['-lgomp'] if platform.system() == 'Linux' else []
 
 EXTENSIONS = [
     Extension('mbio.Sequence.Ccorrelation',
@@ -75,8 +78,8 @@ EXTENSIONS = [
     Extension('mbio.Sequence.Ccorrelation_p',
               [join('mbio', 'Sequence', 'Ccorrelation_p.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-fopenmp'] + optimize,
-              extra_link_args=['-lgomp'] + optimize),
+              extra_compile_args=[] + optimize + omp_compile,
+              extra_link_args=[] + optimize + omp),
     Extension('mbio.Sequence.Cshuffle',
               [join('mbio', 'Sequence', 'Cshuffle.c'), ],
               include_dirs=[numpy.get_include()],
@@ -100,8 +103,8 @@ EXTENSIONS = [
     Extension('mbio.EM.Cmrcmodel_p',
               [join('mbio', 'EM', 'Cmrcmodel_p.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-fopenmp'] + optimize,
-              extra_link_args=['-lfftw3f', '-lgomp'] + optimize),
+              extra_compile_args=[] + optimize + omp_compile,
+              extra_link_args=[] + optimize + fftw + omp),
     # Extension('mbio.Learning.CNN_p',
     #           [join('mbio', 'Learning', 'CNN_p.c'), ],
     #           include_dirs=[numpy.get_include()],

@@ -1,9 +1,11 @@
-#include "Python.h"
+#include <Python.h>
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #include "numpy/arrayobject.h"
 #include <math.h>
-#include "fftw3.h"
-#include <omp.h>
+#include <fftw3.h>
+#ifdef _OPENMP
+   #include <omp.h>
+#endif
 
 
 typedef struct MRCHeader
@@ -277,13 +279,17 @@ static PyObject *Cpdb2mrc(PyObject *self, PyObject *args, PyObject *kwargs)
 	int step=(int)(nsam/10.0+0.5),count=0,p=0;
 	float closef2=0.,closefcount=0.;
 
+	#ifdef _OPENMP
 	#pragma omp parallel for schedule(dynamic) firstprivate(isodd,hnsaml,hnsam,ii,nsam,id0,j,jj,id1,k,kk,id,rmax,Fpsize,atomid,occ,bf,cor,atomnumber) shared(count,p) reduction(+:closef2) reduction(+:closefcount)
+	#endif
 	for(i=-hnsam;i<hnsam+isodd;i++)
 	{
 		ii=(i+nsam)%nsam;
 		id0=ii*nsam;
 		if (count%step==0){
+			#ifdef _OPENMP
 			#pragma omp critical
+			#endif
 			if(p==0){
 				printf("\r* Progress: %3d%%",(int)(count*100.0/nsam));
 				fflush(stdout);
@@ -312,7 +318,9 @@ static PyObject *Cpdb2mrc(PyObject *self, PyObject *args, PyObject *kwargs)
 				}
 			}
 		}
+		#ifdef _OPENMP
 		#pragma omp critical
+		#endif
 		{
 			count++;
 			p=0;
