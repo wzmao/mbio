@@ -206,6 +206,7 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
     FILE *m_fp=NULL;
     gzFile gzfp=NULL;
     int nsymbt=0, datamode=-1,size=0,bytesize=4,compress=0;
+    unsigned char *matrix;
 
     static char *kwlist[] = {"filename", "nsymbt", "datamode", "data", "size", "compress", NULL};
 
@@ -214,7 +215,7 @@ static PyObject *readData(PyObject *self, PyObject *args, PyObject *kwargs) {
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
     data = PyArray_GETCONTIGUOUS(data);
-    unsigned char *matrix = (unsigned char *) PyArray_DATA(data);
+    matrix = (unsigned char *) PyArray_DATA(data);
     if (compress){
         gzfp = gzopen(filename,"rb");
         if(gzfp==NULL)
@@ -265,6 +266,7 @@ static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
     FILE *m_fp=NULL;
     gzFile gzfp=NULL;
     int i,j,k,bytesize=4,compress=0;
+    void *matrix;
 
     static char *kwlist[] = {"header", "data", "filename", "compress", NULL};
 
@@ -273,7 +275,7 @@ static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
         return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
 
     data = PyArray_GETCONTIGUOUS(data);
-    void *matrix = (void *) PyArray_DATA(data);
+    matrix = (void *) PyArray_DATA(data);
     if (compress){
         gzfp = gzopen(filename,"wb");
         if(gzfp==NULL)
@@ -303,10 +305,10 @@ static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
     m_header.machst=PyInt_AsLong(PyObject_GetAttrString(header, "machst"));
     m_header.nlabels=PyInt_AsLong(PyObject_GetAttrString(header, "nlabels"));
 
-    m_header.dmin=PyFloat_AsDouble(PyObject_GetAttrString(header, "dmin"));
-    m_header.dmax=PyFloat_AsDouble(PyObject_GetAttrString(header, "dmax"));
-    m_header.dmean=PyFloat_AsDouble(PyObject_GetAttrString(header, "dmean"));
-    m_header.rms=PyFloat_AsDouble(PyObject_GetAttrString(header, "rms"));
+    m_header.dmin=(float)PyFloat_AsDouble(PyObject_GetAttrString(header, "dmin"));
+    m_header.dmax=(float)PyFloat_AsDouble(PyObject_GetAttrString(header, "dmax"));
+    m_header.dmean=(float)PyFloat_AsDouble(PyObject_GetAttrString(header, "dmean"));
+    m_header.rms=(float)PyFloat_AsDouble(PyObject_GetAttrString(header, "rms"));
 
     tempchar=PyString_AsString(PyObject_GetAttrString(header, "map"));
     strncpy(m_header.map,tempchar,4);
@@ -327,9 +329,9 @@ static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
         }
 
     for (i=0;i<3;i++){
-      m_header.cella[i]=PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"cella"), i));
-      m_header.cellb[i]=PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"cellb"), i));
-      m_header.origin[i]=PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"origin"), i));
+      m_header.cella[i]=(float)PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"cella"), i));
+      m_header.cellb[i]=(float)PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"cellb"), i));
+      m_header.origin[i]=(float)PyFloat_AsDouble(PyList_GetItem(PyObject_GetAttrString(header,"origin"), i));
     }
 
     for (i=0;i<10;i++){

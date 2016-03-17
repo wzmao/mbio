@@ -57,48 +57,51 @@ PACKAGES = ['mbio',
             'mbio.IO',
             'mbio.Sequence', ]
 
-PACKAGE_DATA = {"mbio.Constant": ["pplus", 'pminus', 'psigplus', 'psigminus']}
+PACKAGE_DATA = {'mbio.Constant': ['pplus', 'pminus', 'psigplus', 'psigminus']}
 
 PACKAGE_DIR = {}
 for pkg in PACKAGES:
     PACKAGE_DIR[pkg] = join(*pkg.split('.'))
 
+optimize = ['-O3'] if platform.system() == 'Linux' else []
+zlib = ['zdll.lib'] if platform.system() == 'Windows' else []
+
 EXTENSIONS = [
     Extension('mbio.Sequence.Ccorrelation',
               [join('mbio', 'Sequence', 'Ccorrelation.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-O3'],
-              extra_link_args=['-O3']),
+              extra_compile_args=[] + optimize,
+              extra_link_args=[] + optimize),
     Extension('mbio.Sequence.Ccorrelation_p',
               [join('mbio', 'Sequence', 'Ccorrelation_p.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-fopenmp', '-O3'],
-              extra_link_args=['-lgomp', '-O3']),
+              extra_compile_args=['-fopenmp'] + optimize,
+              extra_link_args=['-lgomp'] + optimize),
     Extension('mbio.Sequence.Cshuffle',
               [join('mbio', 'Sequence', 'Cshuffle.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-O3'],
-              extra_link_args=['-O3']),
+              extra_compile_args=[] + optimize,
+              extra_link_args=[] + optimize),
     Extension('mbio.Application.c_algorithm',
               [join('mbio', 'Application', 'c_algorithm.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-O3'],
-              extra_link_args=['-O3']),
+              extra_compile_args=[] + optimize,
+              extra_link_args=[] + optimize),
     Extension('mbio.Sequence.Cfasta',
               [join('mbio', 'Sequence', 'Cfasta.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-O3'],
-              extra_link_args=['-O3']),
+              extra_compile_args=[] + optimize,
+              extra_link_args=[] + optimize),
     Extension('mbio.EM.Cmrc',
               [join('mbio', 'EM', 'Cmrc.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-O3'],
-              extra_link_args=['-O3']),
+              extra_compile_args=[] + optimize,
+              extra_link_args=[] + optimize + zlib),
     Extension('mbio.EM.Cmrcmodel_p',
               [join('mbio', 'EM', 'Cmrcmodel_p.c'), ],
               include_dirs=[numpy.get_include()],
-              extra_compile_args=['-fopenmp', '-O3'],
-              extra_link_args=['-lfftw3f', '-lgomp', '-O3']),
+              extra_compile_args=['-fopenmp'] + optimize,
+              extra_link_args=['-lfftw3f', '-lgomp'] + optimize),
     # Extension('mbio.Learning.CNN_p',
     #           [join('mbio', 'Learning', 'CNN_p.c'), ],
     #           include_dirs=[numpy.get_include()],
@@ -122,5 +125,5 @@ setup(
     provides=['mbio ({0:s})'.format(__version__)],
     url='https://github.com/wzmao/mbio',
     license='MIT',
-    platforms=['Linux'],
+    platforms=['Linux', 'Windows'],
 )

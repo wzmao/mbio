@@ -266,7 +266,8 @@ class MRC():
                 if getattr(self, 'header', None):
                     del self.header
 
-                printUpdateInfo("Parsing the Header from file {0}.".format(filename))
+                printUpdateInfo(
+                    "Parsing the Header from file {0}.".format(filename))
                 self.header = MRCHeader(filename=filename)
 
                 if getattr(self, 'data', None):

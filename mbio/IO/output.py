@@ -26,7 +26,10 @@ def setVerbo(mark, **kwargs):
 
 def checkIsSublime(**kwargs):
     """Check if the current job is called from sublime."""
-    from os import getppid, popen
+    try:
+        from os import getppid, popen
+    except:
+        return False
     try:
         pid = str(getppid())
         f = open('/proc/' + str(pid) + '/cmdline', 'r')
