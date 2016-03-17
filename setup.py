@@ -66,7 +66,7 @@ for pkg in PACKAGES:
 optimize = ['-O3']
 zlib = ['-lzdll'] if platform.system() == 'Windows' else []
 fftw = ['-lfftw3f-3'] if platform.system() == 'Windows' else ['-lfftw3f']
-omp_compile =['-fopenmp'] if platform.system() == 'Linux' else []
+omp_compile = ['-fopenmp'] if platform.system() == 'Linux' else []
 omp = ['-lgomp'] if platform.system() == 'Linux' else []
 
 EXTENSIONS = [
