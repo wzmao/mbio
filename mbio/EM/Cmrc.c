@@ -411,6 +411,19 @@ static PyObject *writeData(PyObject *self, PyObject *args, PyObject *kwargs) {
     return Py_BuildValue("i", 0);
 }
 
+static PyObject *tt(PyObject *self, PyObject *args, PyObject *kwargs) {
+
+    PyObject *ff=Py_None;
+    int x=0;
+    static char *kwlist[] = {"function", "x", NULL};
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "Oi", kwlist,
+                                     &ff, &x))
+        return Py_BuildValue("Os", Py_None,"Couldn't parse variable from C function.");
+    PyObject_CallFunctionObjArgs(ff,Py_BuildValue("(i)",x),NULL);
+    // return (PyObject *)Py_BuildValue("(i)",x);
+    return Py_BuildValue("O", ff);
+}
 static PyMethodDef Cmrc_methods[] = {
 
     {"readHeader",  (PyCFunction)readHeader,
@@ -422,6 +435,10 @@ static PyMethodDef Cmrc_methods[] = {
      "Read the MRC Data into a Numpy variable.\n"},
 
     {"writeData",  (PyCFunction)writeData,
+     METH_VARARGS | METH_KEYWORDS,
+     "Write MRC header and data into a file.\n"},
+
+    {"tt",  (PyCFunction)tt,
      METH_VARARGS | METH_KEYWORDS,
      "Write MRC header and data into a file.\n"},
 

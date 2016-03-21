@@ -901,3 +901,14 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
     mrc1.update()
 
     return mrc1
+
+def test(*kwargs,**kkk):
+    print kwargs
+    print kkk
+    print "I am here"
+    return 1
+
+def outtest(x):
+
+    from .Cmrc import tt
+    print tt(test,x)
