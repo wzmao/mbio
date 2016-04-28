@@ -72,6 +72,27 @@ def printInfo(x, **kwargs):
                 _updating = False
             print '\x1b[0;29m* {0}\x1b[0;29m'.format(str(x))
 
+def getTerminalSize():
+    from os import environ as env
+    def ioctl_GWINSZ(fd):
+        try:
+            import fcntl, termios, struct, os
+            cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ,
+        '1234'))
+        except:
+            return
+        return cr
+    cr = ioctl_GWINSZ(0) or ioctl_GWINSZ(1) or ioctl_GWINSZ(2)
+    if not cr:
+        try:
+            fd = os.open(os.ctermid(), os.O_RDONLY)
+            cr = ioctl_GWINSZ(fd)
+            os.close(fd)
+        except:
+            pass
+    if not cr:
+        return None
+    return int(cr[1]), int(cr[0])
 
 def printUpdateInfo(x, **kwargs):
 
@@ -83,7 +104,7 @@ def printUpdateInfo(x, **kwargs):
             from os import popen
             import sys
             try:
-                l = int(popen('stty size').read().split()[-1])
+                l = getTerminalSize()[0]
             except:
                 l = 0
             sys.stdout.write(

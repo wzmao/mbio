@@ -552,19 +552,22 @@ def transCylinder(pdb, **kwargs):
 
     from ..IO.output import printInfo
     from numpy.linalg import svd
-    from numpy import cross, array
+    from numpy import cross, array,ndarray
 
-    p1 = pdb.select("name CA C N").copy()
-    if p1 is None:
-        printError("The pdb has no CA C or N in the backbone.")
-        return None
+    if not isinstance(pdb,ndarray):
+        p1 = pdb.select("name CA C N").copy()
+        if p1 is None:
+            printError("The pdb has no CA C or N in the backbone.")
+            return None
 
-    if p1.numAtoms() < 15:
-        printError("The atom number({0}) is not enough to perform calculation.".format(
-            p1.numAtoms()))
-        printError("The result is not reliable.")
+        if p1.numAtoms() < 15:
+            printError("The atom number({0}) is not enough to perform calculation.".format(
+                p1.numAtoms()))
+            printError("The result is not reliable.")
+        data = p1.getCoords()
+    else:
+        data=pdb
 
-    data = p1.getCoords()
     datamean = data.mean(axis=0)
     uu, dd, vv = svd(data - datamean)
     cent = datamean
@@ -912,3 +915,6 @@ def outtest(x):
 
     from .Cmrc import tt
     print tt(test,x)
+
+# def getclass(mrc, **kwargs):
+    

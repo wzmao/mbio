@@ -18,7 +18,7 @@ def parseMRC(filename=None, **kwargs):
         printError("The filename is wrong.")
         return None
     if exists(filename) and isfile(filename):
-        return MRC(filename=filename)
+        return MRC(filename=filename, **kwargs)
     else:
         from .output import printError
         printError("The filename doesn't exists or is not a file.")

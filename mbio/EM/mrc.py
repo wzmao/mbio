@@ -172,6 +172,18 @@ class MRCHeader():
         if self.nsymbt != 0:
             p("\t{0}".format(self.symdata))
 
+    def getMatrixShape(self, **kwargs):
+        """Get the data shape from the header information.
+        Caution: it could be different with the data array."""
+
+        if (isinstance(self.nx, int) and
+                isinstance(self.ny, int) and isinstance(self.nz, int)):
+            return (self.nx, self.ny, self.nz)
+        else:
+            from ..IO.output import printError
+            printError("There is no header information here.")
+            return None
+
     def __repr__(self):
 
         return "MRCHeader"
@@ -198,7 +210,7 @@ class MRC():
         self.header = MRCHeader()
         self.data = None
         if filename:
-            self.parseData(filename=filename)
+            self.parseData(filename=filename, **kwargs)
 
     def __getattr__(self, name, **kwargs):
 
@@ -266,8 +278,9 @@ class MRC():
                 if getattr(self, 'header', None):
                     del self.header
 
-                printUpdateInfo(
-                    "Parsing the Header from file {0}.".format(filename))
+                if kwargs.get('output', True):
+                    printUpdateInfo(
+                        "Parsing the Header from file {0}.".format(filename))
                 self.header = MRCHeader(filename=filename)
 
                 if getattr(self, 'data', None):
@@ -302,8 +315,9 @@ class MRC():
                         del self.data
                         self.data = None
                         return None
-                    printUpdateInfo(
-                        "Parsing the Data from file {0}.".format(filename))
+                    if kwargs.get('output', True):
+                        printUpdateInfo(
+                            "Parsing the Data from file {0}.".format(filename))
                     self.data = self.data - 1
                     compress = 1 if filename.lower().endswith('.gz') else 0
                     temp = readData(
@@ -402,7 +416,8 @@ class MRC():
             self.header.mapc, self.header.mapr, self.header.maps = 1, 2, 3
         self.header.nxstart, self.header.nystart, self.header.nzstart = array(
             [self.header.nxstart, self.header.nystart, self.header.nzstart])[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
-        printInfo("Writing MRC to {0}".format(filename))
+        if kwargs.get('output', True):
+            printInfo("Writing MRC to {0}".format(filename))
         compress = 1 if filename.lower().endswith('.gz') else 0
         temp = writeData(header=self.header, data=transpose(
             self.data, (self.header.maps - 1, self.header.mapr - 1, self.header.mapc - 1)), filename=filename, compress=compress)
@@ -561,17 +576,17 @@ class MRC():
         self.header.nx, self.header.ny, self.header.nz = array(
             self.data.shape)[[self.header.mapc - 1, self.header.mapr - 1, self.header.maps - 1]]
 
-    def getMatrixShape(self, **kwargs):
-        """Get the data shape from the header information.
-        Caution: it could be different with the data array."""
+    # def getMatrixShape(self, **kwargs):
+    #     """Get the data shape from the header information.
+    #     Caution: it could be different with the data array."""
 
-        if (isinstance(self.header.nx, int) and
-                isinstance(self.header.ny, int) and isinstance(self.header.nz, int)):
-            return (self.header.nx, self.header.ny, self.header.nz)
-        else:
-            from ..IO.output import printError
-            printError("There is no header information here.")
-            return None
+    #     if (isinstance(self.header.nx, int) and
+    #             isinstance(self.header.ny, int) and isinstance(self.header.nz, int)):
+    #         return (self.header.nx, self.header.ny, self.header.nz)
+    #     else:
+    #         from ..IO.output import printError
+    #         printError("There is no header information here.")
+    #         return None
 
     def getGridCoords(self, **kwargs):
         """Return the x, y and z coordinate for the whole grid."""
