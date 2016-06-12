@@ -146,7 +146,7 @@ class ANOVA(object):
         return None
 
 
-def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
+def performRegression(x, y, const=True, alpha=0.05, label=None, output=True, **kwargs):
     """Make regression analysis of array data. And test each parameter using t-test.
 
     `x` must be a N*a array. `y` must be a N*1 array.
@@ -213,8 +213,9 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
             x = hstack((x, ones((x.shape[0], 1))))
             addconst = 1
             label.append('c')
-            printInfo(
-                "Add const automatically. If you don't want to add const, use `const = False`")
+            if output:
+                printInfo(
+                    "Add const automatically. If you don't want to add const, use `const = False`")
 
     cov = inv(x.T.dot(x))
     beta = cov.dot(x.T).dot(y)
@@ -229,11 +230,12 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
         st += "{0:+10.6f}".format(beta[-1, 0])
     else:
         st += "{0:+10.6f}*{1:s}".format(beta[-1, 0], label[x.shape[1] - 1])
-    printInfo("The result is :")
-    printInfo(st)
-    printInfo("Test each parameter.")
-    printInfo("\t{0:^5s}{1:^15s}{2:^15s}{3:^15s}{4:^5s}{5:^9s}{6:^5s}".format(
-        "xi", "Para", "Sigma", "t-statistics", 'FD', "p-value", 'Sig'))
+    if output:
+        printInfo("The result is :")
+        printInfo(st)
+        printInfo("Test each parameter.")
+        printInfo("\t{0:^5s}{1:^15s}{2:^15s}{3:^15s}{4:^5s}{5:^9s}{6:^5s}".format(
+            "xi", "Para", "Sigma", "t-statistics", 'FD', "p-value", 'Sig'))
     p = []
     ts = []
     sig = []
@@ -244,14 +246,15 @@ def performRegression(x, y, const=True, alpha=0.05, label=None, **kwargs):
         p.append((1. - t.cdf(abs(ts[-1]), x.shape[0] - x.shape[1])) * 2)
         sig.append("Yes" if 2. * (1. - t.cdf(abs(beta[i][0] / (
             (sigma2 * cov[i, i]) ** .5)), x.shape[0] - x.shape[1])) < alpha else 'No')
-        printInfo("\t{0:^5s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
-                  "{6:^5s}".format(label[i],
-                                   beta[i][0],
-                                   sigma[-1],
-                                   ts[-1],
-                                   x.shape[0] - x.shape[1],
-                                   p[-1],
-                                   sig[-1]))
+        if output:
+            printInfo("\t{0:^5s}{1:^15.6e}{2:^15.6e}{3:^15.6e}{4:^5d}{5:^9f}"
+                      "{6:^5s}".format(label[i],
+                                       beta[i][0],
+                                       sigma[-1],
+                                       ts[-1],
+                                       x.shape[0] - x.shape[1],
+                                       p[-1],
+                                       sig[-1]))
     p = array(p)
     ts = array(ts)
     sig = array(sig)
