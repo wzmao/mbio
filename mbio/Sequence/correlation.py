@@ -670,7 +670,7 @@ def applyDICOV(msa=None, di=None, dca=None, psicov=None, **kwargs):
             if cdouble[i][j] == -1:
                 temp = array([X[i][j], Y[i][j]]).reshape((2, 1))
                 temp = e ** (para1 *
-                            ((invs.dot((pos - temp)) * (pos - temp)).sum(0)))
+                             ((invs.dot((pos - temp)) * (pos - temp)).sum(0)))
                 cdouble[i][j] = (temp.dot(val).sum()) / temp.sum()
 
     csingle = zeros_like(psigplus)

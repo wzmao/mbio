@@ -38,23 +38,23 @@ def interpolationcube(m, p, way, *kwargs):
 
     if way == 'idw':
         tt = array([[[0, 0], [0, 0]], [[0, 0], [0, 0]]], dtype=float)
-        tt[0,:,:] += p[0] ** 2
-        tt[1,:,:] += (1 - p[0]) ** 2
-        tt[:, 0,:] += p[1] ** 2
-        tt[:, 1,:] += (1 - p[1]) ** 2
-        tt[:,:, 0] += p[2] ** 2
-        tt[:,:, 1] += (1 - p[2]) ** 2
+        tt[0, :, :] += p[0] ** 2
+        tt[1, :, :] += (1 - p[0]) ** 2
+        tt[:, 0, :] += p[1] ** 2
+        tt[:, 1, :] += (1 - p[1]) ** 2
+        tt[:, :, 0] += p[2] ** 2
+        tt[:, :, 1] += (1 - p[2]) ** 2
         tt = tt ** .5
         tt = 1. / tt
         tt = tt / tt.sum()
     elif way == 'interpolation':
         tt = array([[[1, 1], [1, 1]], [[1, 1], [1, 1]]], dtype=float)
-        tt[0,:,:] *= 1 - p[0]
-        tt[1,:,:] *= p[0]
-        tt[:, 0,:] *= 1 - p[1]
-        tt[:, 1,:] *= p[1]
-        tt[:,:, 0] *= 1 - p[2]
-        tt[:,:, 1] *= p[2]
+        tt[0, :, :] *= 1 - p[0]
+        tt[1, :, :] *= p[0]
+        tt[:, 0, :] *= 1 - p[1]
+        tt[:, 1, :] *= p[1]
+        tt[:, :, 0] *= 1 - p[2]
+        tt[:, :, 1] *= p[2]
     if m.shape != (2, 2, 2):
         return -999999999999
     else:
@@ -552,9 +552,9 @@ def transCylinder(pdb, **kwargs):
 
     from ..IO.output import printInfo
     from numpy.linalg import svd
-    from numpy import cross, array,ndarray
+    from numpy import cross, array, ndarray
 
-    if not isinstance(pdb,ndarray):
+    if not isinstance(pdb, ndarray):
         p1 = pdb.select("name CA C N").copy()
         if p1 is None:
             printError("The pdb has no CA C or N in the backbone.")
@@ -566,7 +566,7 @@ def transCylinder(pdb, **kwargs):
             printError("The result is not reliable.")
         data = p1.getCoords()
     else:
-        data=pdb
+        data = pdb
 
     datamean = data.mean(axis=0)
     uu, dd, vv = svd(data - datamean)
@@ -585,6 +585,7 @@ def transCylinder(pdb, **kwargs):
     dirc3 = dirc3 / ((dirc3 ** 2).sum() ** .5)
     dirc = array((dirc1, dirc2, dirc3))
     return cent, dirc, rankrange
+
 
 def showMRCConnection(mrc, cutoff=2, **kwargs):
     """Plot 3D plot of connected parts in different color for MRC."""
@@ -622,18 +623,18 @@ def showMRCConnection(mrc, cutoff=2, **kwargs):
         else:
             classes[mrc.data[i, j, k]].append([i, j, k])
     for ty, i in zip(classes.keys(), xrange(len(classes))):
-        color = plt.cm.gist_ncar(i*1./len(classes)*.9)
+        color = plt.cm.gist_ncar(i * 1. / len(classes) * .9)
         pos = array(classes[ty])
-        ax.scatter(pos[:, 0]*step[0]+mrc.origin[0],
-                   pos[:, 1]*step[1]+mrc.origin[1],
-                   pos[:, 2]*step[2]+mrc.origin[2], lw=0, c=color, zorder=10)
+        ax.scatter(pos[:, 0] * step[0] + mrc.origin[0],
+                   pos[:, 1] * step[1] + mrc.origin[1],
+                   pos[:, 2] * step[2] + mrc.origin[2], lw=0, c=color, zorder=10)
         if cutoff > 0:
             for j in xrange(len(pos)):
                 for k in xrange(j):
-                    if (((pos[j]-pos[k])*step)**2).sum() <= cutoff:
-                        ax.plot(pos[[j, k], 0]*step[0]+mrc.origin[0],
-                                pos[[j, k], 1]*step[1]+mrc.origin[1],
-                                pos[[j, k], 2]*step[2]+mrc.origin[2], lw=3, c=color, zorder=10)
+                    if (((pos[j] - pos[k]) * step)**2).sum() <= cutoff:
+                        ax.plot(pos[[j, k], 0] * step[0] + mrc.origin[0],
+                                pos[[j, k], 1] * step[1] + mrc.origin[1],
+                                pos[[j, k], 2] * step[2] + mrc.origin[2], lw=3, c=color, zorder=10)
         del pos
     ax.set_xlabel('X', fontsize=15)
     ax.set_ylabel('Y', fontsize=15)
@@ -648,6 +649,7 @@ def showMRCConnection(mrc, cutoff=2, **kwargs):
     # except:
     #     pass
     return fig
+
 
 def showMRCConnectionEach(mrc, cutoff=2, path=None, **kwargs):
     """Plot 3D plot of connected parts in different color for MRC."""
@@ -695,29 +697,31 @@ def showMRCConnectionEach(mrc, cutoff=2, path=None, **kwargs):
     ax.set_zlabel('Z', fontsize=15)
     setAxesEqual(ax)
     for ty, i in zip(classes.keys(), xrange(len(classes))):
-        color = plt.cm.gist_ncar(i*1./len(classes)*.9)
+        color = plt.cm.gist_ncar(i * 1. / len(classes) * .9)
         pos = array(classes[ty])
-        sca._offsets3d = pos[:, 0]*step[0]+mrc.origin[0], pos[:, 1]*step[1]+mrc.origin[1], pos[:, 2]*step[2]+mrc.origin[2]
+        sca._offsets3d = pos[:, 0] * step[0] + mrc.origin[0], pos[:, 1] * \
+            step[1] + mrc.origin[1], pos[:, 2] * step[2] + mrc.origin[2]
         sca._facecolor3d = color
         del pos
-        plt.savefig(os.path.join(path, str(i)+'.png'))
+        plt.savefig(os.path.join(path, str(i) + '.png'))
     del classes
     del ax
     return fig
+
 
 def testfit(pos, step):
 
     from numpy import array, diag
     from numpy.linalg import svd
-    
-    data = array(pos)*step
+
+    data = array(pos) * step
     datamean = data.mean(axis=0)
     uu, dd, vv = svd(data - datamean, full_matrices=False)
     d = dd**2
     dd[0] = 0
     if (((uu.dot(diag(dd)).dot(vv))**2).sum(1)**.5 > 4).any():
         return 2
-    elif d[0]/d.sum() > .6:
+    elif d[0] / d.sum() > .6:
         return 1
     else:
         return 0
@@ -740,6 +744,7 @@ def testfit(pos, step):
     # else:
     #     return 1
 
+
 def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
     """Segment the MRC with the top `percentage` points.
     Only two points closer than the cutoff will be taken as connected."""
@@ -748,11 +753,12 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
     from ..IO.output import printUpdateInfo, finishUpdate, printInfo
     from .mrc import MRC
 
-    maxnum = int(percentage*mrc.data.size)
-    args = argsort(mrc.data.ravel())[:mrc.data.size-maxnum-1:-1]
+    maxnum = int(percentage * mrc.data.size)
+    args = argsort(mrc.data.ravel())[:mrc.data.size - maxnum - 1:-1]
     pos = zeros((maxnum, 3), dtype=int)
-    pos[:, 0] = args // (mrc.data.shape[1]*mrc.data.shape[2])
-    pos[:, 1] = args % (mrc.data.shape[1]*mrc.data.shape[2]) // mrc.data.shape[2]
+    pos[:, 0] = args // (mrc.data.shape[1] * mrc.data.shape[2])
+    pos[:, 1] = args % (mrc.data.shape[1] *
+                        mrc.data.shape[2]) // mrc.data.shape[2]
     pos[:, 2] = args % (mrc.data.shape[2])
     data = mrc.data.ravel()[args]
 
@@ -762,8 +768,9 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
 
     origin = mrc.origin
     grid = mrc.getGridSteps()
-    step = cutoff/grid
-    ranges = [xrange(int(floor(-step[i])), int(ceil(step[i])+int(step[i].is_integer()))) for i in xrange(3)]
+    step = cutoff / grid
+    ranges = [xrange(int(floor(-step[i])), int(ceil(step[i]) +
+                                               int(step[i].is_integer()))) for i in xrange(3)]
     cutoff2 = cutoff**2
 
     classnum = 0
@@ -775,7 +782,7 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
     statuscount = [0, 0, 0]
 
     for posnum in xrange(maxnum):
-        if posnum%1000 == 0:
+        if posnum % 1000 == 0:
             printUpdateInfo("Building {:10d}/{:10d}".format(posnum, maxnum))
         temp = pos[posnum]
         closeset = []
@@ -784,9 +791,10 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
         for i in ranges[0]:
             for j in ranges[1]:
                 for k in ranges[2]:
-                    if save[temp[0]+i, temp[1]+j, temp[2]+k] > 0 and (i*grid[0])**2+(j*grid[1])**2+(k*grid[2])**2 <= cutoff2:
-                        closeset.append([temp+array([i, j, k])])
-                        closetype.append(classmp[save[temp[0]+i, temp[1]+j, temp[2]+k]])
+                    if save[temp[0] + i, temp[1] + j, temp[2] + k] > 0 and (i * grid[0])**2 + (j * grid[1])**2 + (k * grid[2])**2 <= cutoff2:
+                        closeset.append([temp + array([i, j, k])])
+                        closetype.append(
+                            classmp[save[temp[0] + i, temp[1] + j, temp[2] + k]])
                         closenumber += 1
         if closenumber == 0:
             classnum += 1
@@ -805,7 +813,8 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
             if classcount[typeclass][1] == 0:
                 if classcount[typeclass][0] >= 10:
                     statuscount[0] -= 1
-                    classcount[typeclass][1] = testfit(classpos[typeclass], grid)
+                    classcount[typeclass][1] = testfit(
+                        classpos[typeclass], grid)
                     statuscount[classcount[typeclass][1]] += 1
             elif classcount[typeclass][1] == 1:
                 statuscount[1] -= 1
@@ -815,7 +824,8 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
                     save1count += 1
                     tempposlist = classpos[typeclass]
                     for i in xrange(orilen):
-                        save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
+                        save1[tempposlist[i][0], tempposlist[i]
+                              [1], tempposlist[i][2]] = save1count
                     del tempposlist
             else:
                 pass
@@ -841,7 +851,8 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
             if classcount[typeclass][1] == 0:
                 if classcount[typeclass][0] >= 10:
                     statuscount[0] -= 1
-                    classcount[typeclass][1] = testfit(classpos[typeclass], grid) if not hasnocylinder else 2
+                    classcount[typeclass][1] = testfit(
+                        classpos[typeclass], grid) if not hasnocylinder else 2
                     statuscount[classcount[typeclass][1]] += 1
                     if classcount[typeclass][1] == 2:
                         for i in closetypesort[1:]:
@@ -849,11 +860,13 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
                                 save1count += 1
                                 tempposlist = classpos[i]
                                 for i in xrange(len(classpos[i])):
-                                    save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
+                                    save1[tempposlist[i][0], tempposlist[i][
+                                        1], tempposlist[i][2]] = save1count
                                 del tempposlist
             elif classcount[typeclass][1] == 1:
                 statuscount[1] -= 1
-                classcount[typeclass][1] = testfit(classpos[typeclass], grid) if not hasnocylinder else 2
+                classcount[typeclass][1] = testfit(
+                    classpos[typeclass], grid) if not hasnocylinder else 2
                 statuscount[classcount[typeclass][1]] += 1
                 if classcount[typeclass][1] == 2:
                     for i in closetypesort[1:]:
@@ -861,12 +874,14 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
                             save1count += 1
                             tempposlist = classpos[i]
                             for i in xrange(len(classpos[i])):
-                                save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
+                                save1[tempposlist[i][0], tempposlist[i]
+                                      [1], tempposlist[i][2]] = save1count
                             del tempposlist
                     save1count += 1
                     tempposlist = classpos[typeclass]
                     for i in xrange(orilen):
-                        save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
+                        save1[tempposlist[i][0], tempposlist[i]
+                              [1], tempposlist[i][2]] = save1count
                     del tempposlist
             else:
                 pass
@@ -891,7 +906,8 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
             save1count += 1
             tempposlist = classpos[i]
             for i in xrange(len(tempposlist)):
-                save1[tempposlist[i][0], tempposlist[i][1], tempposlist[i][2]] = save1count
+                save1[tempposlist[i][0], tempposlist[i]
+                      [1], tempposlist[i][2]] = save1count
 
     del classnum, save1count, classmp, classmpreverse, classcount, classpos
 
@@ -905,16 +921,13 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
 
     return mrc1
 
-def test(*kwargs,**kkk):
-    print kwargs
-    print kkk
-    print "I am here"
-    return 1
+# def test(*kwargs,**kkk):
+#     print kwargs
+#     print kkk
+#     print "I am here"
+#     return 1
 
-def outtest(x):
+# def outtest(x):
 
-    from .Cmrc import tt
-    print tt(test,x)
-
-# def getclass(mrc, **kwargs):
-    
+#     from .Cmrc import tt
+#     print tt(test,x)
