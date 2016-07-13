@@ -921,17 +921,6 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
 
     return mrc1
 
-# def test(*kwargs,**kkk):
-#     print kwargs
-#     print kkk
-#     print "I am here"
-#     return 1
-
-# def outtest(x):
-
-#     from .Cmrc import tt
-#     print tt(test,x)
-
 
 def gaussian3D(matrix, sigma, *args, **kwargs):
     """Gaussian 3D filter with specific sigma. The filter is ignored after 4*sigma.
@@ -944,6 +933,9 @@ def gaussian3D(matrix, sigma, *args, **kwargs):
     from ..IO.output import printError
     from numpy import zeros_like
     from .Cmrc_analysis_p import Cgaussian
+
+    if ~matrix.flags.contiguous:
+        matrix = matrix.copy()
     result = zeros_like(matrix)
     result = Cgaussian(matrix=matrix, sigma=sigma, result=result)
     if isinstance(result, tuple):
