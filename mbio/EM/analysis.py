@@ -4,7 +4,7 @@
 
 __author__ = 'Wenzhi Mao'
 __all__ = ['genPvalue', 'calcPcutoff', 'showPcutoff', 'transCylinder',
-           'showMRCConnection', 'showMRCConnectionEach', 'mrcSegment']
+           'showMRCConnection', 'showMRCConnectionEach', 'gaussian3D']
 
 
 def interpolationball(matrix, index, step, r, **kwargs):
@@ -931,3 +931,25 @@ def mrcSegment(mrc, percentage=0.001, cutoff=3, autostop=False, **kwargs):
 
 #     from .Cmrc import tt
 #     print tt(test,x)
+
+
+def gaussian3D(matrix, sigma, *args, **kwargs):
+    """Gaussian 3D filter with specific sigma. The filter is ignored after 4*sigma.
+    The program is written in C(OpenMP) to perform quicker calculation than `scipy.ndimage`.
+    The boundary condition using wrap mode in scipy.
+    wrap:
+        7 8 9|1 2 3 4 5 6 7 8 9|1 2 3
+    """
+
+    from ..IO.output import printError
+    from numpy import zeros_like
+    from .Cmrc_analysis_p import Cgaussian
+    result = zeros_like(matrix)
+    result = Cgaussian(matrix=matrix, sigma=sigma, result=result)
+    if isinstance(result, tuple):
+        if result[0] is None:
+            printError(result[1])
+        else:
+            printError("Get wrong return from C function.")
+        return None
+    return result
